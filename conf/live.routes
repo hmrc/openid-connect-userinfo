@@ -1,0 +1,2 @@
+GET /userinfo             controllers.LiveUserInfoController.userInfo
+POST /userinfo             controllers.LiveUserInfoController.userInfo

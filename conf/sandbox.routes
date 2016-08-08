@@ -1,0 +1,2 @@
+GET /userinfo             controllers.SandboxUserInfoController.userInfo
+POST /userinfo             controllers.SandboxUserInfoController.userInfo
