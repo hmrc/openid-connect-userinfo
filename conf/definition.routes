@@ -1,0 +1,4 @@
+GET        /api/definition                                       controllers.DocumentationController.definition()
+
+GET        /api/documentation/:version/:endpointName             controllers.DocumentationController.documentation(version, endpointName)
+
