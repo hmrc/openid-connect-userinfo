@@ -1,0 +1,58 @@
+@import uk.gov.hmrc.openidconnect.userinfo.domain.APIAccess
+@import play.api.libs.json.Json
+
+@(access: APIAccess)
+{
+  "scopes":[
+    {
+      "key":"openid",
+      "name":"Confirm HMRC has a record of you",
+      "description":"Access your personal details"
+    },
+    {
+      "key":"profile",
+      "name":"Access your name, gender and date of birth",
+      "description":"Access your name, gender and date of birth"
+    },
+    {
+      "key":"address",
+      "name":"Access your address details",
+      "description":"Access your address details"
+    },
+    {
+      "key":"openid:gov-uk-identifiers",
+      "name":"Access your tax identifiers",
+      "description":"Access your tax identifiers"
+    }
+  ],
+  "api":{
+    "name":"OpenID Connect UserInfo",
+    "description":"The OpenID Connect compliant API provides access to user information",
+    "context":"openid-connect-userinfo",
+    "versions":[
+      {
+        "version":"1.0",
+        "status":"PROTOTYPED",
+        "access" : @Json.toJson(access),
+        "endpoints":[
+          {
+            "uriPattern":"/userinfo",
+            "endpointName":"Get user info",
+            "method":"GET",
+            "authType":"USER",
+            "throttlingTier":"UNLIMITED",
+            "scope":"openid"
+          },
+          {
+            "uriPattern":"/userinfo",
+            "endpointName":"Get user info POST",
+            "method":"POST",
+            "authType":"USER",
+            "throttlingTier":"UNLIMITED",
+            "scope":"openid"
+          }
+        ]
+      }
+    ]
+  }
+}
