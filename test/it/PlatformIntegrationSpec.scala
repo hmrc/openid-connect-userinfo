@@ -17,7 +17,7 @@
 package it
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import controllers.DocumentationController
+import uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController
 import it.utils.{MicroserviceLocalRunSugar, WiremockServiceLocatorSugar}
 import org.scalatest.BeforeAndAfter
 import org.scalatest.concurrent.ScalaFutures

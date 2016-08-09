@@ -1,2 +1,2 @@
-GET /userinfo             controllers.SandboxUserInfoController.userInfo
-POST /userinfo             controllers.SandboxUserInfoController.userInfo
+GET /userinfo             uk.gov.hmrc.openidconnect.userinfo.controllers.SandboxUserInfoController.userInfo
+POST /userinfo            uk.gov.hmrc.openidconnect.userinfo.controllers.SandboxUserInfoController.userInfo

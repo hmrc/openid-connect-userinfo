@@ -1,4 +1,4 @@
-GET        /api/definition                                       controllers.DocumentationController.definition()
+GET        /api/definition                                       uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController.definition()
 
-GET        /api/documentation/:version/:endpointName             controllers.DocumentationController.documentation(version, endpointName)
+GET        /api/documentation/:version/:endpointName             uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController.documentation(version, endpointName)
 
