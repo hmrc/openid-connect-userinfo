@@ -5,10 +5,10 @@
 
 <endpoint>
     <name>Get User Info POST</name>
-    <description>Retrieves OpenID Connect compliant user details</description>
+    <description>Retrieves OpenID Connect compliant information about the signed-in user</description>
     <section id="resource">
         <title>Resource</title>
-        <resource>POST /openid-connect-userinfo/userinfo</resource>
+        <resource>POST /userinfo</resource>
     </section>
     <section id="authorisation">
         <title>Authorisation</title>
