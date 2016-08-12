@@ -7,7 +7,7 @@
     {
       "key":"openid",
       "name":"Confirm HMRC has a record of you",
-      "description":"Access your personal details"
+      "description":"Confirm HMRC has a record of you"
     },
     {
       "key":"profile",
@@ -26,9 +26,9 @@
     }
   ],
   "api":{
-    "name":"OpenID Connect UserInfo",
-    "description":"The OpenID Connect compliant API provides access to user information",
-    "context":"openid-connect-userinfo",
+    "name":"User Information",
+    "description":"The User Information API allows you to retrieve information about the signed-in user, in an OpenID Connect compliant format",
+    "context":"userinfo",
     "versions":[
       {
         "version":"1.0",
@@ -36,7 +36,7 @@
         "access" : @Json.toJson(access),
         "endpoints":[
           {
-            "uriPattern":"/userinfo",
+            "uriPattern":"",
             "endpointName":"Get user info",
             "method":"GET",
             "authType":"USER",
@@ -44,7 +44,7 @@
             "scope":"openid"
           },
           {
-            "uriPattern":"/userinfo",
+            "uriPattern":"",
             "endpointName":"Get user info POST",
             "method":"POST",
             "authType":"USER",

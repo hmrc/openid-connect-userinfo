@@ -1,2 +1,2 @@
-GET /userinfo             uk.gov.hmrc.openidconnect.userinfo.controllers.LiveUserInfoController.userInfo
-POST /userinfo            uk.gov.hmrc.openidconnect.userinfo.controllers.LiveUserInfoController.userInfo
+GET /             uk.gov.hmrc.openidconnect.userinfo.controllers.LiveUserInfoController.userInfo
+POST /            uk.gov.hmrc.openidconnect.userinfo.controllers.LiveUserInfoController.userInfo
