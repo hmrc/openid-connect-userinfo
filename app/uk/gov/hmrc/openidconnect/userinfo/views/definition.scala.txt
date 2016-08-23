@@ -7,22 +7,26 @@
     {
       "key":"openid",
       "name":"Confirm HMRC has a record of you",
-      "description":"Confirm HMRC has a record of you"
+      "description":"Confirm HMRC has a record of you",
+      "confidenceLevel": 200
     },
     {
       "key":"profile",
       "name":"Access your name, gender and date of birth",
-      "description":"Access your name, gender and date of birth"
+      "description":"Access your name, gender and date of birth",
+      "confidenceLevel": 200
     },
     {
       "key":"address",
       "name":"Access your address details",
-      "description":"Access your address details"
+      "description":"Access your address details",
+      "confidenceLevel": 200
     },
     {
       "key":"openid:gov-uk-identifiers",
       "name":"Access your tax identifiers",
-      "description":"Access your tax identifiers"
+      "description":"Access your tax identifiers",
+      "confidenceLevel": 200
     }
   ],
   "api":{
