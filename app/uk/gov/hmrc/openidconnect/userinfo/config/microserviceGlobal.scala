@@ -17,7 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo.config
 
 import com.typesafe.config.Config
-import uk.gov.hmrc.openidconnect.userinfo.connectors.ServiceLocatorConnector
+import uk.gov.hmrc.api.connector.ServiceLocatorConnector
 import uk.gov.hmrc.openidconnect.userinfo.controllers._
 import net.ceedubs.ficus.Ficus._
 import play.api._
@@ -83,7 +83,7 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Se
 
   override lazy val registrationEnabled = AppContext.registrationEnabled
 
-  override lazy val slConnector = ServiceLocatorConnector
+  override lazy val slConnector = ServiceLocatorConnector(WSHttp)
 
   override def onError(request: RequestHeader, ex: Throwable): Future[Result] = {
     super.onError(request, ex) map (res => {

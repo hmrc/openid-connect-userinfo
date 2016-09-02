@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -35,9 +34,7 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
           val cf = (resp.json \ "confidenceLevel").as[Int]
           Some(cf)
       } recover {
-        case e: Throwable =>
-          Logger.error("failed to retrieve auth confidenceLevel", e)
-          None
+        case e: Throwable => None
       }
   }
 }

@@ -14,16 +14,19 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.filters
+package unit.uk.gov.hmrc.openidconnect.userinfo.filters
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import play.api.Routes
+import play.api.libs.json.Json
+import play.api.libs.json.Json.obj
 import play.api.mvc.RequestHeader
 import play.api.mvc.Results._
 import play.api.test.FakeRequest
+import uk.gov.hmrc.openidconnect.userinfo.filters.MicroserviceAuthFilter
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
@@ -77,10 +80,10 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
       when(authFilter.authParamsConfig.authConfig(live)).thenReturn(AuthConfig(confidenceLevel = ConfidenceLevel.L50))
 
       val request = FakeRequest("GET", "/").copy(tags = Map(Routes.ROUTE_CONTROLLER -> live))
-      val response = authFilter(nextCall _)(request).futureValue
+      val response = await(authFilter(nextCall _)(request))
 
       response.header.status shouldBe 401
-      bodyOf(response) shouldBe empty
+      jsonBodyOf(response) shouldBe obj("code" -> "UNAUTHORIZED", "message" -> "Bearer token is missing or not authorized")
     }
 
     "call the next filter if authentication is not required" in new Setup {

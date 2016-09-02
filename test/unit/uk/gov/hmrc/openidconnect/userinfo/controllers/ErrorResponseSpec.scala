@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.unit.controllers
+package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorAcceptHeaderInvalid
 import org.scalatest.Matchers

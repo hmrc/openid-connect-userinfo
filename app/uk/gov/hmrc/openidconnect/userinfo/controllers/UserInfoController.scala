@@ -48,7 +48,7 @@ trait UserInfoController extends BaseController with HeaderValidator {
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async {
     service.fetchUserInfo().map(userInfo => Ok(Json.toJson(userInfo))
     ) recover {
-      case ex: NotImplementedException => Status(ErrorNotImplemented.httpStatusCode)(Json.toJson(ErrorNotImplemented))
+      case ex: NotImplementedException => NotImplemented(Json.toJson(ErrorNotImplemented))
       case e: Throwable =>
         Logger.error(s"Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
