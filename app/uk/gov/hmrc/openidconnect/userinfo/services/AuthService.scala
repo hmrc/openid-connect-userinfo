@@ -25,11 +25,9 @@ trait AuthService {
   val authConnector: AuthConnector
 
   def isAuthorised()(implicit hc: HeaderCarrier) = {
-    authConnector.confidenceLevel().map { result =>
-      result match {
-        case Some(cf) => cf >= L200.level
-        case None => false
-      }
+    authConnector.confidenceLevel().map {
+      case Some(cf) => cf >= L200.level
+      case None => false
     }
   }
 }

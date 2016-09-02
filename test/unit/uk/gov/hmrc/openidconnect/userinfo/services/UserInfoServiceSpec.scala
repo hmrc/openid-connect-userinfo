@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.services
+package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
@@ -22,6 +22,7 @@ import org.joda.time.LocalDate
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.openidconnect.userinfo.services.{SandboxUserInfoService, LiveUserInfoService}
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotImplementedException}
 import uk.gov.hmrc.play.test.UnitSpec
 

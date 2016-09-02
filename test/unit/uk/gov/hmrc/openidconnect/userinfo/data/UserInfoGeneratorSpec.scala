@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.data
+package unit.uk.gov.hmrc.openidconnect.userinfo.data
 
+import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.UserInfo
 import org.joda.time.LocalDate
 import org.scalatest.prop.PropertyChecks

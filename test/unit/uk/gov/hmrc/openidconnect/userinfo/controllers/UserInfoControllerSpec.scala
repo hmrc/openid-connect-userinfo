@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.controllers
+package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
 
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
 import org.joda.time.DateTime

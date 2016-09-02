@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.openidconnect.userinfo.connectors;
+package unit.uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.mock.MockitoSugar
