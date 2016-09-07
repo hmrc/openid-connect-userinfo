@@ -16,28 +16,50 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotImplementedException}
+import uk.gov.hmrc.play.http.HeaderCarrier
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 trait UserInfoService {
-  val userInfoGenerator: UserInfoGenerator = UserInfoGenerator
-  def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo]
+  def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]]
 }
 
 trait LiveUserInfoService extends UserInfoService {
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    Future.failed(new NotImplementedException("endpoint not implemented"))
+  val authConnector: AuthConnector
+  val desConnector: DesConnector
+  val countryService: CountryService
+
+  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
+
+    val future: Future[UserInfo] = for {
+      nino <- authConnector.fetchNino()
+      desUserInfo <- desConnector.fetchUserInfo(nino.nino)
+    } yield UserInfo.from(desUserInfo, desUserInfo.address.countryCode flatMap countryService.getCountry)
+
+    future map (Some(_)) recover {
+      case NinoNotFoundException() | UserInfoNotFoundException() => None
+    }
   }
 }
 
 trait SandboxUserInfoService extends UserInfoService {
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    Future.successful(userInfoGenerator.userInfo.sample.getOrElse(throw new RuntimeException("Failed to generate user information")))
+  val userInfoGenerator: UserInfoGenerator
+
+  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
+    Future.successful(userInfoGenerator.userInfo.sample)
   }
 }
 
-object LiveUserInfoService extends LiveUserInfoService
-object SandboxUserInfoService extends SandboxUserInfoService
+object LiveUserInfoService extends LiveUserInfoService {
+  override val desConnector = DesConnector
+  override val authConnector = AuthConnector
+  override val countryService = CountryService
+}
+
+object SandboxUserInfoService extends SandboxUserInfoService {
+  override val userInfoGenerator = UserInfoGenerator
+}

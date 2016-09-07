@@ -41,7 +41,7 @@ private object AppDependencies {
   val scalaTestPlus = "org.scalatestplus" %% "play" % "1.2.0" % testScope
   val scalaHttp = "org.scalaj" %% "scalaj-http" % "1.1.5"
   val junit = "junit" % "junit" % "4.12" % testScope
-  val wireMock = "com.github.tomakehurst" % "wiremock" % "1.54" % testScope exclude("org.apache.httpcomponents", "httpclient") exclude("org.apache.httpcomponents", "httpcore")
+  val wireMock = "com.github.tomakehurst" % "wiremock" % "1.57" % testScope exclude("org.apache.httpcomponents", "httpclient") exclude("org.apache.httpcomponents", "httpcore")
 
   val compileDependencies = Seq(microserviceBootStrap, playAuthorisation, playHealth, playUrlBinders, playConfig, playJsonLogger, domain, referenceChecker, scalaCheck, playHmrcApi)
   val testDependencies = Seq(hmrcTest, scalaTest, pegDown, playTest, scalaTestPlus, scalaHttp, junit, wireMock)
