@@ -46,9 +46,10 @@ trait UserInfoController extends BaseController with HeaderValidator {
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async {
-    service.fetchUserInfo().map(userInfo => Ok(Json.toJson(userInfo))
-    ) recover {
-      case ex: NotImplementedException => NotImplemented(Json.toJson(ErrorNotImplemented))
+    service.fetchUserInfo() map {
+      case Some(userInfo) => Ok(Json.toJson(userInfo))
+      case None => Ok(Json.obj())
+    } recover {
       case e: Throwable =>
         Logger.error(s"Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
@@ -57,11 +58,11 @@ trait UserInfoController extends BaseController with HeaderValidator {
 }
 
 trait SandboxUserInfoController extends UserInfoController {
-  override val service = SandboxUserInfoService
+  override val service: SandboxUserInfoService = SandboxUserInfoService
 }
 
 trait LiveUserInfoController extends UserInfoController {
-  override val service = LiveUserInfoService
+  override val service: LiveUserInfoService = LiveUserInfoService
 }
 
 object SandboxUserInfoController extends SandboxUserInfoController

@@ -28,7 +28,7 @@ trait UserInfoGenerator {
     """221B Baker Street
       |London
       |NW1 9NT
-      |Great Britain""".stripMargin, "NW1 9NT", "Great Britain")
+      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"))
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
   private lazy val ninoSuffixes = "ABCD"
 
@@ -65,7 +65,7 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, dob, nino)
+  } yield UserInfo(name, lastName, middleName, address, Some(dob), nino)
 }
 
 object UserInfoGenerator extends UserInfoGenerator

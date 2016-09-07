@@ -18,14 +18,17 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
+import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+import uk.gov.hmrc.play.http.{Upstream5xxResponse, HeaderCarrier, HttpGet}
 import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
 
 class AuthConnectorSpec extends WireMockSugar {
+
   "confidenceLevel" should {
     "return the authority's confidence level" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
@@ -37,11 +40,29 @@ class AuthConnectorSpec extends WireMockSugar {
       confidenceLevel().futureValue shouldBe None
     }
 
-   "return false when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
-     given().get(urlPathEqualTo("/auth/authority")).returns(500)
-     confidenceLevel().futureValue shouldBe None
+    "return false when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(500)
+      confidenceLevel().futureValue shouldBe None
     }
   }
+
+  "fetchNino" should {
+    "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
+      fetchNino().futureValue shouldBe Nino("NB966669A")
+    }
+
+    "fail with NinoNotFoundException when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
+      intercept[NinoNotFoundException]{await(fetchNino())}
+    }
+
+    "fail when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(500)
+      intercept[Upstream5xxResponse]{await(fetchNino())}
+    }
+  }
+
 }
 
 class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with MockitoSugar {

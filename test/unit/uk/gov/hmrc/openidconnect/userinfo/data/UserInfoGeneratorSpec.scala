@@ -33,12 +33,13 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks {
       UserInfoGenerator.middleNames should contain (userInfo.middle_name)
       UserInfoGenerator.lastNames should contain (userInfo.family_name)
       userInfo.address shouldBe UserInfoGenerator.address
-      assertValidDob(userInfo.birthdate)
+      assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino)
     }
   }
 
   private def assertValidDob(dob: LocalDate): Unit = {
+
       dob.isAfter(from) && dob.isBefore(until) match {
         case true =>
         case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")

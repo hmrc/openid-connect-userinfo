@@ -16,7 +16,9 @@
 
 package uk.gov.hmrc.openidconnect.userinfo
 
+import org.joda.time.LocalDate
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 
 package object domain {
   implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd")
@@ -24,4 +26,27 @@ package object domain {
   implicit val addressFmt = Json.format[Address]
   implicit val userInfoFmt = Json.format[UserInfo]
   implicit val apiAccessFmt = Json.format[APIAccess]
+
+  implicit val desUserName : Reads[DesUserName] = (
+    (JsPath \ "firstForenameOrInitial").read[String] and
+      (JsPath \ "secondForenameOrInitial").readNullable[String] and
+      (JsPath \ "surname").read[String]
+    )(DesUserName.apply _)
+
+  implicit val desAddress : Reads[DesAddress] = (
+    (JsPath \ "line1").read[String] and
+      (JsPath \ "line2").read[String] and
+      (JsPath \ "line3").readNullable[String] and
+      (JsPath \ "line4").readNullable[String] and
+      (JsPath \ "postcode").readNullable[String] and
+      (JsPath \ "countryCode").readNullable[Int]
+    )(DesAddress.apply _)
+
+  implicit val desUserInfo : Reads[DesUserInfo] = (
+    (JsPath \ "nino").read[String] and
+      (JsPath \ "names" \ "1").read[DesUserName] and
+      (JsPath \ "dateOfBirth").readNullable[LocalDate] and
+      (JsPath \ "addresses" \ "1").read[DesAddress]
+    )(DesUserInfo.apply _)
+
 }
