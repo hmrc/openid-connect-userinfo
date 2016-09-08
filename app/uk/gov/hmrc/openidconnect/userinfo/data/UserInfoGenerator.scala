@@ -24,11 +24,11 @@ trait UserInfoGenerator {
   val firstNames = List("Roland", "Eddie", "Susanna", "Jake", "Oy", "Cuthbert", "Alain", "Jamie", "Thomas", "Susan", "Randall")
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None)
   val lastNames = List("Deschain", "Dean", "Dean", "Chambers", "Bumbler", "Allgood", "Johns", "Curry", "Whitman", "Delgado", "Flagg")
-  val address = Address(
+  val address = Some(Address(
     """221B Baker Street
       |London
       |NW1 9NT
-      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"))
+      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain")))
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
   private lazy val ninoSuffixes = "ABCD"
 
@@ -65,7 +65,7 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, Some(dob), nino)
+  } yield UserInfo(Some(name), Some(lastName), middleName, address, Some(dob), Some(nino))
 }
 
 object UserInfoGenerator extends UserInfoGenerator

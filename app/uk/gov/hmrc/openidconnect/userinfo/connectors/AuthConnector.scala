@@ -32,7 +32,8 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
 
   def confidenceLevel()(implicit hc: HeaderCarrier): Future[Option[Int]] = {
       http.GET(s"$authBaseUrl/auth/authority") map {
-        resp => (resp.json \ "confidenceLevel").asOpt[Int]
+        resp =>
+          (resp.json \ "confidenceLevel").asOpt[Int]
       } recover {
         case e: Throwable => None
       }

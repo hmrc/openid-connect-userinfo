@@ -17,5 +17,3 @@
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
 case class NinoNotFoundException() extends Exception
-
-case class UserInfoNotFoundException() extends Exception

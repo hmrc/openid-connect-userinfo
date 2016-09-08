@@ -98,18 +98,20 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
       val result = await(connector.fetchUserInfo(nino))
 
-      result shouldBe DesUserInfo("AB123456",
+      result shouldBe Some(DesUserInfo(
         DesUserName("Andrew", Some("John"), "Smith"),
         Some(LocalDate.parse("1980-01-01")),
-        DesAddress("1 Station Road", "Town Centre", Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1)))
+        DesAddress("1 Station Road", "Town Centre", Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
     }
 
-    "fail with UserInfoNotFound when DES does not have an entry for the NINO" in new Setup {
+    "return None when DES does not have an entry for the NINO" in new Setup {
 
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
         aResponse().withStatus(404)))
 
-      intercept[UserInfoNotFoundException]{await(connector.fetchUserInfo(nino))}
+      val result = await(connector.fetchUserInfo(nino))
+
+      result shouldBe None
     }
 
     "fail with UserInfoNotFound when DES does not have validated data" in new Setup {
@@ -117,7 +119,9 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
         aResponse().withStatus(400)))
 
-      intercept[UserInfoNotFoundException]{await(connector.fetchUserInfo(nino))}
+      val result = await(connector.fetchUserInfo(nino))
+
+      result shouldBe None
     }
 
     "fail when DES returns a 500 response" in new Setup {
