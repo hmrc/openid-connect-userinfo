@@ -43,8 +43,7 @@ package object domain {
     )(DesAddress.apply _)
 
   implicit val desUserInfo : Reads[DesUserInfo] = (
-    (JsPath \ "nino").read[String] and
-      (JsPath \ "names" \ "1").read[DesUserName] and
+    (JsPath \ "names" \ "1").read[DesUserName] and
       (JsPath \ "dateOfBirth").readNullable[LocalDate] and
       (JsPath \ "addresses" \ "1").read[DesAddress]
     )(DesUserInfo.apply _)

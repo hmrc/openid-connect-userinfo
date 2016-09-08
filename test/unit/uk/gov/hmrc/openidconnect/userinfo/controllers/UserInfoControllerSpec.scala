@@ -20,7 +20,6 @@ import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.BDDMockito.given
 import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
-import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
 import org.joda.time.{LocalDate, DateTime}
 import org.scalatest.concurrent.ScalaFutures
@@ -34,12 +33,12 @@ import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
 class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
 
   val userInfo = UserInfo(
-    "John",
-    "Smith",
+    Some("John"),
+    Some("Smith"),
     Some("Hannibal"),
-    Address("221B\\BAKER STREET\\nLONDON\\NW1 9NT\\nUnited Kingdom", Some("NW1 9NT"), Some("United Kingdom")),
+    Some(Address("221B\\BAKER STREET\\nLONDON\\NW1 9NT\\nUnited Kingdom", Some("NW1 9NT"), Some("United Kingdom"))),
     Some(LocalDate.parse("1982-11-15")),
-    "AR778351B")
+    Some("AR778351B"))
 
   trait Setup {
     val mockLiveUserInfoService = mock[LiveUserInfoService]

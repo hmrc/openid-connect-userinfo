@@ -17,7 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import uk.gov.hmrc.openidconnect.userinfo.config.{WSHttp, AppContext}
-import uk.gov.hmrc.openidconnect.userinfo.domain.{UserInfoNotFoundException, NinoNotFoundException, DesUserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
@@ -32,13 +32,13 @@ trait DesConnector {
   val desEnvironment: String
   val desBearerToken: String
 
-  def fetchUserInfo(nino: String)(implicit hc: HeaderCarrier): Future[DesUserInfo] = {
+  def fetchUserInfo(nino: String)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val newHc = hc.withExtraHeaders(
       "Authorization" -> ("Bearer " + desBearerToken),
       "Environment" -> desEnvironment)
 
-    http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/$nino")(implicitly[HttpReads[DesUserInfo]], newHc) recover {
-      case _: NotFoundException | _: BadRequestException => throw UserInfoNotFoundException()
+    http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/$nino")(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
+      case _: NotFoundException | _: BadRequestException => None
     }
   }
 }

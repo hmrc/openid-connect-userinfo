@@ -31,17 +31,18 @@ trait UserInfoService {
 trait LiveUserInfoService extends UserInfoService {
   val authConnector: AuthConnector
   val desConnector: DesConnector
-  val countryService: CountryService
+  val userInfoTransformer: UserInfoTransformer
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
 
     val future: Future[UserInfo] = for {
       nino <- authConnector.fetchNino()
       desUserInfo <- desConnector.fetchUserInfo(nino.nino)
-    } yield UserInfo.from(desUserInfo, desUserInfo.address.countryCode flatMap countryService.getCountry)
+      userInfo <- userInfoTransformer.transform(desUserInfo, nino.nino)
+    } yield userInfo
 
     future map (Some(_)) recover {
-      case NinoNotFoundException() | UserInfoNotFoundException() => None
+      case NinoNotFoundException() => None
     }
   }
 }
@@ -57,7 +58,7 @@ trait SandboxUserInfoService extends UserInfoService {
 object LiveUserInfoService extends LiveUserInfoService {
   override val desConnector = DesConnector
   override val authConnector = AuthConnector
-  override val countryService = CountryService
+  override val userInfoTransformer = UserInfoTransformer
 }
 
 object SandboxUserInfoService extends SandboxUserInfoService {

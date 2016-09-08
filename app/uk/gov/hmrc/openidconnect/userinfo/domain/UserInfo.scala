@@ -22,37 +22,25 @@ case class Address(formatted: String,
                    postal_code: Option[String],
                    country: Option[String])
 
-case class UserInfo(given_name: String,
-                    family_name: String,
+case class UserInfo(given_name: Option[String],
+                    family_name: Option[String],
                     middle_name: Option[String],
-                    address: Address,
+                    address: Option[Address],
                     birthdate: Option[LocalDate],
-                    uk_gov_nino: String)
+                    uk_gov_nino: Option[String])
 
+case class UserInformation(profile: Option[UserProfile],
+                           address: Option[Address],
+                           uk_gov_nino: Option[String])
 
-object UserInfo {
+case class UserProfile(given_name: Option[String],
+                       family_name: Option[String],
+                       middle_name: Option[String],
+                       birthdate: Option[LocalDate])
 
-  val addLine = PartialFunction[Option[String], String](_.map(s => s"\n$s").getOrElse(""))
-
-  private def formattedAddress(desAddress: DesAddress, country: Option[String]) = {
-    s"${desAddress.line1}\n${desAddress.line2}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
-  }
-
-  def from(desUserInfo: DesUserInfo, country: Option[String]): UserInfo = {
-    UserInfo(desUserInfo.name.firstForenameOrInitial,
-      desUserInfo.name.surname,
-      desUserInfo.name.secondForenameOrInitial,
-      Address(formattedAddress(desUserInfo.address, country), desUserInfo.address.postcode, country),
-      desUserInfo.dateOfBirth,
-      desUserInfo.nino)
-  }
-}
-
-case class DesUserInfo(nino: String,
-                       name: DesUserName,
+case class DesUserInfo(name: DesUserName,
                        dateOfBirth: Option[LocalDate],
                        address: DesAddress)
-
 
 case class DesUserName(firstForenameOrInitial: String,
                        secondForenameOrInitial: Option[String],
