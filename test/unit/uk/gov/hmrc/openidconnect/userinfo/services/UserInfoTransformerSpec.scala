@@ -90,7 +90,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
       result shouldBe userInfo.copy(given_name = None, family_name = None, middle_name = None, birthdate = None)
     }
 
-    "does not return the address when the delegated authority does not have the scope 'openid:gov-uk-identifiers'" in new Setup {
+    "does not return the nino when the delegated authority does not have the scope 'openid:gov-uk-identifiers'" in new Setup {
 
       given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile"))
 
