@@ -114,7 +114,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       result shouldBe None
     }
 
-    "fail with UserInfoNotFound when DES does not have validated data" in new Setup {
+    "return None when DES does not have validated data" in new Setup {
 
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
         aResponse().withStatus(400)))
