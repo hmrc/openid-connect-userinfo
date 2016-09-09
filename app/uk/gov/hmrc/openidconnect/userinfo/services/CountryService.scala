@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
-import scala.io.Source.fromFile
+import scala.io.Source
 
 trait CountryService {
 
@@ -26,5 +26,13 @@ trait CountryService {
 }
 
 object CountryService extends CountryService {
-  override val countries = fromFile("conf/country.properties").getLines().map(_.split("=")).map(t => (t(0), t(1))).toMap
+  override val countries = loadCountriesFromFile("/resources/country.properties")
+
+  private def loadCountriesFromFile(file: String) = {
+    val is = getClass.getResourceAsStream(file)
+    try {
+      val lines = Source.fromInputStream(is).getLines().toSeq
+      lines.map(_.split("=")).map(t => (t(0), t(1))).toMap
+    } finally is.close()
+  }
 }
