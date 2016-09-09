@@ -23,6 +23,8 @@ object AppContext extends ServicesConfig {
   lazy val appName = current.configuration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
   lazy val appUrl = current.configuration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
   lazy val serviceLocatorUrl: String = baseUrl("service-locator")
-  lazy val registrationEnabled: Boolean = current.configuration.getBoolean(s"${env}.microservice.services.service-locator.enabled").getOrElse(true)
+  lazy val registrationEnabled: Boolean = current.configuration.getBoolean(s"$env.microservice.services.service-locator.enabled").getOrElse(true)
   lazy val access = current.configuration.getConfig(s"$env.api.access")
+  lazy val desEnvironment = current.configuration.getString(s"$env.microservice.services.des.environment").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.environment is not configured"))
+  lazy val desBearerToken =  current.configuration.getString(s"$env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.bearer-token is not configured"))
 }

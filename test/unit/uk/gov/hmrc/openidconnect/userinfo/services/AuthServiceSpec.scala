@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.services
+package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
+import org.mockito.Matchers._
+import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
-import org.mockito.Matchers._
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
+import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
 

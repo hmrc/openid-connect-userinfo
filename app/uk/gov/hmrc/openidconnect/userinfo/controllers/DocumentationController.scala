@@ -29,7 +29,7 @@ import scala.language.dynamics
 trait DocumentationController extends uk.gov.hmrc.api.controllers.DocumentationController {
 
   override def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(buildAccess())).withHeaders(("Content-Type" -> "application/json"))
+    Ok(txt.definition(buildAccess())).withHeaders("Content-Type" -> "application/json")
   }
 
   override def documentation(version: String, endpointName: String): Action[AnyContent] = Action {

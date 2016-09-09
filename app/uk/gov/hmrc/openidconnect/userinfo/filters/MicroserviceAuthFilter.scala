@@ -16,9 +16,12 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.filters
 
+import controllers.Default.Unauthorized
 import play.api.Routes
+import play.api.libs.json.Json
 import play.api.mvc.{Filter, RequestHeader, Result, Results}
 import uk.gov.hmrc.openidconnect.userinfo.config.{AuthParamsControllerConfiguration, ControllerConfiguration}
+import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,7 +43,7 @@ trait MicroserviceAuthFilter extends Filter {
     authConfig(rh) match {
       case Some(authConfig) => authService.isAuthorised().flatMap {
         case true => next(rh)
-        case _ => Future.successful(Results.Unauthorized)
+        case _ => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized)))
       }
       case _ => next(rh)
     }

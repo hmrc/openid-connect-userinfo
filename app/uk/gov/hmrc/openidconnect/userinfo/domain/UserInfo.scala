@@ -19,12 +19,36 @@ package uk.gov.hmrc.openidconnect.userinfo.domain
 import org.joda.time.LocalDate
 
 case class Address(formatted: String,
-                   postal_code: String,
-                   country: String)
+                   postal_code: Option[String],
+                   country: Option[String])
 
-case class UserInfo(given_name: String,
-                    family_name: String,
+case class UserInfo(given_name: Option[String],
+                    family_name: Option[String],
                     middle_name: Option[String],
-                    address: Address,
-                    birthdate: LocalDate,
-                    uk_gov_nino: String)
+                    address: Option[Address],
+                    birthdate: Option[LocalDate],
+                    uk_gov_nino: Option[String])
+
+case class UserInformation(profile: Option[UserProfile],
+                           address: Option[Address],
+                           uk_gov_nino: Option[String])
+
+case class UserProfile(given_name: Option[String],
+                       family_name: Option[String],
+                       middle_name: Option[String],
+                       birthdate: Option[LocalDate])
+
+case class DesUserInfo(name: DesUserName,
+                       dateOfBirth: Option[LocalDate],
+                       address: DesAddress)
+
+case class DesUserName(firstForenameOrInitial: String,
+                       secondForenameOrInitial: Option[String],
+                       surname: String)
+
+case class DesAddress(line1: String,
+                      line2: String,
+                      line3: Option[String],
+                      line4: Option[String],
+                      postcode: Option[String],
+                      countryCode: Option[Int])

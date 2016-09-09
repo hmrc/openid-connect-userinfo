@@ -64,13 +64,13 @@
                 <row>
                     <cell><code>address.postal_code</code><optional/></cell>
                     <cell><code>String</code></cell>
-                    <cell><code>@userInfo.address.postal_code</code></cell>
+                    <cell><code>@userInfo.address.map(_.postal_code)</code></cell>
                     <cell>End-user's Zip code or postal code.</cell>
                 </row>
                 <row>
                     <cell><code>address.country</code><optional/></cell>
                     <cell><code>String</code></cell>
-                    <cell><code>@userInfo.address.country</code></cell>
+                    <cell><code>@userInfo.address.map(_.country)</code></cell>
                     <cell>End-user's country name.</cell>
                 </row>
                 <row>

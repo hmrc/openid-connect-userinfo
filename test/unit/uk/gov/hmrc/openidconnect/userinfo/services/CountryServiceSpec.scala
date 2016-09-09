@@ -14,24 +14,23 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.services
+package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
-import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel.L200
-import uk.gov.hmrc.play.http.HeaderCarrier
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.openidconnect.userinfo.services.CountryService
+import uk.gov.hmrc.play.test.UnitSpec
 
-trait AuthService {
-  val authConnector: AuthConnector
+class CountryServiceSpec extends UnitSpec {
 
-  def isAuthorised()(implicit hc: HeaderCarrier) = {
-    authConnector.confidenceLevel().map {
-      case Some(cf) => cf >= L200.level
-      case None => false
+  "getCountry" should {
+    "return the country when the country is in the file" in {
+
+      CountryService.getCountry(1) shouldBe Some("GREAT BRITAIN")
+      CountryService.getCountry(283) shouldBe Some("REPUBLIC OF MONTENEGRO")
+    }
+
+    "return None when the country is not in the file" in {
+
+      CountryService.getCountry(284) shouldBe None
     }
   }
-}
-
-object AuthService extends AuthService {
-  override val authConnector = AuthConnector
 }

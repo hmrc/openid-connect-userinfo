@@ -16,7 +16,8 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq(play.PlayScala)
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
-  lazy val ItTest = config("it") extend Test
+  def intTestFilter(name: String): Boolean = name startsWith "it"
+  def unitFilter(name: String): Boolean = name startsWith "unit"
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.PlayScala) ++ plugins : _*)
@@ -32,22 +33,21 @@ trait MicroService {
       // remove when we upgrade to play 2.5.x https://github.com/playframework/playframework/pull/5135
       scalacOptions ++= Seq("-Xlint:-missing-interpolator"),
       libraryDependencies ++= appDependencies,
+      testOptions in Test := Seq(Tests.Filter(unitFilter)),
       parallelExecution in Test := false,
       fork in Test := false,
       retrieveManaged := true,
       evictionWarningOptions in update := EvictionWarningOptions.default.withWarnScalaVersionEviction(false)
     )
-    .configs(ItTest)
-    .settings(inConfig(ItTest)(Defaults.testSettings): _*)
+    .configs(IntegrationTest)
+    .settings(inConfig(IntegrationTest)(Defaults.itSettings): _*)
     .settings(
-      Keys.fork in ItTest := false,
-      unmanagedSourceDirectories in ItTest <<= (baseDirectory in ItTest)(base => Seq(base / "func")),
-      unmanagedClasspath in ItTest += baseDirectory.value / "resources",
-      unmanagedClasspath in Runtime += baseDirectory.value / "resources",
-      unmanagedResourceDirectories in Compile += baseDirectory.value / "resources",
-      addTestReportOption(ItTest, "int-test-reports"),
-      testGrouping in ItTest := oneForkedJvmPerTest((definedTests in ItTest).value),
-      parallelExecution in ItTest := false)
+      Keys.fork in IntegrationTest := false,
+      unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "test")),
+      addTestReportOption(IntegrationTest, "int-test-reports"),
+      testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
+      testOptions in IntegrationTest := Seq(Tests.Filter(intTestFilter)),
+      parallelExecution in IntegrationTest := false)
     .settings(resolvers += Resolver.bintrayRepo("hmrc", "releases"))
 }
 

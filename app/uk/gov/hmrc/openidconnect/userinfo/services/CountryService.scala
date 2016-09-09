@@ -16,22 +16,15 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
-import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel.L200
-import uk.gov.hmrc.play.http.HeaderCarrier
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.io.Source.fromFile
 
-trait AuthService {
-  val authConnector: AuthConnector
+trait CountryService {
 
-  def isAuthorised()(implicit hc: HeaderCarrier) = {
-    authConnector.confidenceLevel().map {
-      case Some(cf) => cf >= L200.level
-      case None => false
-    }
-  }
+  val countries: Map[String, String]
+
+  def getCountry(countryCode: Int): Option[String] = countries.get(countryCode.toString)
 }
 
-object AuthService extends AuthService {
-  override val authConnector = AuthConnector
+object CountryService extends CountryService {
+  override val countries = fromFile("conf/country.properties").getLines().map(_.split("=")).map(t => (t(0), t(1))).toMap
 }
