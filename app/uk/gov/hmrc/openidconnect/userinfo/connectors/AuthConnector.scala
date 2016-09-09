@@ -16,8 +16,9 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import play.api.Logger
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
+import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
@@ -32,13 +33,19 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
   def confidenceLevel()(implicit hc: HeaderCarrier): Future[Option[Int]] = {
       http.GET(s"$authBaseUrl/auth/authority") map {
         resp =>
-          val cf = (resp.json \ "confidenceLevel").as[Int]
-          Some(cf)
+          (resp.json \ "confidenceLevel").asOpt[Int]
       } recover {
-        case e: Throwable =>
-          Logger.error("failed to retrieve auth confidenceLevel", e)
-          None
+        case e: Throwable => None
       }
+  }
+
+  def fetchNino()(implicit hc:HeaderCarrier): Future[Nino] = {
+    http.GET(s"$authBaseUrl/auth/authority") map {
+      resp => (resp.json \ "nino").as[Option[Nino]] match {
+        case Some(n) => n
+        case None => throw NinoNotFoundException()
+      }
+    }
   }
 }
 

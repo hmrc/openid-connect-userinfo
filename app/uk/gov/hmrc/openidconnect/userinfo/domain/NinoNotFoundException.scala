@@ -14,19 +14,6 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
+package uk.gov.hmrc.openidconnect.userinfo.domain
 
-import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorAcceptHeaderInvalid
-import org.scalatest.Matchers
-import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
-
-class ErrorResponseSpec extends UnitSpec with Matchers{
-  "errorResponse" should {
-    "be translated to error Json with only the required fields" in {
-      Json.toJson(ErrorAcceptHeaderInvalid).toString() shouldBe
-        """{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}"""
-    }
-  }
-
-}
+case class NinoNotFoundException() extends Exception

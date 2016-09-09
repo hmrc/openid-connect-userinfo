@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.data
+package unit.uk.gov.hmrc.openidconnect.userinfo.data
 
+import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.UserInfo
 import org.joda.time.LocalDate
 import org.scalatest.prop.PropertyChecks
@@ -28,16 +29,22 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks {
 
   "userInfo" should {
     "generate an OpenID Connect compliant UserInfo response" in forAll(UserInfoGenerator.userInfo) { userInfo: UserInfo =>
-      UserInfoGenerator.firstNames should contain (userInfo.given_name)
+      assertValid("givenName", UserInfoGenerator.firstNames, userInfo.given_name)
       UserInfoGenerator.middleNames should contain (userInfo.middle_name)
-      UserInfoGenerator.lastNames should contain (userInfo.family_name)
+      assertValid("familyName", UserInfoGenerator.lastNames, userInfo.family_name)
+      assertValid("givenName", UserInfoGenerator.firstNames, userInfo.given_name)
       userInfo.address shouldBe UserInfoGenerator.address
-      assertValidDob(userInfo.birthdate)
-      assertValidNino(userInfo.uk_gov_nino)
+      assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
+      assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
     }
   }
 
+  private def assertValid(name: String, expected: List[String], actual: Option[String]): Unit = {
+    expected should contain (actual.getOrElse(fail(s"Generated user's $name is not defined")))
+  }
+
   private def assertValidDob(dob: LocalDate): Unit = {
+
       dob.isAfter(from) && dob.isBefore(until) match {
         case true =>
         case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")

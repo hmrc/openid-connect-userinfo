@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
+package it.stubs
 
-import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorAcceptHeaderInvalid
-import org.scalatest.Matchers
+import com.github.tomakehurst.wiremock.client.WireMock._
+import it.{MockHost, Stub}
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.test.UnitSpec
 
-class ErrorResponseSpec extends UnitSpec with Matchers{
-  "errorResponse" should {
-    "be translated to error Json with only the required fields" in {
-      Json.toJson(ErrorAcceptHeaderInvalid).toString() shouldBe
-        """{"code":"ACCEPT_HEADER_INVALID","message":"The accept header is missing or invalid"}"""
-    }
+object ThirdPartyDelegatedAuthorityStub extends Stub {
+  override val stub: MockHost = new MockHost(22223)
+
+  def willReturnScopesForAuthBearerToken(authBearerToken: String, scopes: Set[String]) = {
+    stub.mock.register(get(urlPathEqualTo(s"/delegated-authority"))
+      .withQueryParam("auth_bearer_token", equalTo(authBearerToken))
+      .willReturn(aResponse().withBody(
+        s"""
+          |{"token":
+          | {
+          |   "scopes":${Json.toJson(scopes)}
+          | }
+          |}
+        """.stripMargin)))
   }
-
 }

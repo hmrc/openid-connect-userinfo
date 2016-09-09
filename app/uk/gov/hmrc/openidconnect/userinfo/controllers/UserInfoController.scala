@@ -34,6 +34,7 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc.Request
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.play.http.{HeaderCarrier, NotImplementedException}
@@ -43,12 +44,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
-  implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  final def userInfo() = validateAccept(acceptHeaderValidationRules).async {
-    service.fetchUserInfo().map(userInfo => Ok(Json.toJson(userInfo))
-    ) recover {
-      case ex: NotImplementedException => Status(ErrorNotImplemented.httpStatusCode)(Json.toJson(ErrorNotImplemented))
+  final def userInfo() = validateAccept(acceptHeaderValidationRules).async { request =>
+    service.fetchUserInfo()(hc(request)) map {
+      case Some(userInfo) => Ok(Json.toJson(userInfo))
+      case None => Ok(Json.obj())
+    } recover {
       case e: Throwable =>
         Logger.error(s"Internal server error: ${e.getMessage}", e)
         Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
@@ -57,11 +58,11 @@ trait UserInfoController extends BaseController with HeaderValidator {
 }
 
 trait SandboxUserInfoController extends UserInfoController {
-  override val service = SandboxUserInfoService
+  override val service: SandboxUserInfoService = SandboxUserInfoService
 }
 
 trait LiveUserInfoController extends UserInfoController {
-  override val service = LiveUserInfoService
+  override val service: LiveUserInfoService = LiveUserInfoService
 }
 
 object SandboxUserInfoController extends SandboxUserInfoController
