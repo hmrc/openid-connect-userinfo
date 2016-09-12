@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
+import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.config.{WSHttp, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -40,7 +41,9 @@ trait DesConnector {
       "Environment" -> desEnvironment)
 
     http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino)}")(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
-      case _: NotFoundException | _: BadRequestException => None
+      case _: NotFoundException | _: BadRequestException =>
+        Logger.debug(s"User information for nino $nino is not available in DES")
+        None
     }
   }
 

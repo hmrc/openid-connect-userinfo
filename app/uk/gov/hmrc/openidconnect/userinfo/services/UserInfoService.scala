@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -42,7 +43,9 @@ trait LiveUserInfoService extends UserInfoService {
     } yield userInfo
 
     future map (Some(_)) recover {
-      case NinoNotFoundException() => None
+      case NinoNotFoundException() =>
+        Logger.debug("Nino not present in Bearer Token")
+        None
     }
   }
 }
