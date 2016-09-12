@@ -59,11 +59,12 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
   }
 
   "fetch user info" should {
-    val nino = "AB123456"
+    val nino = "AA111111A"
+    val ninoWithoutSuffix = "AA111111"
 
     "return the user info" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino"))
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))
         .withHeader("Authorization", equalTo(s"Bearer $desToken"))
         .withHeader("Environment", equalTo(desEnv)).willReturn(
         aResponse()
@@ -72,7 +73,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
           .withBody(
             s"""
               |{
-              |  "nino": "$nino",
+              |  "nino": "$ninoWithoutSuffix",
               |  "names": {
               |    "1": {
               |      "firstForenameOrInitial": "Andrew",
@@ -106,7 +107,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "return None when DES does not have an entry for the NINO" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(404)))
 
       val result = await(connector.fetchUserInfo(nino))
@@ -116,7 +117,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "return None when DES does not have validated data" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(400)))
 
       val result = await(connector.fetchUserInfo(nino))
@@ -126,7 +127,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "fail when DES returns a 500 response" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$nino")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(500)))
 
       intercept[Upstream5xxResponse]{await(connector.fetchUserInfo(nino))}

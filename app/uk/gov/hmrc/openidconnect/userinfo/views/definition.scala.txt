@@ -46,14 +46,6 @@
             "authType":"USER",
             "throttlingTier":"UNLIMITED",
             "scope":"openid"
-          },
-          {
-            "uriPattern":"",
-            "endpointName":"Get user info POST",
-            "method":"POST",
-            "authType":"USER",
-            "throttlingTier":"UNLIMITED",
-            "scope":"openid"
           }
         ]
       }
