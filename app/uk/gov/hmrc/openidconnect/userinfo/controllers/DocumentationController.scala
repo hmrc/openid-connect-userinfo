@@ -50,14 +50,12 @@ object DocumentationController extends DocumentationController
 object Documentation {
   val version1_0 = "1.0"
   val getUserInfo = "Get user info"
-  val getUserInfoPost = "Get user info POST"
 
   def findDocumentation(endpointName: String, version: String) = applyTemplate(endpointName, version)(userInfo)
 
   def applyTemplate(apiName: String, version: String)(info: UserInfo): Option[Xml] = {
     (apiName, version) match {
       case (`getUserInfo`, `version1_0`) => Some(xml.getUserInfo(info))
-      case (`getUserInfoPost`, `version1_0`) => Some(xml.getUserInfoPost(info))
       case _ => None
     }
   }
