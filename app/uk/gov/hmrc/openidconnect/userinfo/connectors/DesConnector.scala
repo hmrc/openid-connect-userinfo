@@ -27,6 +27,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 trait DesConnector {
 
+  val NINO_LENGTH = 8
+
   val http: HttpGet
   val serviceUrl: String
   val desEnvironment: String
@@ -37,10 +39,12 @@ trait DesConnector {
       "Authorization" -> ("Bearer " + desBearerToken),
       "Environment" -> desEnvironment)
 
-    http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/$nino")(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
+    http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino)}")(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
       case _: NotFoundException | _: BadRequestException => None
     }
   }
+
+  private def withoutSuffix(nino: String) = nino.take(NINO_LENGTH)
 }
 
 
