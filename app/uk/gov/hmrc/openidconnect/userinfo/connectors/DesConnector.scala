@@ -40,7 +40,10 @@ trait DesConnector {
       "Authorization" -> ("Bearer " + desBearerToken),
       "Environment" -> desEnvironment)
 
-    http.GET[DesUserInfo](s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino)}")(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
+    val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino)}"
+    Logger.debug(s"GET $url with environment=$desEnvironment")
+
+    http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
       case _: NotFoundException | _: BadRequestException =>
         Logger.debug(s"User information for nino $nino is not available in DES")
         None
