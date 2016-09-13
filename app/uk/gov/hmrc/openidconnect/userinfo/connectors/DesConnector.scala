@@ -21,6 +21,7 @@ import uk.gov.hmrc.openidconnect.userinfo.config.{WSHttp, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
+import uk.gov.hmrc.play.http.logging.Authorization
 
 import scala.concurrent.Future
 
@@ -36,9 +37,7 @@ trait DesConnector {
   val desBearerToken: String
 
   def fetchUserInfo(nino: String)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
-    val newHc = hc.withExtraHeaders(
-      "Authorization" -> ("Bearer " + desBearerToken),
-      "Environment" -> desEnvironment)
+    val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken"))).withExtraHeaders("Environment" -> desEnvironment)
 
     val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino)}"
     Logger.debug(s"GET $url with environment=$desEnvironment")

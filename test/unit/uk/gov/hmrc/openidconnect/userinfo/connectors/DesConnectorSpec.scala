@@ -25,8 +25,10 @@ import org.scalatest.BeforeAndAfterEach
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.DesConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain._
+import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{Upstream5xxResponse, HeaderCarrier, HttpGet}
 import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import scala.collection.JavaConverters._
 
 class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
 
@@ -103,6 +105,16 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
         DesUserName("Andrew", Some("John"), "Smith"),
         Some(LocalDate.parse("1980-01-01")),
         DesAddress("1 Station Road", "Town Centre", Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
+    }
+
+    "replace the Auth Authorization header by Des Authorization header" in new Setup {
+
+      val headerCarrierWithAuthBearerToken = hc.copy(authorization = Some(Authorization("auth_bearer_token")))
+
+      await(connector.fetchUserInfo(nino)(headerCarrierWithAuthBearerToken))
+
+      val requestToDes = findAll(getRequestedFor(urlEqualTo(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))).get(0)
+      requestToDes.getHeaders.getHeader("Authorization").values().asScala shouldBe List("Bearer aToken")
     }
 
     "return None when DES does not have an entry for the NINO" in new Setup {
