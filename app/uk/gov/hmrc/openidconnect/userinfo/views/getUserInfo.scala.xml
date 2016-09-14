@@ -14,7 +14,7 @@
         <title>Authorisation</title>
         <authorisation>
             <type>USER</type>
-            <scope>openid</scope>
+            <scope>openid profile address openid:gov-uk-identifiers</scope>
         </authorisation>
     </section>
     <section id="content-types">
