@@ -40,7 +40,7 @@
         "access" : @Json.toJson(access),
         "endpoints":[
           {
-            "uriPattern":"",
+            "uriPattern":"/",
             "endpointName":"Get user info",
             "method":"GET",
             "authType":"USER",
