@@ -51,7 +51,7 @@ trait UserInfoTransformer {
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) Some(nino) else None
     val address = if (scopes.contains("address")) desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, country)) else None
 
-    UserInfo(profile.map(_.firstName),
+    UserInfo(profile.flatMap(_.firstName),
       profile.map(_.familyName),
       profile.flatMap(_.middleName),
       address,
@@ -63,7 +63,7 @@ trait UserInfoTransformer {
     s"${desAddress.line1}\n${desAddress.line2}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
   }
 
-  private case class UserProfile(firstName: String, familyName: String, middleName: Option[String], birthDate: Option[LocalDate])
+  private case class UserProfile(firstName: Option[String], familyName: String, middleName: Option[String], birthDate: Option[LocalDate])
 }
 
 object UserInfoTransformer extends UserInfoTransformer {
