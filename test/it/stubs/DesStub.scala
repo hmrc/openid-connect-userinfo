@@ -33,7 +33,7 @@ object DesStub extends Stub {
           |{
           |  "names": {
           |    "1": {
-          |      "firstForenameOrInitial": "${desUserInfo.name.firstForenameOrInitial}",
+          |      "firstForenameOrInitial": "${desUserInfo.name.firstForenameOrInitial.getOrElse("")}",
           |      "secondForenameOrInitial": "${desUserInfo.name.secondForenameOrInitial.get}",
           |      "surname": "${desUserInfo.name.surname}"
           |      }

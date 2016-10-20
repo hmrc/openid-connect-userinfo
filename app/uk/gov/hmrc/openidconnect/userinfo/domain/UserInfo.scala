@@ -42,7 +42,7 @@ case class DesUserInfo(name: DesUserName,
                        dateOfBirth: Option[LocalDate],
                        address: DesAddress)
 
-case class DesUserName(firstForenameOrInitial: String,
+case class DesUserName(firstForenameOrInitial: Option[String],
                        secondForenameOrInitial: Option[String],
                        surname: String)
 

@@ -102,7 +102,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       val result = await(connector.fetchUserInfo(nino))
 
       result shouldBe Some(DesUserInfo(
-        DesUserName("Andrew", Some("John"), "Smith"),
+        DesUserName(Some("Andrew"), Some("John"), "Smith"),
         Some(LocalDate.parse("1980-01-01")),
         DesAddress("1 Station Road", "Town Centre", Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
     }

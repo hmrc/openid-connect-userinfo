@@ -31,7 +31,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
   val ukCountryCode = 10
   val nino = "AB123456A"
   val authBearerToken = "AUTH_BEARER_TOKEN"
-  val desUserInfo = DesUserInfo(DesUserName("John", Some("A"), "Smith"), Some(LocalDate.parse("1980-01-01")),
+  val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), "Smith"), Some(LocalDate.parse("1980-01-01")),
     DesAddress("1 Station Road", "Town Centre", Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
 
   val userInfo = UserInfo(

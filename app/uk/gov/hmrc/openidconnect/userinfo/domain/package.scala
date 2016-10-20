@@ -28,7 +28,7 @@ package object domain {
   implicit val apiAccessFmt = Json.format[APIAccess]
 
   implicit val desUserName : Reads[DesUserName] = (
-    (JsPath \ "firstForenameOrInitial").read[String] and
+    (JsPath \ "firstForenameOrInitial").readNullable[String] and
       (JsPath \ "secondForenameOrInitial").readNullable[String] and
       (JsPath \ "surname").read[String]
     )(DesUserName.apply _)
