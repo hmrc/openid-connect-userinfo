@@ -23,7 +23,7 @@ import org.scalacheck.Gen
 trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
-  val lastNames = List("Deschain", "Dean", "Dean", "Chambers", "Bumbler", "Allgood", "Johns", "Curry", "Whitman", "Delgado", "Flagg", "Bowen")
+  val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
   val address = Some(Address(
     """221B Baker Street
       |London
@@ -65,7 +65,7 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, Some(lastName), middleName, address, Some(dob), Some(nino))
+  } yield UserInfo(name, lastName, middleName, address, Some(dob), Some(nino))
 }
 
 object UserInfoGenerator extends UserInfoGenerator

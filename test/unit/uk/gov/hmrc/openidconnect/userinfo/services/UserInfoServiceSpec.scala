@@ -32,7 +32,7 @@ import scala.concurrent.Future.failed
 class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = "AB123456A"
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, "Smith"), None, DesAddress("1 Station Road", "Town Centre", None, None, None, None))
+  val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, Some("Smith")), None, DesAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None))
   val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, Some(nino))
 
   trait Setup {

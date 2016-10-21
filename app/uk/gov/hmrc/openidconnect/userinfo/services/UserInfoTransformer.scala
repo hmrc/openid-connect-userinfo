@@ -52,7 +52,7 @@ trait UserInfoTransformer {
     val address = if (scopes.contains("address")) desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, country)) else None
 
     UserInfo(profile.flatMap(_.firstName),
-      profile.map(_.familyName),
+      profile.flatMap(_.familyName),
       profile.flatMap(_.middleName),
       address,
       profile.flatMap(_.birthDate),
@@ -60,10 +60,10 @@ trait UserInfoTransformer {
   }
 
   private def formattedAddress(desAddress: DesAddress, country: Option[String]) = {
-    s"${desAddress.line1}\n${desAddress.line2}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
+    s"${desAddress.line1.get}${addLine(desAddress.line2)}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
   }
 
-  private case class UserProfile(firstName: Option[String], familyName: String, middleName: Option[String], birthDate: Option[LocalDate])
+  private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
 }
 
 object UserInfoTransformer extends UserInfoTransformer {
