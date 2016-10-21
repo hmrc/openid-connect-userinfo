@@ -29,8 +29,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val nino = "AB123456A"
   val ukCountryCode = 1
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), "Smith"), Some(LocalDate.parse("1980-01-01")),
-    DesAddress("1 Station Road", "Town Centre", Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfo = UserInfo(
     Some("John"),
     Some("Smith"),
@@ -38,8 +38,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"))
-  val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), "Smith"), Some(LocalDate.parse("1980-01-01")),
-    DesAddress("1 Station Road", "Town Centre", Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFirstName = UserInfo(
     None,
     Some("Smith"),
@@ -47,7 +47,24 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"))
-
+  val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val userInfoWithoutFamilyName = UserInfo(
+    Some("John"),
+    None,
+    Some("A"),
+    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(LocalDate.parse("1980-01-01")),
+    Some("AB123456A"))
+  val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val userInfoWithPartialAddress = UserInfo(
+    Some("John"),
+    Some("Smith"),
+    Some("A"),
+    Some(Address("1 Station Road\nLancaster\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(LocalDate.parse("1980-01-01")),
+    Some("AB123456A"))
 
   feature("fetch user information") {
 
@@ -93,6 +110,50 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       Then("The user information is returned")
       result.code shouldBe 200
       Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFirstName)
+    }
+
+    scenario("fetch user profile without family name") {
+
+      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("DES contains user information for the NINO")
+      desStub.willReturnUserInformation(desUserInfoWithoutFamilyName, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName)
+    }
+
+    scenario("fetch user profile with partial address") {
+
+      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("DES contains user information for the NINO")
+      desStub.willReturnUserInformation(desUserInfoWithPartialAddress, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      Json.parse(result.body) shouldBe Json.toJson(userInfoWithPartialAddress)
     }
   }
 }
