@@ -29,10 +29,9 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks {
 
   "userInfo" should {
     "generate an OpenID Connect compliant UserInfo response" in forAll(UserInfoGenerator.userInfo) { userInfo: UserInfo =>
-      assertValid("givenName", UserInfoGenerator.firstNames, userInfo.given_name)
+      UserInfoGenerator.firstNames should contain (userInfo.given_name)
       UserInfoGenerator.middleNames should contain (userInfo.middle_name)
-      assertValid("familyName", UserInfoGenerator.lastNames, userInfo.family_name)
-      assertValid("givenName", UserInfoGenerator.firstNames, userInfo.given_name)
+      UserInfoGenerator.lastNames should contain (userInfo.family_name)
       userInfo.address shouldBe UserInfoGenerator.address
       assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))

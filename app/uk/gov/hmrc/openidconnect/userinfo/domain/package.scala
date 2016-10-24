@@ -28,14 +28,14 @@ package object domain {
   implicit val apiAccessFmt = Json.format[APIAccess]
 
   implicit val desUserName : Reads[DesUserName] = (
-    (JsPath \ "firstForenameOrInitial").read[String] and
+    (JsPath \ "firstForenameOrInitial").readNullable[String] and
       (JsPath \ "secondForenameOrInitial").readNullable[String] and
-      (JsPath \ "surname").read[String]
+      (JsPath \ "surname").readNullable[String]
     )(DesUserName.apply _)
 
   implicit val desAddress : Reads[DesAddress] = (
-    (JsPath \ "line1").read[String] and
-      (JsPath \ "line2").read[String] and
+    (JsPath \ "line1").readNullable[String] and
+      (JsPath \ "line2").readNullable[String] and
       (JsPath \ "line3").readNullable[String] and
       (JsPath \ "line4").readNullable[String] and
       (JsPath \ "postcode").readNullable[String] and
