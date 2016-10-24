@@ -30,8 +30,6 @@ trait UserInfoTransformer {
   val countryService: CountryService
   val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 
-  val addLine = PartialFunction[Option[String], String](_.map(s => s"\n$s").getOrElse(""))
-
   def transform(desUserInfo: Option[DesUserInfo], nino: String)(implicit hc:HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = authorization.value.stripPrefix("Bearer ")
 
@@ -60,7 +58,7 @@ trait UserInfoTransformer {
   }
 
   private def formattedAddress(desAddress: DesAddress, country: Option[String]) = {
-    s"${desAddress.line1.get}${addLine(desAddress.line2)}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
+    Seq(desAddress.line1,desAddress.line2, desAddress.line3, desAddress.line4, desAddress.postcode, country).flatten.mkString("\n")
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
