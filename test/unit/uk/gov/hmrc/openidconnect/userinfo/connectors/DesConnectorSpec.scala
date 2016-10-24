@@ -102,9 +102,9 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       val result = await(connector.fetchUserInfo(nino))
 
       result shouldBe Some(DesUserInfo(
-        DesUserName("Andrew", Some("John"), "Smith"),
+        DesUserName(Some("Andrew"), Some("John"), Some("Smith")),
         Some(LocalDate.parse("1980-01-01")),
-        DesAddress("1 Station Road", "Town Centre", Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
+        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
     }
 
     "replace the Auth Authorization header by Des Authorization header" in new Setup {

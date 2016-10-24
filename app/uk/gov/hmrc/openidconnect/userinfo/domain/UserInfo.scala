@@ -42,12 +42,12 @@ case class DesUserInfo(name: DesUserName,
                        dateOfBirth: Option[LocalDate],
                        address: DesAddress)
 
-case class DesUserName(firstForenameOrInitial: String,
+case class DesUserName(firstForenameOrInitial: Option[String],
                        secondForenameOrInitial: Option[String],
-                       surname: String)
+                       surname: Option[String])
 
-case class DesAddress(line1: String,
-                      line2: String,
+case class DesAddress(line1: Option[String],
+                      line2: Option[String],
                       line3: Option[String],
                       line4: Option[String],
                       postcode: Option[String],

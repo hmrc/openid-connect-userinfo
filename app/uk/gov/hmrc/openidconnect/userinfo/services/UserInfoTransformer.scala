@@ -30,8 +30,6 @@ trait UserInfoTransformer {
   val countryService: CountryService
   val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 
-  val addLine = PartialFunction[Option[String], String](_.map(s => s"\n$s").getOrElse(""))
-
   def transform(desUserInfo: Option[DesUserInfo], nino: String)(implicit hc:HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = authorization.value.stripPrefix("Bearer ")
 
@@ -51,8 +49,8 @@ trait UserInfoTransformer {
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) Some(nino) else None
     val address = if (scopes.contains("address")) desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, country)) else None
 
-    UserInfo(profile.map(_.firstName),
-      profile.map(_.familyName),
+    UserInfo(profile.flatMap(_.firstName),
+      profile.flatMap(_.familyName),
       profile.flatMap(_.middleName),
       address,
       profile.flatMap(_.birthDate),
@@ -60,10 +58,10 @@ trait UserInfoTransformer {
   }
 
   private def formattedAddress(desAddress: DesAddress, country: Option[String]) = {
-    s"${desAddress.line1}\n${desAddress.line2}${addLine(desAddress.line3)}${addLine(desAddress.line4)}${addLine(desAddress.postcode)}${addLine(country)}"
+    Seq(desAddress.line1,desAddress.line2, desAddress.line3, desAddress.line4, desAddress.postcode, country).flatten.mkString("\n")
   }
 
-  private case class UserProfile(firstName: String, familyName: String, middleName: Option[String], birthDate: Option[LocalDate])
+  private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
 }
 
 object UserInfoTransformer extends UserInfoTransformer {
