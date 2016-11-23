@@ -1,0 +1,54 @@
+#%RAML 1.0
+---
+
+title: User Information
+version: 1.0
+protocols: [ HTTPS ]
+baseUri: https://api.service.hmrc.gov.uk/
+
+documentation:
+ - title: Overview
+   content: !include docs/overview.md
+ - title: Versioning
+   content: !include docs/versioning.md
+ - title: Errors
+   content: !include docs/errors.md
+
+mediaType: [ application/json, application/hal+json ]
+
+uses:
+  sec: modules/securitySchemes.raml
+
+annotationTypes:
+  config: object
+  group:
+    type: object
+    properties:
+      name: string
+      description: string
+  scope:
+
+traits:
+  commonHeaders:
+    headers:
+      Accept:
+        description: API version
+        type: string
+        required: true
+        example: application/vnd.hmrc.1.0+json
+
+/userinfo:
+  get:
+    displayName: Get user info
+    description: Retrieves OpenID Connect compliant information about the signed-in user
+    is: [commonHeaders]
+    (scope): "openid"
+    securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              example-1:
+                value: !include examples/get-user-info-example-1.json
+
