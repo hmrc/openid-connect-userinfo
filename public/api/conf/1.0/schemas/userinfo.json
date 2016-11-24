@@ -8,6 +8,11 @@
       "description": "End-user's first name.",
       "example": "Thomas"
     },
+    "middle_name": {
+      "type": "string",
+      "description": "End user's middle name.",
+      "example": "A."
+    },
     "family_name": {
       "type": "string",
       "description": "End-user's last name.",
