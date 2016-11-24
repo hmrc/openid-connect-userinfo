@@ -52,6 +52,7 @@ traits:
       200:
         body:
           application/json:
+            type: !include schemas/userinfo.json
             examples:
               example-1:
                 value: !include examples/get-user-info-example-1.json
