@@ -10,14 +10,15 @@ documentation:
  - title: Overview
    content: !include docs/overview.md
  - title: Versioning
-   content: !include docs/versioning.md
+   content: !include http://api-documentation-raml-frontend.service/api-documentation/assets/common/docs/versioning.md
  - title: Errors
-   content: !include docs/errors.md
+   content: !include http://api-documentation-raml-frontend.service/api-documentation/assets/common/docs/errors.md
 
 mediaType: [ application/json, application/hal+json ]
 
 uses:
-  sec: modules/securitySchemes.raml
+  sec: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/securitySchemes.raml
+  headers: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/headers.raml
 
 annotationTypes:
   config: object
@@ -29,19 +30,22 @@ annotationTypes:
   scope:
 
 traits:
-  commonHeaders:
-    headers:
-      Accept:
-        description: API version
-        type: string
-        required: true
-        example: application/vnd.hmrc.1.0+json
+  successResponse:
+    responses:
+      200:
+        body:
+          application/json:
+            type: <<responseSchema>>
+            examples:
+              example-1:
+                value: <<successExample>>
 
 /userinfo:
   get:
     displayName: Get user info
     description: Retrieves OpenID Connect compliant information about the signed-in user
-    is: [commonHeaders]
+    is:
+      - headers.acceptHeader
     (scope): "openid"
     securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
     responses:

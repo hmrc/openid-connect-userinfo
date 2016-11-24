@@ -16,11 +16,11 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.controllers
 
+import controllers.Assets
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.{APIAccess, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.views._
-
 import play.api.mvc.{Action, AnyContent}
 import play.twirl.api.Xml
 
@@ -37,6 +37,10 @@ trait DocumentationController extends uk.gov.hmrc.api.controllers.DocumentationC
       case Some(docs) => Ok(docs).withHeaders("Content-Type" -> "application/xml")
       case None => NotFound
     }
+  }
+
+  def ramlDocs(version: String, filename: String): Action[AnyContent] = {
+    Assets.at(s"/public/api/conf/$version", filename)
   }
 
   private def buildAccess() = {
