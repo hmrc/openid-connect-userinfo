@@ -39,6 +39,13 @@ traits:
             examples:
               example-1:
                 value: <<successExample>>
+types:
+  errorResponse:
+    properties:
+      scenario:
+        type: string
+      code:
+        type: string
 
 /userinfo:
   get:
@@ -56,4 +63,12 @@ traits:
             examples:
               example-1:
                 value: !include examples/get-user-info-example-1.json
+      403:
+        body:
+          application/json:
+            type: errorResponse
+            examples:
+              BadRequest:
+                scenario: Forbidden operation
+                code: FORBIDDEN
 
