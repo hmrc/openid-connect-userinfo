@@ -1,1 +1,1 @@
-The User Information API allows you to retrieve information about the signed-in user, in an OpenID Connect compliant format
+The User Information API provides information about the signed-in user, in an OpenID Connect compliant format.
