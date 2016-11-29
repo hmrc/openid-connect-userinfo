@@ -1,0 +1,74 @@
+#%RAML 1.0
+---
+
+title: User Information
+version: 1.0
+protocols: [ HTTPS ]
+baseUri: https://api.service.hmrc.gov.uk/
+
+documentation:
+ - title: Overview
+   content: !include docs/overview.md
+ - title: Versioning
+   content: !include http://api-documentation-raml-frontend.service/api-documentation/assets/common/docs/versioning.md
+ - title: Errors
+   content: !include http://api-documentation-raml-frontend.service/api-documentation/assets/common/docs/errors.md
+
+mediaType: [ application/json, application/hal+json ]
+
+uses:
+  sec: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/securitySchemes.raml
+  headers: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/headers.raml
+
+annotationTypes:
+  config: object
+  group:
+    type: object
+    properties:
+      name: string
+      description: string
+  scope:
+
+traits:
+  successResponse:
+    responses:
+      200:
+        body:
+          application/json:
+            type: <<responseSchema>>
+            examples:
+              example-1:
+                value: <<successExample>>
+types:
+  errorResponse:
+    properties:
+      scenario:
+        type: string
+      code:
+        type: string
+
+/userinfo:
+  get:
+    displayName: Get user information
+    description: Retrieves OpenID Connect compliant information about the signed-in user
+    is:
+      - headers.acceptHeader
+    (scope): "openid profile address openid:gov-uk-identifiers"
+    securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
+    responses:
+      200:
+        body:
+          application/json:
+            type: !include schemas/userinfo.json
+            examples:
+              example-1:
+                value: !include examples/get-user-info-example-1.json
+      403:
+        body:
+          application/json:
+            type: errorResponse
+            examples:
+              BadRequest:
+                scenario: Forbidden operation
+                code: FORBIDDEN
+
