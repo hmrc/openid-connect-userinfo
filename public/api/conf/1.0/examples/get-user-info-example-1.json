@@ -1,0 +1,12 @@
+{
+  "given_name" : "John",
+  "family_name" : "Smith",
+  "middle_name" : "Scott",
+  "address" : {
+    "formatted" : "221B Baker Street\nLondon\nNW1 9NT\nGreat Britain",
+    "postal_code" : "NW1 9NT",
+    "country" : "Great Britain"
+  },
+  "birthdate" : "1950-01-01",
+  "uk_gov_nino" : "AA000003D"
+}
