@@ -49,11 +49,11 @@ types:
 
 /userinfo:
   get:
-    displayName: Get user info
+    displayName: Get user information
     description: Retrieves OpenID Connect compliant information about the signed-in user
     is:
       - headers.acceptHeader
-    (scope): "openid"
+    (scope): "openid profile address openid:gov-uk-identifiers"
     securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
     responses:
       200:
