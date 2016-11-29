@@ -26,7 +26,7 @@
     "uk_gov_nino": {
       "type": "string",
       "description": "End-User's National Insurance Number.",
-      "example": "GG853817C"
+      "example": "AA000003D"
     },
     "address": {
       "type": "object",
