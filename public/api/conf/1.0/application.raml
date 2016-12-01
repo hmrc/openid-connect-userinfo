@@ -19,15 +19,8 @@ mediaType: [ application/json, application/hal+json ]
 uses:
   sec: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/securitySchemes.raml
   headers: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/headers.raml
-
-annotationTypes:
-  config: object
-  group:
-    type: object
-    properties:
-      name: string
-      description: string
-  scope:
+  annotations: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/annotations.raml
+  types: http://api-documentation-raml-frontend.service/api-documentation/assets/common/modules/types.raml
 
 traits:
   successResponse:
@@ -39,13 +32,6 @@ traits:
             examples:
               example-1:
                 value: <<successExample>>
-types:
-  errorResponse:
-    properties:
-      scenario:
-        type: string
-      code:
-        type: string
 
 /userinfo:
   get:
@@ -53,7 +39,7 @@ types:
     description: Retrieves OpenID Connect compliant information about the signed-in user
     is:
       - headers.acceptHeader
-    (scope): "openid profile address openid:gov-uk-identifiers"
+    (annotations.scope): "openid profile address openid:gov-uk-identifiers"
     securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
     responses:
       200:
@@ -66,9 +52,9 @@ types:
       403:
         body:
           application/json:
-            type: errorResponse
+            type: types.errorResponse
             examples:
               BadRequest:
-                scenario: Forbidden operation
-                code: FORBIDDEN
-
+                description: Forbidden operation
+                value:
+                  code: FORBIDDEN
