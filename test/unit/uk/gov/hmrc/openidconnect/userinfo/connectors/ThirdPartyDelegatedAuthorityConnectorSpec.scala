@@ -22,9 +22,9 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.BeforeAndAfterEach
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{ThirdPartyDelegatedAuthorityConnector, DesConnector}
-import uk.gov.hmrc.play.http.{HttpGet, HeaderCarrier}
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.openidconnect.userinfo.connectors.ThirdPartyDelegatedAuthorityConnector
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
 
@@ -85,6 +85,5 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with BeforeAndA
 
       scopes shouldBe Set()
     }
-
   }
 }

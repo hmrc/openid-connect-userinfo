@@ -45,8 +45,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
 
-  final def userInfo() = validateAccept(acceptHeaderValidationRules).async { request =>
-    service.fetchUserInfo()(hc(request)) map {
+  final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
+    service.fetchUserInfo() map {
       case Some(userInfo) => Ok(Json.toJson(userInfo))
       case None => Ok(Json.obj())
     } recover {

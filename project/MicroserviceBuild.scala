@@ -3,7 +3,7 @@ import sbt._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.versioning.SbtGitVersioning
-import play.PlayImport._
+import play.sbt.PlayImport._
 
 object MicroServiceBuild extends Build with MicroService {
 
@@ -21,26 +21,26 @@ private object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "4.4.0",
-    "uk.gov.hmrc" %% "play-authorisation" % "3.3.0",
-    "uk.gov.hmrc" %% "play-config" % "2.1.0",
-    "uk.gov.hmrc" %% "play-json-logger" % "2.1.1",
-    "uk.gov.hmrc" %% "play-health" % "1.1.0",
-    "uk.gov.hmrc" %% "play-config" % "2.1.0",
+    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.8.0",
+    "uk.gov.hmrc" %% "play-authorisation" % "4.2.0",
+    "uk.gov.hmrc" %% "play-config" % "3.0.0",
+    "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
+    "uk.gov.hmrc" %% "play-health" % "2.0.0",
     "org.scalacheck" %% "scalacheck" % "1.12.5",
-    "uk.gov.hmrc" %% "play-hmrc-api" % "0.5.0",
-    "uk.gov.hmrc" %% "domain" % "3.7.0"
+    "uk.gov.hmrc" %% "play-hmrc-api" % "1.2.0",
+    "uk.gov.hmrc" %% "domain" % "4.0.0"
   )
 
   val test = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "1.8.0" % testScope,
+    "uk.gov.hmrc" %% "hmrctest" % "2.2.0" % testScope,
     "org.scalatest" %% "scalatest" % "2.2.6" % testScope,
-    "org.scalatestplus" %% "play" % "1.2.0" % testScope,
-    "org.pegdown" % "pegdown" % "1.5.0" % testScope,
-    "org.jsoup" % "jsoup" % "1.7.3" % testScope,
+    "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % testScope,
+    "org.pegdown" % "pegdown" % "1.6.0" % testScope,
+    "org.jsoup" % "jsoup" % "1.10.1" % testScope,
     "com.typesafe.play" %% "play-test" % PlayVersion.current % testScope,
-    "com.github.tomakehurst" % "wiremock" % "1.57" % testScope,
-    "org.scalaj" %% "scalaj-http" % "1.1.5" % testScope
+    "com.github.tomakehurst" % "wiremock" % "1.58" % testScope,
+    "org.mockito" % "mockito-all" % "1.10.19" % testScope,
+    "org.scalaj" %% "scalaj-http" % "2.3.0" % testScope
   )
 
   def apply() = compile ++ test
