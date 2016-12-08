@@ -24,7 +24,7 @@ import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
-import uk.gov.hmrc.play.http.{Upstream5xxResponse, HeaderCarrier, HttpGet}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
 import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
 
 class AuthConnectorSpec extends WireMockSugar {

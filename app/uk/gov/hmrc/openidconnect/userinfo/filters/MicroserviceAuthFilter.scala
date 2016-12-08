@@ -17,13 +17,14 @@
 package uk.gov.hmrc.openidconnect.userinfo.filters
 
 import controllers.Default.Unauthorized
-import play.api.Routes
 import play.api.libs.json.Json
-import play.api.mvc.{Filter, RequestHeader, Result, Results}
+import play.api.mvc.{Filter, RequestHeader, Result}
+import play.api.routing.Router
 import uk.gov.hmrc.openidconnect.userinfo.config.{AuthParamsControllerConfiguration, ControllerConfiguration}
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,7 +35,7 @@ trait MicroserviceAuthFilter extends Filter {
     implicit val hc = HeaderCarrier.fromHeadersAndSession(rh.headers)
 
     def authConfig(rh: RequestHeader): Option[AuthConfig] = {
-      rh.tags.get(Routes.ROUTE_CONTROLLER).flatMap { name =>
+      rh.tags.get(Router.Tags.RouteController).flatMap { name =>
         if (controllerNeedsAuth(name)) Some(authParamsConfig.authConfig(name))
         else None
       }
@@ -55,7 +56,7 @@ trait MicroserviceAuthFilter extends Filter {
   def controllerNeedsAuth(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuth
 }
 
-object MicroserviceAuthFilter extends MicroserviceAuthFilter {
+object MicroserviceAuthFilter extends MicroserviceAuthFilter with MicroserviceFilterSupport {
   override lazy val authService = AuthService
   override lazy val authParamsConfig = AuthParamsControllerConfiguration
 }

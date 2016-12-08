@@ -20,29 +20,29 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import play.api.Routes
-import play.api.libs.json.Json
 import play.api.libs.json.Json.obj
 import play.api.mvc.RequestHeader
 import play.api.mvc.Results._
+import play.api.routing.Router
 import play.api.test.FakeRequest
 import uk.gov.hmrc.openidconnect.userinfo.filters.MicroserviceAuthFilter
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
-class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with MockitoSugar {
+class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with MockitoSugar with WithFakeApplication {
 
   val sandbox = "sandbox"
   val live = "live"
 
-  trait Setup {
+  trait Setup extends MicroserviceFilterSupport {
 
-    val authFilter = new MicroserviceAuthFilter {
+    val authFilter = new MicroserviceAuthFilter with MicroserviceFilterSupport {
       override val authService = mock[AuthService]
       override val authParamsConfig = mock[AuthParamsControllerConfig]
 
@@ -67,7 +67,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
       when(authFilter.authService.isAuthorised()(any())).thenReturn(Future.successful(true))
       when(authFilter.authParamsConfig.authConfig(live)).thenReturn(AuthConfig(confidenceLevel = ConfidenceLevel.L50))
 
-      val request = FakeRequest("GET", "/").copy(tags = Map(Routes.ROUTE_CONTROLLER -> live))
+      val request = FakeRequest("GET", "/").copy(tags = Map(Router.Tags.RouteController -> live))
       val response = authFilter(nextCall _)(request).futureValue
 
       response.header.status shouldBe 200
@@ -79,7 +79,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
       when(authFilter.authService.isAuthorised()(any())).thenReturn(Future.successful(false))
       when(authFilter.authParamsConfig.authConfig(live)).thenReturn(AuthConfig(confidenceLevel = ConfidenceLevel.L50))
 
-      val request = FakeRequest("GET", "/").copy(tags = Map(Routes.ROUTE_CONTROLLER -> live))
+      val request = FakeRequest("GET", "/").copy(tags = Map(Router.Tags.RouteController -> live))
       val response = await(authFilter(nextCall _)(request))
 
       response.header.status shouldBe 401
@@ -88,7 +88,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
 
     "call the next filter if authentication is not required" in new Setup {
 
-      val request = FakeRequest("GET", "/").copy(tags = Map(Routes.ROUTE_CONTROLLER -> sandbox))
+      val request = FakeRequest("GET", "/").copy(tags = Map(Router.Tags.RouteController -> sandbox))
 
       val response = authFilter(nextCall _)(request).futureValue
 
