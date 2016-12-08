@@ -24,12 +24,11 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.concurrent.{Eventually, IntegrationPatience, ScalaFutures}
-import org.scalatestplus.play.OneServerPerSuite
-import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.duration.FiniteDuration
 
-trait WireMockSugar extends UnitSpec with OneServerPerSuite with Eventually with ScalaFutures
+trait WireMockSugar extends UnitSpec with WithFakeApplication with Eventually with ScalaFutures
   with IntegrationPatience with BeforeAndAfterAll with WiremockDSL {
 
   override implicit val defaultTimeout = FiniteDuration(100, TimeUnit.SECONDS)

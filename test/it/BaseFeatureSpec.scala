@@ -19,14 +19,14 @@ package it
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import it.stubs.{ThirdPartyDelegatedAuthorityStub, AuthStub, DesStub}
+import it.stubs.{AuthStub, DesStub, ThirdPartyDelegatedAuthorityStub}
 import org.scalatest._
-import org.scalatestplus.play.OneServerPerSuite
+import org.scalatestplus.play.{OneServerPerSuite, OneServerPerTest}
 
 import scala.concurrent.duration._
 
 abstract class BaseFeatureSpec extends FeatureSpec with GivenWhenThen with Matchers
-with BeforeAndAfterEach with BeforeAndAfterAll with OneServerPerSuite {
+with BeforeAndAfterEach with BeforeAndAfterAll with OneServerPerTest {
 
   override lazy val port = 19111
   val serviceUrl = s"http://localhost:$port"

@@ -17,16 +17,17 @@
 package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import controllers.Assets
+import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
+import play.api.mvc.{Action, AnyContent}
+import play.twirl.api.Xml
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain.{APIAccess, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.views._
-import play.api.mvc.{Action, AnyContent}
-import play.twirl.api.Xml
 
 import scala.language.dynamics
 
-trait DocumentationController extends uk.gov.hmrc.api.controllers.DocumentationController {
+class DocumentationController(errorHandler:HttpErrorHandler) extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     Ok(txt.definition(buildAccess())).withHeaders("Content-Type" -> "application/json")
@@ -49,7 +50,7 @@ trait DocumentationController extends uk.gov.hmrc.api.controllers.DocumentationC
   }
 }
 
-object DocumentationController extends DocumentationController
+object DocumentationController extends DocumentationController(LazyHttpErrorHandler)
 
 object Documentation {
   val version1_0 = "1.0"
