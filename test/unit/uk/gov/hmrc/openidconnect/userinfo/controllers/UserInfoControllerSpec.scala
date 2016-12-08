@@ -16,19 +16,20 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
 
+import org.joda.time.LocalDate
+import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers.any
-import org.mockito.BDDMockito.given
-import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
-import org.joda.time.{LocalDate, DateTime}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
+import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
 
@@ -40,7 +41,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"))
 
-  trait Setup {
+  trait Setup extends MicroserviceFilterSupport {
     val mockLiveUserInfoService = mock[LiveUserInfoService]
     val mockSandboxUserInfoService = mock[SandboxUserInfoService]
 

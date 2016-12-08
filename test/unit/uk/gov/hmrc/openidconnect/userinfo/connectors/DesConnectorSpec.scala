@@ -26,8 +26,9 @@ import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.DesConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.play.http.logging.Authorization
-import uk.gov.hmrc.play.http.{Upstream5xxResponse, HeaderCarrier, HttpGet}
-import uk.gov.hmrc.play.test.{WithFakeApplication, UnitSpec}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+
 import scala.collection.JavaConverters._
 
 class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {

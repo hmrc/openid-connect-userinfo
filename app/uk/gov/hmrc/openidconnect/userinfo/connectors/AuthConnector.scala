@@ -31,9 +31,8 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
   val http: HttpGet
 
   def confidenceLevel()(implicit hc: HeaderCarrier): Future[Option[Int]] = {
-      http.GET(s"$authBaseUrl/auth/authority") map {
-        resp =>
-          (resp.json \ "confidenceLevel").asOpt[Int]
+      http.GET(s"$authBaseUrl/auth/authority") map { resp =>
+        (resp.json \ "confidenceLevel").asOpt[Int]
       } recover {
         case e: Throwable => None
       }
@@ -41,7 +40,7 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
 
   def fetchNino()(implicit hc:HeaderCarrier): Future[Nino] = {
     http.GET(s"$authBaseUrl/auth/authority") map {
-      resp => (resp.json \ "nino").as[Option[Nino]] match {
+      resp => (resp.json \ "nino").asOpt[Nino] match {
         case Some(n) => n
         case None => throw NinoNotFoundException()
       }
