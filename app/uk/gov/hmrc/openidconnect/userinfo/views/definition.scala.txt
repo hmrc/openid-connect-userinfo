@@ -37,17 +37,7 @@
       {
         "version":"1.0",
         "status":"PUBLISHED",
-        "access" : @Json.toJson(access),
-        "endpoints":[
-          {
-            "uriPattern":"/",
-            "endpointName":"Get user info",
-            "method":"GET",
-            "authType":"USER",
-            "throttlingTier":"UNLIMITED",
-            "scope":"openid"
-          }
-        ]
+        "access" : @Json.toJson(access)
       }
     ]
   }

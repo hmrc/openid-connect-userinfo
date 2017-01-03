@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,13 +33,6 @@ class DocumentationController(errorHandler:HttpErrorHandler) extends uk.gov.hmrc
     Ok(txt.definition(buildAccess())).withHeaders("Content-Type" -> "application/json")
   }
 
-  override def documentation(version: String, endpointName: String): Action[AnyContent] = Action {
-    Documentation.findDocumentation(endpointName, version) match {
-      case Some(docs) => Ok(docs).withHeaders("Content-Type" -> "application/xml")
-      case None => NotFound
-    }
-  }
-
   def ramlDocs(version: String, filename: String): Action[AnyContent] = {
     Assets.at(s"/public/api/conf/$version", filename)
   }
@@ -51,24 +44,3 @@ class DocumentationController(errorHandler:HttpErrorHandler) extends uk.gov.hmrc
 }
 
 object DocumentationController extends DocumentationController(LazyHttpErrorHandler)
-
-object Documentation {
-  val version1_0 = "1.0"
-  val getUserInfo = "Get user info"
-
-  def findDocumentation(endpointName: String, version: String) = applyTemplate(endpointName, version)(userInfo)
-
-  def applyTemplate(apiName: String, version: String)(info: UserInfo): Option[Xml] = {
-    (apiName, version) match {
-      case (`getUserInfo`, `version1_0`) => Some(xml.getUserInfo(info))
-      case _ => None
-    }
-  }
-
-  def userInfo = {
-    UserInfoGenerator.userInfo.sample match {
-      case Some(userInfo) => userInfo
-      case None => throw new RuntimeException("Failed to generate dynamic UserInfo")
-    }
-  }
-}
