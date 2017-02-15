@@ -39,7 +39,7 @@ traits:
     description: Retrieves OpenID Connect compliant information about the signed-in user
     is:
       - headers.acceptHeader
-    (annotations.scope): "openid profile address openid:gov-uk-identifiers"
+    (annotations.scope): "openid"
     securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
     responses:
       200:
