@@ -31,13 +31,16 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+
   val userInfo = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments))
   val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFirstName = UserInfo(
@@ -46,7 +49,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments)
+  )
   val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFamilyName = UserInfo(
@@ -55,7 +60,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments))
   val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithPartialAddress = UserInfo(
@@ -64,7 +70,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nLancaster\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    None)
 
   feature("fetch user information") {
 
@@ -72,10 +79,13 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfo, nino)
@@ -94,10 +104,13 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithoutFirstName, nino)
@@ -114,12 +127,15 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile without family name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithoutFamilyName, nino)

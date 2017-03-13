@@ -33,7 +33,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = "AB123456A"
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, Some("Smith")), None, DesAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None))
-  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, Some(nino))
+  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, Some(nino), Some(enrolments))
 
   trait Setup {
     implicit val headers = HeaderCarrier()
@@ -54,8 +55,9 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "return the userInfo" in new Setup {
 
       given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Nino(nino))
+      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
       given(liveInfoService.desConnector.fetchUserInfo(nino)(headers)).willReturn(Some(desUserInfo))
-      given(liveInfoService.userInfoTransformer.transform(Some(desUserInfo), nino)(headers)).willReturn(userInfo)
+      given(liveInfoService.userInfoTransformer.transform(Some(desUserInfo), nino, Some(enrolments))(headers)).willReturn(userInfo)
 
       val result = await(liveInfoService.fetchUserInfo())
 
@@ -72,11 +74,12 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     "return only the nino when there is no user information for this NINO" in new Setup {
 
-      val userInfoWithNinoOnly = UserInfo(None, None, None, None, None, Some(nino))
+      val userInfoWithNinoOnly = UserInfo(None, None, None, None, None, Some(nino), None)
 
       given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Nino(nino))
+      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(None)
       given(liveInfoService.desConnector.fetchUserInfo(nino)(headers)).willReturn(None)
-      given(liveInfoService.userInfoTransformer.transform(None, nino)(headers)).willReturn(userInfoWithNinoOnly)
+      given(liveInfoService.userInfoTransformer.transform(None, nino, None)(headers)).willReturn(userInfoWithNinoOnly)
 
       val result = await(liveInfoService.fetchUserInfo())
 

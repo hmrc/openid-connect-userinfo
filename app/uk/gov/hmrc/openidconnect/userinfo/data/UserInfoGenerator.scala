@@ -16,7 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.data
 
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, UserInfo}
 import org.joda.time._
 import org.scalacheck.Gen
 
@@ -29,6 +29,8 @@ trait UserInfoGenerator {
       |London
       |NW1 9NT
       |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain")))
+  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
   private lazy val ninoSuffixes = "ABCD"
 
@@ -65,7 +67,7 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, Some(dob), Some(nino))
+  } yield UserInfo(name, lastName, middleName, address, Some(dob), Some(nino), Some(enrolments))
 }
 
 object UserInfoGenerator extends UserInfoGenerator

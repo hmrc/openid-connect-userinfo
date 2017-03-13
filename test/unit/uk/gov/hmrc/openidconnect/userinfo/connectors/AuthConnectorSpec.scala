@@ -21,7 +21,7 @@ import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Enrolment, EnrolmentIdentifier, NinoNotFoundException}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
@@ -63,6 +63,25 @@ class AuthConnectorSpec extends WireMockSugar {
     }
   }
 
+  "fetchEnrloments" should {
+    "return the authority enrloments" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+      given().get(urlPathEqualTo("/uri/to/enrolments")).returns(enrolmentsJson())
+      fetchEnrolments().futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
+    }
+
+    "return None when there is no URI for enrolments" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
+      fetchEnrolments().futureValue shouldBe None
+    }
+
+    "return None when there are no enrolments at all" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+      given().get(urlPathEqualTo("/uri/to/enrolments")).returns("{}")
+      fetchEnrolments().futureValue shouldBe None
+    }
+  }
+
 }
 
 class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with MockitoSugar {
@@ -75,8 +94,26 @@ class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with Mock
       s"""
          |{
          |    "credentialStrength":"weak",
-         |    "confidenceLevel": ${confidenceLevel.level}
+         |    "confidenceLevel": ${confidenceLevel.level},
+         |    "enrolments": "/uri/to/enrolments"
          |}
       """.stripMargin
+  }
+
+  def enrolmentsJson() = {
+    s"""
+       |[
+       |    {
+       |        "key": "IR-SA",
+       |        "identifiers": [
+       |            {
+       |                "key": "UTR",
+       |                "value": "174371121"
+       |            }
+       |        ],
+       |        "state": "Activated"
+       |    }
+       |]
+     """.stripMargin
   }
 }
