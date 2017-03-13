@@ -38,8 +38,9 @@ trait LiveUserInfoService extends UserInfoService {
 
     val future: Future[UserInfo] = for {
       nino <- authConnector.fetchNino()
+      enrolments <- authConnector.fetchEnrolments()
       desUserInfo <- desConnector.fetchUserInfo(nino.nino)
-      userInfo <- userInfoTransformer.transform(desUserInfo, nino.nino)
+      userInfo <- userInfoTransformer.transform(desUserInfo, nino.nino, enrolments)
     } yield userInfo
 
     future map (Some(_)) recover {

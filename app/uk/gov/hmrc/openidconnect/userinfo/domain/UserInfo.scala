@@ -27,7 +27,8 @@ case class UserInfo(given_name: Option[String],
                     middle_name: Option[String],
                     address: Option[Address],
                     birthdate: Option[LocalDate],
-                    uk_gov_nino: Option[String])
+                    uk_gov_nino: Option[String],
+                    hmrc_enrolments: Option[Seq[Enrolment]])
 
 case class UserInformation(profile: Option[UserProfile],
                            address: Option[Address],

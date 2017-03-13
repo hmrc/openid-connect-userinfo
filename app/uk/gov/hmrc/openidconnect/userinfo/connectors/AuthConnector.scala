@@ -18,7 +18,7 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Enrolment, NinoNotFoundException}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
@@ -31,11 +31,11 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
   val http: HttpGet
 
   def confidenceLevel()(implicit hc: HeaderCarrier): Future[Option[Int]] = {
-      http.GET(s"$authBaseUrl/auth/authority") map { resp =>
-        (resp.json \ "confidenceLevel").asOpt[Int]
-      } recover {
-        case e: Throwable => None
-      }
+    http.GET(s"$authBaseUrl/auth/authority") map { resp =>
+      (resp.json \ "confidenceLevel").asOpt[Int]
+    } recover {
+      case e: Throwable => None
+    }
   }
 
   def fetchNino()(implicit hc:HeaderCarrier): Future[Nino] = {
@@ -44,6 +44,27 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
         case Some(n) => n
         case None => throw NinoNotFoundException()
       }
+    }
+  }
+
+  def fetchEnrolments()(implicit headerCarrier: HeaderCarrier): Future[Option[Seq[Enrolment]]] = {
+    getEnrolmentsUri flatMap {
+      case Some(enrolmentsUri) => {
+        http.GET(s"$authBaseUrl$enrolmentsUri") map { response =>
+          response.json.asOpt[Seq[Enrolment]]
+        } recover {
+          case e: Throwable => None
+        }
+      }
+      case None => Future.successful(None)
+    }
+  }
+
+  private def getEnrolmentsUri()(implicit hc: HeaderCarrier): Future[Option[String]] = {
+    http.GET(s"$authBaseUrl/auth/authority").map { response =>
+      (response.json \ "enrolments").asOpt[String]
+    } recover {
+      case e: Throwable => None
     }
   }
 }
