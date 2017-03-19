@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.DesConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -62,7 +63,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
   }
 
   "fetch user info" should {
-    val nino = "AA111111A"
+    val nino = Some(Nino("AA111111A"))
     val ninoWithoutSuffix = "AA111111"
 
     "return the user info" in new Setup {

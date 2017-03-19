@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
+import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Enrolment, NinoNotFoundException}
+import uk.gov.hmrc.openidconnect.userinfo.domain.Enrolment
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
@@ -34,15 +35,20 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
     http.GET(s"$authBaseUrl/auth/authority") map { resp =>
       (resp.json \ "confidenceLevel").asOpt[Int]
     } recover {
-      case e: Throwable => None
+      case e: Throwable => {
+        Logger.error(e.getMessage, e)
+        None
+      }
     }
   }
 
-  def fetchNino()(implicit hc:HeaderCarrier): Future[Nino] = {
+  def fetchNino()(implicit hc:HeaderCarrier): Future[Option[Nino]] = {
     http.GET(s"$authBaseUrl/auth/authority") map {
-      resp => (resp.json \ "nino").asOpt[Nino] match {
-        case Some(n) => n
-        case None => throw NinoNotFoundException()
+      resp => (resp.json \ "nino").asOpt[Nino]
+    } recover {
+      case e: Throwable => {
+        Logger.error("Nino not present.", e)
+        None
       }
     }
   }
@@ -53,10 +59,16 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
         http.GET(s"$authBaseUrl$enrolmentsUri") map { response =>
           response.json.asOpt[Seq[Enrolment]]
         } recover {
-          case e: Throwable => None
+          case e: Throwable => {
+            Logger.error(e.getMessage, e)
+            None
+          }
         }
       }
-      case None => Future.successful(None)
+      case None => {
+        Logger.debug("No enrolment uri.")
+        Future.successful(None)
+      }
     }
   }
 
@@ -64,7 +76,10 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
     http.GET(s"$authBaseUrl/auth/authority").map { response =>
       (response.json \ "enrolments").asOpt[String]
     } recover {
-      case e: Throwable => None
+      case e: Throwable => {
+        Logger.error(e.getMessage, e)
+        None
+      }
     }
   }
 }

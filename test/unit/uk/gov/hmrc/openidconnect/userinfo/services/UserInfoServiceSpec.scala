@@ -17,27 +17,29 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.mockito.BDDMockito.given
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector}
-import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
-import uk.gov.hmrc.openidconnect.userinfo.domain._
+import org.mockito.Matchers.any
+import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.openidconnect.userinfo.services.{UserInfoTransformer, SandboxUserInfoService, LiveUserInfoService}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector, ThirdPartyDelegatedAuthorityConnector}
+import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
+import uk.gov.hmrc.openidconnect.userinfo.domain._
+import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
 import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.test.UnitSpec
-
-import scala.concurrent.Future.failed
 
 class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
-  val nino = "AB123456A"
+  val nino = Nino("AB123456A")
+  val authBearerToken = "AUTH_BEARER_TOKEN"
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, Some("Smith")), None, DesAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
-  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, Some(nino), Some(enrolments))
+  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, Some(nino).map(_.nino), Some(enrolments))
 
   trait Setup {
-    implicit val headers = HeaderCarrier()
+    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
 
     val sandboxInfoService = new SandboxUserInfoService {
       override val userInfoGenerator = mock[UserInfoGenerator]
@@ -47,43 +49,83 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       override val authConnector: AuthConnector =  mock[AuthConnector]
       override val desConnector: DesConnector = mock[DesConnector]
       override val userInfoTransformer = mock[UserInfoTransformer]
+      override val thirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
     }
   }
 
   "LiveUserInfoService" should {
 
-    "return the userInfo" in new Setup {
+    "requests all available data" in new Setup {
 
-      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Nino(nino))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Some(nino))
       given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.desConnector.fetchUserInfo(nino)(headers)).willReturn(Some(desUserInfo))
-      given(liveInfoService.userInfoTransformer.transform(Some(desUserInfo), nino, Some(enrolments))(headers)).willReturn(userInfo)
+      given(liveInfoService.desConnector.fetchUserInfo(Some(nino))(headers)).willReturn(Some(desUserInfo))
+      given(liveInfoService.userInfoTransformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments))).willReturn(any[UserInfo], any[UserInfo])
 
-      val result = await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo())
 
-      result shouldBe Some(userInfo)
+      verify(liveInfoService.desConnector).fetchUserInfo(Some(nino))
+      verify(liveInfoService.authConnector).fetchNino()
+      verify(liveInfoService.authConnector).fetchEnrolments()
     }
 
     "return None when the NINO is not in the authority" in new Setup {
-      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(failed(new NinoNotFoundException))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(None)
 
       val result = await(liveInfoService.fetchUserInfo())
 
       result shouldBe None
     }
 
-    "return only the nino when there is no user information for this NINO" in new Setup {
+    "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
 
-      val userInfoWithNinoOnly = UserInfo(None, None, None, None, None, Some(nino), None)
+      val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
-      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Nino(nino))
-      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(None)
-      given(liveInfoService.desConnector.fetchUserInfo(nino)(headers)).willReturn(None)
-      given(liveInfoService.userInfoTransformer.transform(None, nino, None)(headers)).willReturn(userInfoWithNinoOnly)
+      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Some(nino))
+      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(nino), Some(enrolments))).willReturn(any[UserInfo], any[UserInfo])
 
-      val result = await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo())
 
-      result shouldBe Some(userInfoWithNinoOnly)
+      verify(liveInfoService.desConnector, never).fetchUserInfo(any[Option[Nino]])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector).fetchNino()
+      verify(liveInfoService.authConnector).fetchEnrolments()
+    }
+
+    "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
+
+      val scopes = Set("openid:hmrc_enrolments")
+      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+
+      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, None, Some(enrolments))).willReturn(any[UserInfo], any[UserInfo])
+
+      await(liveInfoService.fetchUserInfo())
+
+      verify(liveInfoService.desConnector, never).fetchUserInfo(any[Option[Nino]])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector, never).fetchNino()
+      verify(liveInfoService.authConnector).fetchEnrolments()
+    }
+
+    "does not request AUTH::fetchEnrloments when the scopes does not contain 'openid:hmrc_enrolments'" in new Setup {
+
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
+      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+
+      given(liveInfoService.authConnector.fetchNino()(headers)).willReturn(Some(nino))
+      given(liveInfoService.desConnector.fetchUserInfo(Some(nino))(headers)).willReturn(None)
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, None, Some(enrolments))).willReturn(any[UserInfo], any[UserInfo])
+
+      await(liveInfoService.fetchUserInfo())
+
+      verify(liveInfoService.authConnector, never).fetchEnrolments()
+      verify(liveInfoService.authConnector).fetchNino()
+      verify(liveInfoService.desConnector).fetchUserInfo(any[Option[Nino]])(any[HeaderCarrier])
     }
   }
 

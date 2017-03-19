@@ -16,21 +16,20 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.openidconnect.userinfo.connectors.ThirdPartyDelegatedAuthorityConnector
+import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{CountryService, UserInfoTransformer}
 import uk.gov.hmrc.play.http.HeaderCarrier
-import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.test.UnitSpec
 
 class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
   val ukCountryCode = 10
-  val nino = "AB123456A"
-  val authBearerToken = "AUTH_BEARER_TOKEN"
+  val nino = Nino("AB123456A")
   val desAddress: DesAddress = DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode))
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
@@ -47,11 +46,10 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
   )
 
   trait Setup {
-    implicit val hc: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
     val transformer = new UserInfoTransformer {
       override val countryService = mock[CountryService]
-      override val thirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
     }
     given(transformer.countryService.getCountry(ukCountryCode)).willReturn(Some("United Kingdom"))
   }
@@ -60,27 +58,27 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
     "return the full object when the delegated authority has scope 'address', 'profile', 'openid:gov-uk-identifiers' and 'openid:hrmc_enrolments'" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe userInfo
     }
 
     "return only the nino when des user info could not be retrieved" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
 
-      val result = await(transformer.transform(None, nino, None))
+      val result = await(transformer.transform(scopes, None, Some(nino), None))
 
-      result shouldBe UserInfo(None, None, None, None, None, Some(nino), None)
+      result shouldBe UserInfo(None, None, None, None, None, Some(nino.map(_.nino)), None)
     }
 
     "does not return the address when the delegated authority does not have the scope 'address'" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe userInfo.copy(address = None)
     }
@@ -88,86 +86,86 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
     "does not return the enrolments when the delegated authority does not have the scope 'openid:hmrc_enrolments'" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe userInfo.copy(hmrc_enrolments = None)
     }
 
     "does not return the user profile when the delegated authority does not have the scope 'profile'" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe userInfo.copy(given_name = None, family_name = None, middle_name = None, birthdate = None)
     }
 
     "does not return the nino when the delegated authority does not have the scope 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments'" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "profile", "openid:hmrc_enrolments")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe userInfo.copy(uk_gov_nino = None)
     }
 
     "return an empty object when the delegated authority does have only 'openid' scope" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("openid"))
+      val scopes = Set("openid")
 
-      val result = await(transformer.transform(Some(desUserInfo), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(nino), Some(enrolments)))
 
       result shouldBe UserInfo(None, None, None, None, None, None, None)
     }
 
     "handle missing first line of address" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
       val desUserMissingline1 = desUserInfo.copy(address = desAddress.copy(line1=None))
-      val result = await(transformer.transform(Some(desUserMissingline1), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserMissingline1), Some(nino), Some(enrolments)))
       val userInfoMissingLine1 = userInfo.copy(address = Some(userAddress.copy(formatted = "Town Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom")))
       result shouldBe userInfoMissingLine1
     }
 
     "handle missing second line of address" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
       val desUserMissingLine2 = desUserInfo.copy(address = desAddress.copy(line2=None))
-      val result = await(transformer.transform(Some(desUserMissingLine2), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserMissingLine2), Some(nino),Some(enrolments)))
       val userInfoMissingLine2 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nLondon\nEngland\nNW1 6XE\nUnited Kingdom")))
       result shouldBe userInfoMissingLine2
     }
 
     "handle missing third line of address" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
 
       val desUserMissingLine3 = desUserInfo.copy(address = desAddress.copy(line3=None))
-      val result = await(transformer.transform(Some(desUserMissingLine3), nino, Some(enrolments)))
+      val result = await(transformer.transform(scopes, Some(desUserMissingLine3), Some(nino),Some(enrolments)))
       val userInfoMissingLine3 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nEngland\nNW1 6XE\nUnited Kingdom")))
       result shouldBe userInfoMissingLine3
     }
 
     "handle missing fourth line of address" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
 
       val desUserMissingLine4 = desUserInfo.copy(address = desAddress.copy(line4=None))
-      val result = await(transformer.transform(Some(desUserMissingLine4), nino, None))
+      val result = await(transformer.transform(scopes, Some(desUserMissingLine4), Some(nino),None))
       val userInfoMissingLine4 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nNW1 6XE\nUnited Kingdom")),hmrc_enrolments = None)
       result shouldBe userInfoMissingLine4
     }
 
     "handle missing post code in address" in new Setup {
 
-      given(transformer.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(hc)).willReturn(Set("address", "profile", "openid:gov-uk-identifiers"))
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
 
       val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postcode = None))
-      val result = await(transformer.transform(Some(desUserMissingPostCode), nino, None))
+      val result = await(transformer.transform(scopes, Some(desUserMissingPostCode), Some(nino),None))
       val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUnited Kingdom",postal_code = None)), hmrc_enrolments = None)
       result shouldBe userInfoMissingPostCode
     }
