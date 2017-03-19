@@ -77,7 +77,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
@@ -102,7 +102,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile without first name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
@@ -170,6 +170,94 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       Then("The user information is returned")
       result.code shouldBe 200
       Json.parse(result.body) shouldBe Json.toJson(userInfoWithPartialAddress)
+    }
+
+    scenario("fetch user data without enrolments when there are no enrolments") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("DES contains user information for the NINO")
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      Json.parse(result.body) shouldBe Json.toJson(userInfo.copy(hmrc_enrolments = None))
+    }
+
+    scenario("fetch user data without address and user details when there are no address and user details") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None)
+      Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
+    }
+
+    scenario("fetch enrolments only when scope contains 'openid:hmrc_enrolments'") {
+
+      Given("A Auth token with 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None)
+      Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
+    }
+
+    scenario("return 401 - unauthorized when confidence level is less than 200") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L100, Nino(nino))
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 401
+
+      Json.parse(result.body) shouldBe Json.parse(s"""{"code":"UNAUTHORIZED","message":"Bearer token is missing or not authorized"}""".stripMargin)
     }
   }
 }

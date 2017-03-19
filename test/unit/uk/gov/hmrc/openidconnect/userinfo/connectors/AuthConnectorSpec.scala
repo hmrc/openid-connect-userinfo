@@ -49,17 +49,17 @@ class AuthConnectorSpec extends WireMockSugar {
   "fetchNino" should {
     "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
-      fetchNino().futureValue shouldBe Nino("NB966669A")
+      fetchNino().futureValue shouldBe Some(Nino("NB966669A"))
     }
 
-    "fail with NinoNotFoundException when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
+    "return None when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-      intercept[NinoNotFoundException]{await(fetchNino())}
+      fetchNino().futureValue shouldBe None
     }
 
-    "fail when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+    "return None when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns(500)
-      intercept[Upstream5xxResponse]{await(fetchNino())}
+      fetchNino().futureValue shouldBe None
     }
   }
 
