@@ -47,6 +47,47 @@
           "example": "Great Britain"
         }
       }
+    },
+    "hmrc_enrolment": {
+      "type": "object",
+      "description": "End-user's HMRC enrolment.",
+      "properties": {
+        "service": {
+          "type": "string",
+          "description": "HMRC service name.",
+          "example": "IR-SA"
+        },
+        "identifiers": {
+          "type": "object",
+          "description": "End-user's identifiers associated to this HMRC service.",
+          "example": "UTR : 123456789013"
+        },
+        "state": {
+          "type": "string",
+          "description": "End-user's HMRC enrolment status.",
+          "enum": [
+            "awaitingActivation",
+            "activated",
+            "pending",
+            "givenToAgent"
+          ]
+        },
+        "confidenceLevel": {
+          "type": "integer",
+          "required": false,
+          "description": "End-user's confidence level to this HMRC service.",
+          "example": 200
+        }
+      }
+    },
+    "hmrc_enrolments": {
+      "type": "array",
+      "description": "End-user's HMRC enrolments.",
+      "items": [
+        {
+          "type": "hmrc_enrolment"
+        }
+      ]
     }
   }
 }

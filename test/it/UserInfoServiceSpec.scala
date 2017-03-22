@@ -31,13 +31,16 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+
   val userInfo = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments))
   val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFirstName = UserInfo(
@@ -46,7 +49,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments)
+  )
   val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFamilyName = UserInfo(
@@ -55,7 +60,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    Some(enrolments))
   val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithPartialAddress = UserInfo(
@@ -64,18 +70,22 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("A"),
     Some(Address("1 Station Road\nLancaster\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
     Some(LocalDate.parse("1980-01-01")),
-    Some("AB123456A"))
+    Some("AB123456A"),
+    None)
 
   feature("fetch user information") {
 
     scenario("fetch user profile") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfo, nino)
@@ -92,12 +102,15 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile without first name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithoutFirstName, nino)
@@ -114,12 +127,15 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile without family name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithoutFamilyName, nino)
@@ -154,6 +170,94 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       Then("The user information is returned")
       result.code shouldBe 200
       Json.parse(result.body) shouldBe Json.toJson(userInfoWithPartialAddress)
+    }
+
+    scenario("fetch user data without enrolments when there are no enrolments") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("DES contains user information for the NINO")
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      Json.parse(result.body) shouldBe Json.toJson(userInfo.copy(hmrc_enrolments = None))
+    }
+
+    scenario("fetch user data without address and user details when there are no address and user details") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None)
+      Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
+    }
+
+    scenario("fetch enrolments only when scope contains 'openid:hmrc_enrolments'") {
+
+      Given("A Auth token with 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None)
+      Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
+    }
+
+    scenario("return 401 - unauthorized when confidence level is less than 200") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L100, Nino(nino))
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 401
+
+      Json.parse(result.body) shouldBe Json.parse(s"""{"code":"UNAUTHORIZED","message":"Bearer token is missing or not authorized"}""".stripMargin)
     }
   }
 }

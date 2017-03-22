@@ -21,7 +21,7 @@ import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.openidconnect.userinfo.domain.NinoNotFoundException
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Enrolment, EnrolmentIdentifier, NinoNotFoundException}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
@@ -49,17 +49,36 @@ class AuthConnectorSpec extends WireMockSugar {
   "fetchNino" should {
     "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
-      fetchNino().futureValue shouldBe Nino("NB966669A")
+      fetchNino().futureValue shouldBe Some(Nino("NB966669A"))
     }
 
-    "fail with NinoNotFoundException when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
+    "return None when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-      intercept[NinoNotFoundException]{await(fetchNino())}
+      fetchNino().futureValue shouldBe None
     }
 
-    "fail when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+    "return None when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/auth/authority")).returns(500)
-      intercept[Upstream5xxResponse]{await(fetchNino())}
+      fetchNino().futureValue shouldBe None
+    }
+  }
+
+  "fetchEnrloments" should {
+    "return the authority enrloments" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+      given().get(urlPathEqualTo("/uri/to/enrolments")).returns(enrolmentsJson())
+      fetchEnrolments().futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
+    }
+
+    "return None when there is no URI for enrolments" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
+      fetchEnrolments().futureValue shouldBe None
+    }
+
+    "return None when there are no enrolments at all" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+      given().get(urlPathEqualTo("/uri/to/enrolments")).returns("{}")
+      fetchEnrolments().futureValue shouldBe None
     }
   }
 
@@ -75,8 +94,26 @@ class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with Mock
       s"""
          |{
          |    "credentialStrength":"weak",
-         |    "confidenceLevel": ${confidenceLevel.level}
+         |    "confidenceLevel": ${confidenceLevel.level},
+         |    "enrolments": "/uri/to/enrolments"
          |}
       """.stripMargin
+  }
+
+  def enrolmentsJson() = {
+    s"""
+       |[
+       |    {
+       |        "key": "IR-SA",
+       |        "identifiers": [
+       |            {
+       |                "key": "UTR",
+       |                "value": "174371121"
+       |            }
+       |        ],
+       |        "state": "Activated"
+       |    }
+       |]
+     """.stripMargin
   }
 }

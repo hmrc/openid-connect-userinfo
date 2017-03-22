@@ -17,13 +17,16 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import play.api.Logger
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector}
+import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector, ThirdPartyDelegatedAuthorityConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
-import uk.gov.hmrc.play.http.HeaderCarrier
-import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.play.http.logging.Authorization
+import uk.gov.hmrc.play.http.{HeaderCarrier, UnauthorizedException}
 
-import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{Future, Promise}
+import scala.util.{Failure, Success}
 
 trait UserInfoService {
   def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]]
@@ -33,19 +36,57 @@ trait LiveUserInfoService extends UserInfoService {
   val authConnector: AuthConnector
   val desConnector: DesConnector
   val userInfoTransformer: UserInfoTransformer
+  val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
+
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
+    def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
 
-    val future: Future[UserInfo] = for {
-      nino <- authConnector.fetchNino()
-      desUserInfo <- desConnector.fetchUserInfo(nino.nino)
-      userInfo <- userInfoTransformer.transform(desUserInfo, nino.nino)
-    } yield userInfo
+    def scopes = hc.authorization match {
+      case Some(authorization) => thirdPartyDelegatedAuthorityConnector.fetchScopes(bearerToken(authorization))
+      case None => Future.failed(new UnauthorizedException("Bearer token is required"))
+    }
 
-    future map (Some(_)) recover {
-      case NinoNotFoundException() =>
-        Logger.debug("Nino not present in Bearer Token")
-        None
+    val promiseNino = Promise[Option[Nino]]()
+    val maybeNino = promiseNino.future
+
+    scopes flatMap { scopes =>
+      val scopesForNino = Set("profile", "address", "openid:gov-uk-identifiers")
+      if ((scopesForNino -- scopes).size != scopesForNino.size) {
+        authConnector.fetchNino() onComplete {
+          case Success(nino) => promiseNino success nino
+          case Failure(exception) => throw exception
+        }
+      } else promiseNino success None
+
+      val promiseDesUserInfo = Promise[Option[DesUserInfo]]
+      val maybeDesUserInfo = promiseDesUserInfo.future
+
+      val scopesDes = Set("profile", "address")
+      if ((scopesDes -- scopes).size != scopesDes.size) {
+        maybeNino onComplete {
+          case Success(hopefulyNino) => desConnector.fetchUserInfo(hopefulyNino) onComplete {
+            case Success(desUserInfo) => promiseDesUserInfo success desUserInfo
+            case Failure(exception) => throw exception
+          }
+          case Failure(exception) => throw exception
+        }
+      } else promiseDesUserInfo success None
+
+      def maybeEnrolments = if (scopes.contains("openid:hmrc_enrolments")) authConnector.fetchEnrolments() else Future.successful(None)
+
+      val future: Future[UserInfo] = for {
+        nino <- maybeNino
+        enrolments <- maybeEnrolments
+        desUserInfo <- maybeDesUserInfo
+      } yield userInfoTransformer.transform(scopes, desUserInfo, nino, enrolments)
+
+      future map (Some((_: UserInfo))) recover {
+        case e: Throwable => {
+          Logger.debug(e.getMessage, e)
+          None
+        }
+      }
     }
   }
 }
@@ -62,6 +103,7 @@ object LiveUserInfoService extends LiveUserInfoService {
   override val desConnector = DesConnector
   override val authConnector = AuthConnector
   override val userInfoTransformer = UserInfoTransformer
+  override val thirdPartyDelegatedAuthorityConnector = ThirdPartyDelegatedAuthorityConnector
 }
 
 object SandboxUserInfoService extends SandboxUserInfoService {

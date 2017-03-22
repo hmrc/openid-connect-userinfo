@@ -30,9 +30,30 @@ object AuthStub extends Stub {
         s"""
           |{
           |   "confidenceLevel": ${confidenceLevel.level},
-          |   "nino": "${nino.nino}"
+          |   "nino": "${nino.nino}",
+          |   "enrolments": "/auth/oid/2/enrolments"
           |}
-        """.stripMargin)))
+        """.stripMargin
+      )))
   }
 
+  def willReturnEnrolmentsWith() = {
+    stub.mock.register(get(urlPathEqualTo(s"/auth/oid/2/enrolments"))
+      .willReturn(aResponse().withBody(
+      s"""
+         |[
+         |  {
+         |    "key": "IR-SA",
+         |    "identifiers": [
+         |       {
+         |         "key": "UTR",
+         |         "value": "174371121"
+         |       }
+         |    ],
+         |    "state": "Activated"
+         |  }
+         |]
+     """.stripMargin
+    )))
+  }
 }
