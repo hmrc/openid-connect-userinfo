@@ -8,5 +8,17 @@
     "country" : "Great Britain"
   },
   "birthdate" : "1950-01-01",
-  "uk_gov_nino" : "AA000003D"
+  "uk_gov_nino" : "AA000003D",
+  "hmrc_enrolments": [
+    {
+      "key": "IR-SA",
+      "identifiers": [
+        {
+          "key": "UTR",
+          "value": "174371121"
+        }
+      ],
+      "state": "Activated"
+    }
+  ]
 }
