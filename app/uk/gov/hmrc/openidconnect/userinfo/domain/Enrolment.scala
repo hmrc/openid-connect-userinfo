@@ -18,9 +18,9 @@ package uk.gov.hmrc.openidconnect.userinfo.domain
 
 case class EnrolmentIdentifier(key: String, value: String)
 
-case class Enrolment(key: String,
+case class Enrolment(service: String,
                      identifiers: Seq[EnrolmentIdentifier] = Seq(),
-                     state: String = "Activated") {
+                     state: String = "activated") {
 
   def getIdentifier(key: String): Option[EnrolmentIdentifier] = identifiers.find { ei =>
     ei.key.equalsIgnoreCase(key)
@@ -32,6 +32,6 @@ case class Enrolment(key: String,
 
 case object ActiveEnrolment {
   def unapply(enrolment: Enrolment): Option[String] =
-    if (enrolment.isActivated) Some(enrolment.key)
+    if (enrolment.isActivated) Some(enrolment.service)
     else None
 }
