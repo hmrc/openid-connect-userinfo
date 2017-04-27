@@ -48,17 +48,17 @@
         }
       }
     },
-    "hmrc_enrolment": {
-      "type": "object",
-      "description": "End-user's HMRC enrolment.",
+    "hmrc_enrolments": {
+      "type": "array",
+      "description": "End-user's HMRC enrolments.",
       "properties": {
-        "service": {
+        "key": {
           "type": "string",
           "description": "HMRC service name.",
           "example": "IR-SA"
         },
         "identifiers": {
-          "type": "object",
+          "type": "array",
           "description": "End-user's identifiers associated to this HMRC service.",
           "example": "UTR : 123456789013"
         },
@@ -68,26 +68,19 @@
           "enum": [
             "awaitingActivation",
             "activated",
+            "Active",
+            "Activated",
             "pending",
             "givenToAgent"
           ]
         },
         "confidenceLevel": {
           "type": "integer",
-          "required": false,
           "description": "End-user's confidence level to this HMRC service.",
           "example": 200
         }
-      }
-    },
-    "hmrc_enrolments": {
-      "type": "array",
-      "description": "End-user's HMRC enrolments.",
-      "items": [
-        {
-          "type": "hmrc_enrolment"
-        }
-      ]
+      },
+      "required": ["service", "identifiers", "state"]
     }
   }
 }

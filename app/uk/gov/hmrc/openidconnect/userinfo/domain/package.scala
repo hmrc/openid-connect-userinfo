@@ -45,14 +45,14 @@ package object domain {
 
   implicit val idformat = Json.format[EnrolmentIdentifier]
   implicit val format = Format(
-    ((__ \ "service").read[String] and
+    ((__ \ "key").read[String] and
       (__ \ "identifiers").read[Seq[EnrolmentIdentifier]] and
       (__ \ "state").readNullable[String]) {
       (key, ids, optState) =>
         Enrolment(
           key,
           ids,
-          optState.getOrElse("activated")
+          optState.getOrElse("Activated")
         )
     },
     Writes[Enrolment] { enrolment =>

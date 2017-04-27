@@ -11,7 +11,7 @@
   "uk_gov_nino" : "AA000003D",
   "hmrc_enrolments": [
     {
-      "service": "IR-SA",
+      "key": "IR-SA",
       "identifiers": [
         {
           "key": "UTR",
