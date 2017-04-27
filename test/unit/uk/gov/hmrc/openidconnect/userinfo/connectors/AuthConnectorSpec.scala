@@ -104,14 +104,14 @@ class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with Mock
     s"""
        |[
        |    {
-       |        "service": "IR-SA",
+       |        "key": "IR-SA",
        |        "identifiers": [
        |            {
        |                "key": "UTR",
        |                "value": "174371121"
        |            }
        |        ],
-       |        "state": "activated"
+       |        "state": "Activated"
        |    }
        |]
      """.stripMargin
