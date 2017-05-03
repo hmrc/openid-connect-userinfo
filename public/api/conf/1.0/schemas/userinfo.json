@@ -60,7 +60,12 @@
         "identifiers": {
           "type": "array",
           "description": "End-user's identifiers associated to this HMRC service.",
-          "example": "UTR : 123456789013"
+          "example": [
+            {
+              "key": "UTR",
+              "value": "174371121"
+            }
+          ]
         },
         "state": {
           "type": "string",
@@ -80,7 +85,7 @@
           "example": 200
         }
       },
-      "required": ["service", "identifiers", "state"]
+      "required": ["key", "identifiers", "state"]
     }
   }
 }
