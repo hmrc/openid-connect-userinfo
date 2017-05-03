@@ -78,11 +78,6 @@
             "pending",
             "givenToAgent"
           ]
-        },
-        "confidenceLevel": {
-          "type": "integer",
-          "description": "End-user's confidence level to this HMRC service.",
-          "example": 200
         }
       },
       "required": ["key", "identifiers", "state"]
