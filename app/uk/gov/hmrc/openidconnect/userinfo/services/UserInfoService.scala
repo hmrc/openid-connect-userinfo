@@ -64,13 +64,10 @@ trait LiveUserInfoService extends UserInfoService {
 
       val scopesDes = Set("profile", "address")
       if ((scopesDes -- scopes).size != scopesDes.size) {
-        maybeNino onComplete {
-          case Success(hopefulyNino) => desConnector.fetchUserInfo(hopefulyNino) onComplete {
+        maybeNino.flatMap(desConnector.fetchUserInfo(_)) onComplete {
             case Success(desUserInfo) => promiseDesUserInfo success desUserInfo
             case Failure(exception) => throw exception
           }
-          case Failure(exception) => throw exception
-        }
       } else promiseDesUserInfo success None
 
       def maybeEnrolments = if (scopes.contains("openid:hmrc_enrolments")) authConnector.fetchEnrolments() else Future.successful(None)
