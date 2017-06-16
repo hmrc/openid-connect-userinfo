@@ -57,7 +57,7 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
     .configure("run.mode" -> "Stub")
     .configure(Map(
       "appName" -> "application-name",
-      "appUrl" -> "http://microservice-name.service",
+      "appUrl" -> "http://microservice-name.protected.mdtp",
       "Test.microservice.services.service-locator.host" -> stubHost,
       "Test.microservice.services.service-locator.port" -> stubPort))
     .in(Mode.Test).build()
@@ -82,7 +82,7 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
 
       verify(1, postRequestedFor(urlMatching("/registration")).
       withHeader("content-type", equalTo("application/json")).
-      withRequestBody(equalTo(regPayloadStringFor("application-name", "http://microservice-name.service"))))
+      withRequestBody(equalTo(regPayloadStringFor("application-name", "http://microservice-name.protected.mdtp"))))
     }
 
     "provide definition endpoint" in new Setup {
