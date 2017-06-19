@@ -17,16 +17,18 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
+import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel.L200
 import uk.gov.hmrc.play.http.HeaderCarrier
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 trait AuthService {
   val authConnector: AuthConnector
 
   def isAuthorised()(implicit hc: HeaderCarrier) = {
-    authConnector.confidenceLevel().map {
-      case Some(cf) => cf >= L200.level
+    authConnector.fetchAuthority().map {
+      case Some(auth) => auth.confidenceLevel.getOrElse(ConfidenceLevel.L0.level) >= L200.level
       case None => false
     }
   }

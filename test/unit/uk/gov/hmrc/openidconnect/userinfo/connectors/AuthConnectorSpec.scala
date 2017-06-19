@@ -18,70 +18,75 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Enrolment, EnrolmentIdentifier, NinoNotFoundException}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
 
 class AuthConnectorSpec extends WireMockSugar {
 
-  "confidenceLevel" should {
-    "return the authority's confidence level" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
-      confidenceLevel().futureValue shouldBe Some(200)
-    }
+//  "confidenceLevel" should {
+//    "be the authority's confidence level" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+//      confidenceLevel().futureValue shouldBe Some(200)
+//    }
+//
+//    "return None when authority's confidence level is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
+//      confidenceLevel().futureValue shouldBe None
+//    }
+//
+//    "return false when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns(500)
+//      confidenceLevel().futureValue shouldBe None
+//    }
+//  }
 
-    "return None when authority's confidence level is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-      confidenceLevel().futureValue shouldBe None
-    }
-
-    "return false when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns(500)
-      confidenceLevel().futureValue shouldBe None
-    }
-  }
-
-  "fetchNino" should {
-    "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
-      fetchNino().futureValue shouldBe Some(Nino("NB966669A"))
-    }
-
-    "return None when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-      fetchNino().futureValue shouldBe None
-    }
-
-    "return None when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns(500)
-      fetchNino().futureValue shouldBe None
-    }
-  }
+//  "fetchNino" should {
+//    "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
+//      fetchNino().futureValue shouldBe Some(Nino("NB966669A"))
+//    }
+//
+//    "return None when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
+//      fetchNino().futureValue shouldBe None
+//    }
+//
+//    "return None when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
+//      given().get(urlPathEqualTo("/auth/authority")).returns(500)
+//      fetchNino().futureValue shouldBe None
+//    }
+//  }
 
   "fetchEnrloments" should {
+    val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
+      Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
     "return the authority enrloments" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
       given().get(urlPathEqualTo("/uri/to/enrolments")).returns(enrolmentsJson())
-      fetchEnrolments().futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
+      fetchEnrolments(authority).futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
     }
 
     "return None when there is no URI for enrolments" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-      fetchEnrolments().futureValue shouldBe None
+      fetchEnrolments(authority.copy(enrolments = None)).futureValue shouldBe None
     }
 
     "return None when there are no enrolments at all" in new TestAuthConnector(wiremockBaseUrl) {
-      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
       given().get(urlPathEqualTo("/uri/to/enrolments")).returns("{}")
-      fetchEnrolments().futureValue shouldBe None
+      fetchEnrolments(authority).futureValue shouldBe None
     }
   }
 
+  "fetchAuthority" should {
+    "return the authority with some GG fields" in new TestAuthConnector(wiremockBaseUrl) {
+      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
+      fetchAuthority().futureValue shouldBe Some(Authority(Some("weak"),Some(200),Some("AB123456A"),Some("/uri/to/userDetails"),
+        Some("/uri/to/enrolments"),Some("Individual"),Some("1304372065861347")))
+    }
+  }
 }
 
 class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with MockitoSugar {
@@ -95,7 +100,11 @@ class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with Mock
          |{
          |    "credentialStrength":"weak",
          |    "confidenceLevel": ${confidenceLevel.level},
-         |    "enrolments": "/uri/to/enrolments"
+         |    "nino": "AB123456A",
+         |    "userDetailsLink": "/uri/to/userDetails",
+         |    "enrolments": "/uri/to/enrolments",
+         |    "affinityGroup": "Individual",
+         |    "credId": "1304372065861347"
          |}
       """.stripMargin
   }

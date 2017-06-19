@@ -26,9 +26,11 @@ case class UserInfo(given_name: Option[String],
                     family_name: Option[String],
                     middle_name: Option[String],
                     address: Option[Address],
+                    email: Option[String],
                     birthdate: Option[LocalDate],
                     uk_gov_nino: Option[String],
-                    hmrc_enrolments: Option[Seq[Enrolment]])
+                    hmrc_enrolments: Option[Seq[Enrolment]],
+                    government_gateway: Option[GovernmentGatewayDetails])
 
 case class UserInformation(profile: Option[UserProfile],
                            address: Option[Address],

@@ -19,13 +19,13 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{AppContext, WSHttp}
-import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 import uk.gov.hmrc.play.http.logging.Authorization
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 trait DesConnector {
 
@@ -36,11 +36,12 @@ trait DesConnector {
   val desEnvironment: String
   val desBearerToken: String
 
-  def fetchUserInfo(nino: Option[Nino])(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+  def fetchUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken"))).withExtraHeaders("Environment" -> desEnvironment)
 
-    nino map { ninoValue =>
-      val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(ninoValue.nino)}"
+    authority.nino map { ninoString =>
+      val nino = Nino(ninoString) // validates and handles invalid nino value
+      val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino.nino)}"
       Logger.debug(s"GET $url with environment=$desEnvironment")
 
       http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {

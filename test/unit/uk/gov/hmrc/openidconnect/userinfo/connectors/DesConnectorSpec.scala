@@ -22,7 +22,6 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.DesConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -63,8 +62,10 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
   }
 
   "fetch user info" should {
-    val nino = Some(Nino("AA111111A"))
+    val nino = Some("AA111111A")
     val ninoWithoutSuffix = "AA111111"
+    val authority: Authority = Authority(Some("weak"), Some(200), nino, Some("/uri/to/userDetails"),
+      Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
 
     "return the user info" in new Setup {
 
@@ -101,7 +102,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
               |
             """.stripMargin)))
 
-      val result = await(connector.fetchUserInfo(nino))
+      val result = await(connector.fetchUserInfo(authority))
 
       result shouldBe Some(DesUserInfo(
         DesUserName(Some("Andrew"), Some("John"), Some("Smith")),
@@ -113,7 +114,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
       val headerCarrierWithAuthBearerToken = hc.copy(authorization = Some(Authorization("auth_bearer_token")))
 
-      await(connector.fetchUserInfo(nino)(headerCarrierWithAuthBearerToken))
+      await(connector.fetchUserInfo(authority)(headerCarrierWithAuthBearerToken))
 
       val requestToDes = findAll(getRequestedFor(urlEqualTo(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))).get(0)
       requestToDes.getHeaders.getHeader("Authorization").values().asScala shouldBe List("Bearer aToken")
@@ -124,7 +125,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(404)))
 
-      val result = await(connector.fetchUserInfo(nino))
+      val result = await(connector.fetchUserInfo(authority))
 
       result shouldBe None
     }
@@ -134,7 +135,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(400)))
 
-      val result = await(connector.fetchUserInfo(nino))
+      val result = await(connector.fetchUserInfo(authority))
 
       result shouldBe None
     }
@@ -144,7 +145,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(500)))
 
-      intercept[Upstream5xxResponse]{await(connector.fetchUserInfo(nino))}
+      intercept[Upstream5xxResponse]{await(connector.fetchUserInfo(authority))}
     }
   }
 }

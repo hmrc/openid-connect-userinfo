@@ -18,6 +18,11 @@
       "description": "End-user's last name.",
       "example": "Delgado"
     },
+    "email" : {
+      "type" : "string",
+      "description" : "User email",
+      "example" : "Cling.Eastwood@wildwest.com"
+    },
     "birthdate": {
       "type": "string",
       "description": "End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.",
@@ -81,6 +86,32 @@
         }
       },
       "required": ["service", "identifiers", "state"]
+    },
+    "government_gateway": {
+      "type": "object",
+      "description": "Legacy properties based on government gateway input.",
+      "properties" : {
+        "user_id" : {
+          "type": "string",
+          "description": "Cred id",
+          "example" : "1012345"
+        },
+        "gateway_token" : {
+          "type" : "string",
+          "description": "Government gateway token",
+          "example": "c29tZSBtYWdpYyBobXJjIGdnIHRva2Vu"
+        },
+        "roles" : {
+          "type" : "array",
+          "description" : "List of user's roles",
+          "example" : ["User"]
+        },
+        "affinity_group" : {
+          "type" : "string",
+          "description" : "User affinity group",
+          "example" : "Individual"
+        }
+      }
     }
   }
 }

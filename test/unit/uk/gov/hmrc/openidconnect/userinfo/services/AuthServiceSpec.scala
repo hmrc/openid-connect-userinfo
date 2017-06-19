@@ -21,9 +21,13 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
+import uk.gov.hmrc.openidconnect.userinfo.domain.Authority
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.UnitSpec
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
@@ -36,8 +40,10 @@ class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
   }
 
   "isAuthorised" should {
+    val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
+      Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
     "return true if confidenceLevel is 200" in new Setup {
-      when(authService.authConnector.confidenceLevel()(any())).thenReturn(Some(200))
+      when(authService.authConnector.fetchAuthority()(any())).thenReturn(Future(Option(authority)))
 
       val result = authService.isAuthorised()
 
@@ -45,7 +51,7 @@ class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
     }
 
     "return true if confidenceLevel is above 200" in new Setup {
-      when(authService.authConnector.confidenceLevel()(any())).thenReturn(Some(300))
+      when(authService.authConnector.fetchAuthority()(any())).thenReturn(Future(Option(authority)))
 
       val result = authService.isAuthorised()
 
@@ -53,7 +59,7 @@ class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
     }
 
     "return false if confidenceLevel is below 200" in new Setup {
-      when(authService.authConnector.confidenceLevel()(any())).thenReturn(Some(50))
+      when(authService.authConnector.fetchAuthority()(any())).thenReturn(Future(Option(authority.copy(confidenceLevel = Some(0)))))
 
       val result = authService.isAuthorised()
 
@@ -61,7 +67,7 @@ class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
     }
 
     "return false if no confidenceLevel returned from auth" in new Setup {
-      when(authService.authConnector.confidenceLevel()(any())).thenReturn(None)
+      when(authService.authConnector.fetchAuthority()(any())).thenReturn(None)
 
       val result = authService.isAuthorised()
 
