@@ -21,7 +21,7 @@ private object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.8.0",
+    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.15.0",
     "uk.gov.hmrc" %% "play-authorisation" % "4.2.0",
     "uk.gov.hmrc" %% "play-config" % "3.0.0",
     "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",

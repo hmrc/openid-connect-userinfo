@@ -65,7 +65,12 @@
         "identifiers": {
           "type": "array",
           "description": "End-user's identifiers associated to this HMRC service.",
-          "example": "UTR : 123456789013"
+          "example": [
+            {
+              "key": "UTR",
+              "value": "174371121"
+            }
+          ]
         },
         "state": {
           "type": "string",
@@ -78,14 +83,9 @@
             "pending",
             "givenToAgent"
           ]
-        },
-        "confidenceLevel": {
-          "type": "integer",
-          "description": "End-user's confidence level to this HMRC service.",
-          "example": 200
         }
       },
-      "required": ["service", "identifiers", "state"]
+      "required": ["key", "identifiers", "state"]
     },
     "government_gateway": {
       "type": "object",
