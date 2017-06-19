@@ -77,7 +77,8 @@
                 "example": "174371121"
               }
             }
-          }
+          },
+          "example": "[{\"key\": \"UTR\", \"value\": \"174371121\"}]"
         },
         "state": {
           "type": "string",
