@@ -7,6 +7,7 @@
     "postal_code" : "NW1 9NT",
     "country" : "Great Britain"
   },
+  "email" : "John.Smith@abc.uk",
   "birthdate" : "1950-01-01",
   "uk_gov_nino" : "AA000003D",
   "hmrc_enrolments": [
@@ -20,5 +21,12 @@
       ],
       "state": "activated"
     }
-  ]
+  ],
+  "government_gateway":
+  {
+    "user_id": "019283",
+    "gateway_token": "gg7063",
+    "roles": ["User"],
+    "affinity_group": "Individual"
+  }
 }

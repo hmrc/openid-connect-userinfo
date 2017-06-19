@@ -17,14 +17,15 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, DesAddress, DesUserInfo, Enrolment, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, DesAddress, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
+import uk.gov.hmrc.play.http.Token
 
 trait UserInfoTransformer {
 
   val countryService: CountryService
 
-  def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], nino: Option[Nino], enrolments: Option[Seq[Enrolment]]): UserInfo = {
+  def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], enrolments: Option[Seq[Enrolment]], authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): UserInfo = {
+
     def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.firstForenameOrInitial, u.name.surname, u.name.secondForenameOrInitial, u.dateOfBirth)) else None
 
     def address = if (scopes.contains("address")) {
@@ -32,20 +33,36 @@ trait UserInfoTransformer {
       desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, country))
     } else None
 
-    val identifier = if (scopes.contains("openid:gov-uk-identifiers")) nino.map(_.nino) else None
+    val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap  {a => a.nino map {n => n}} else None
+
     val userEnrolments = if (scopes.contains("openid:hmrc_enrolments")) enrolments else None
+
+    val ggInfo = if (scopes.contains("openid:government_gateway")) {
+      formatGGInfo(authority, userDetails, token)
+    } else None
+
+    val email = if (scopes.contains("email")) userDetails flatMap {_.email} else None
 
     UserInfo(profile.flatMap(_.firstName),
       profile.flatMap(_.familyName),
       profile.flatMap(_.middleName),
       address,
+      email,
       profile.flatMap(_.birthDate),
       identifier,
-      userEnrolments)
+      userEnrolments,
+      ggInfo)
   }
 
   private def formattedAddress(desAddress: DesAddress, country: Option[String]) = {
     Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.postcode, country).flatten.mkString("\n")
+  }
+
+  private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): Option[GovernmentGatewayDetails] = {
+    val (credentialRole, affinityGroup) = (userDetails flatMap {_.credentialRole}, userDetails flatMap {_.affinityGroup})
+    val credId = authority flatMap {_.credId}
+
+    Some(GovernmentGatewayDetails(credId, token, credentialRole, affinityGroup))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])

@@ -33,6 +33,18 @@
       "name":"Access your enrolments",
       "description":"Access your enrolments",
       "confidenceLevel": 200
+    },
+    {
+      "key":"openid:government_gateway",
+      "name":"Shows subset of your government gateway details",
+      "description":"Shows subset of yours government gateway details",
+      "confidenceLevel": 200
+    },
+    {
+      "key":"email",
+      "name":"Shows your email address",
+      "description":"Shows your email address",
+      "confidenceLevel": 200
     }
   ],
   "api":{
