@@ -69,19 +69,15 @@
             "type": "object",
             "properties": {
               "key": {
-                "type": "string"
+                "type": "string",
+                "example": "UTR"
               },
               "value": {
-                "type": "string"
+                "type": "string",
+                "example": "174371121"
               }
             }
-          },
-          "example": [
-            {
-              "key": "UTR",
-              "value": "174371121"
-            }
-          ]
+          }
         },
         "state": {
           "type": "string",
