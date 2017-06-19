@@ -65,6 +65,17 @@
         "identifiers": {
           "type": "array",
           "description": "End-user's identifiers associated to this HMRC service.",
+          "items" : {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          },
           "example": [
             {
               "key": "UTR",
