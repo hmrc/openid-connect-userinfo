@@ -28,40 +28,6 @@ import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
 
 class AuthConnectorSpec extends WireMockSugar {
 
-//  "confidenceLevel" should {
-//    "be the authority's confidence level" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns(authorityJson(L200))
-//      confidenceLevel().futureValue shouldBe Some(200)
-//    }
-//
-//    "return None when authority's confidence level is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-//      confidenceLevel().futureValue shouldBe None
-//    }
-//
-//    "return false when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns(500)
-//      confidenceLevel().futureValue shouldBe None
-//    }
-//  }
-
-//  "fetchNino" should {
-//    "return the authority's nino" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"nino":"NB966669A"}""")
-//      fetchNino().futureValue shouldBe Some(Nino("NB966669A"))
-//    }
-//
-//    "return None when authority's NINO is not in the response" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns("""{"credentialStrength":"weak"}""")
-//      fetchNino().futureValue shouldBe None
-//    }
-//
-//    "return None when auth request fails" in new TestAuthConnector(wiremockBaseUrl) {
-//      given().get(urlPathEqualTo("/auth/authority")).returns(500)
-//      fetchNino().futureValue shouldBe None
-//    }
-//  }
-
   "fetchEnrloments" should {
     val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
       Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
