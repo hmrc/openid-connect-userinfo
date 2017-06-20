@@ -47,12 +47,12 @@ trait LiveUserInfoService extends UserInfoService {
 
     scopes flatMap { scopes =>
       def getMaybeForScopes[T](maybeScopes: Set[String], allScopes: Set[String], f: => Future[Option[T]]): Future[Option[T]] = {
-        if ((maybeScopes -- allScopes).size != maybeScopes.size) f
+        if ((maybeScopes intersect allScopes).size > 0) f
         else Future.successful(None)
       }
 
       def getMaybeByParamForScopes[I, O](maybeScopes: Set[String], allScopes: Set[String], param: I, f: I => Future[Option[O]]): Future[Option[O]] = {
-        if ((maybeScopes -- allScopes).size != maybeScopes.size) f(param)
+        if ((maybeScopes intersect allScopes).size > 0) f(param)
         else Future.successful(None)
       }
 
