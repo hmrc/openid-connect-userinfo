@@ -17,16 +17,14 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import play.api.Logger
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector, ThirdPartyDelegatedAuthorityConnector}
+import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, UnauthorizedException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.Future
 
 trait UserInfoService {
   def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]]
@@ -37,7 +35,7 @@ trait LiveUserInfoService extends UserInfoService {
   val desConnector: DesConnector
   val userInfoTransformer: UserInfoTransformer
   val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
-
+  val userDetailsConnector: UserDetailsConnector
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
@@ -47,36 +45,41 @@ trait LiveUserInfoService extends UserInfoService {
       case None => Future.failed(new UnauthorizedException("Bearer token is required"))
     }
 
-    val promiseNino = Promise[Option[Nino]]()
-    val maybeNino = promiseNino.future
-
     scopes flatMap { scopes =>
-      val scopesForNino = Set("profile", "address", "openid:gov-uk-identifiers")
-      if ((scopesForNino -- scopes).size != scopesForNino.size) {
-        authConnector.fetchNino() onComplete {
-          case Success(nino) => promiseNino success nino
-          case Failure(exception) => throw exception
-        }
-      } else promiseNino success None
+      def getMaybeForScopes[T](maybeScopes: Set[String], allScopes: Set[String], f: => Future[Option[T]]): Future[Option[T]] = {
+        if ((maybeScopes intersect allScopes).size > 0) f
+        else Future.successful(None)
+      }
 
-      val promiseDesUserInfo = Promise[Option[DesUserInfo]]
-      val maybeDesUserInfo = promiseDesUserInfo.future
+      def getMaybeByParamForScopes[I, O](maybeScopes: Set[String], allScopes: Set[String], param: I, f: I => Future[Option[O]]): Future[Option[O]] = {
+        if ((maybeScopes intersect allScopes).size > 0) f(param)
+        else Future.successful(None)
+      }
 
-      val scopesDes = Set("profile", "address")
-      if ((scopesDes -- scopes).size != scopesDes.size) {
-        maybeNino.flatMap(desConnector.fetchUserInfo(_)) onComplete {
-            case Success(desUserInfo) => promiseDesUserInfo success desUserInfo
-            case Failure(exception) => throw exception
-          }
-      } else promiseDesUserInfo success None
+      val scopesForAuthority = Set("openid:government_gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority)
 
-      def maybeEnrolments = if (scopes.contains("openid:hmrc_enrolments")) authConnector.fetchEnrolments() else Future.successful(None)
+      val scopesForDes = Set("profile", "address")
+      val maybeDesUserInfo = maybeAuthority flatMap { authority =>
+        getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, authority.getOrElse(Authority()), desConnector.fetchUserInfo)
+      }
+
+      val scopesForUserDetails = Set("openid:government_gateway", "email")
+      val maybeUserDetails = maybeAuthority flatMap { authority =>
+        getMaybeByParamForScopes[Authority, UserDetails](scopesForUserDetails, scopes, authority.getOrElse(Authority()), userDetailsConnector.fetchUserDetails)
+      }
+
+      def maybeEnrolments = maybeAuthority flatMap { authority =>
+        getMaybeByParamForScopes[Authority, Seq[Enrolment]](Set("openid:hmrc_enrolments"), scopes,
+          authority.getOrElse(Authority()), authConnector.fetchEnrolments)
+      }
 
       val future: Future[UserInfo] = for {
-        nino <- maybeNino
         enrolments <- maybeEnrolments
         desUserInfo <- maybeDesUserInfo
-      } yield userInfoTransformer.transform(scopes, desUserInfo, nino, enrolments)
+        authority <- maybeAuthority
+        userDetails <- maybeUserDetails
+      } yield userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails, hc.token)
 
       future map (Some((_: UserInfo))) recover {
         case e: Throwable => {
@@ -101,6 +104,7 @@ object LiveUserInfoService extends LiveUserInfoService {
   override val authConnector = AuthConnector
   override val userInfoTransformer = UserInfoTransformer
   override val thirdPartyDelegatedAuthorityConnector = ThirdPartyDelegatedAuthorityConnector
+  override val userDetailsConnector = UserDetailsConnector
 }
 
 object SandboxUserInfoService extends SandboxUserInfoService {

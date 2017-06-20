@@ -16,9 +16,10 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.data
 
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, UserInfo}
 import org.joda.time._
 import org.scalacheck.Gen
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
+import uk.gov.hmrc.play.http.Token
 
 trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
@@ -30,8 +31,10 @@ trait UserInfoGenerator {
       |NW1 9NT
       |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain")))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
+
   private lazy val ninoSuffixes = "ABCD"
 
   private val nameGen = Gen.oneOf(firstNames)
@@ -43,6 +46,7 @@ trait UserInfoGenerator {
   private val prefixGen = Gen.oneOf(ninoPrefixes)
   private val suffixGen = Gen.oneOf(ninoSuffixes)
   private val numbersGen = Gen.choose(100000, 999999)
+  private val email = s"${nameGen}.${lastNameGen}@abc.uk"
 
   private def dateOfBirth = {
     for {
@@ -61,13 +65,14 @@ trait UserInfoGenerator {
     } yield s"$first$second$number$suffix"
   }
 
+
   val userInfo = for {
     name <- nameGen
     lastName <- lastNameGen
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, Some(dob), Some(nino), Some(enrolments))
+  } yield UserInfo(name, lastName, middleName, address, Some(email), Some(dob), Some(nino), Some(enrolments), Some(government_gateway))
 }
 
 object UserInfoGenerator extends UserInfoGenerator
