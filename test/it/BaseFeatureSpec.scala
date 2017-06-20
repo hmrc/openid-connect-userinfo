@@ -19,9 +19,9 @@ package it
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
-import it.stubs.{AuthStub, DesStub, ThirdPartyDelegatedAuthorityStub}
+import it.stubs.{AuthStub, DesStub, ThirdPartyDelegatedAuthorityStub, UserDetailsStub}
 import org.scalatest._
-import org.scalatestplus.play.{OneServerPerSuite, OneServerPerTest}
+import org.scalatestplus.play.OneServerPerTest
 
 import scala.concurrent.duration._
 
@@ -35,11 +35,13 @@ with BeforeAndAfterEach with BeforeAndAfterAll with OneServerPerTest {
   val authStub = AuthStub
   val desStub = DesStub
   val thirdPartyDelegatedAuthorityStub = ThirdPartyDelegatedAuthorityStub
+  val userDetailsStub = UserDetailsStub
 
-  val mocks = Seq(authStub, desStub, thirdPartyDelegatedAuthorityStub)
+  val mocks = Seq(authStub, desStub, thirdPartyDelegatedAuthorityStub, userDetailsStub)
 
   override protected def beforeEach(): Unit = {
-    mocks.foreach(m => if (!m.stub.server.isRunning) m.stub.server.start())
+    mocks.foreach(m => if (!m.stub.server.isRunning) m.stub.server.start()
+    )
   }
 
   override protected def afterEach(): Unit = {

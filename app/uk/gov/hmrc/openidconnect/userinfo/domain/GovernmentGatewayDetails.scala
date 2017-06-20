@@ -16,17 +16,11 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-case class EnrolmentIdentifier(key: String, value: String)
+import uk.gov.hmrc.play.http.Token
 
-case class Enrolment(key: String,
-                     identifiers: Seq[EnrolmentIdentifier] = Seq(),
-                     state: String = "Activated") {
-
-  def isActivated = state.toLowerCase == "activated"
-}
-
-case object ActiveEnrolment {
-  def unapply(enrolment: Enrolment): Option[String] =
-    if (enrolment.isActivated) Some(enrolment.key)
-    else None
-}
+case class GovernmentGatewayDetails(
+                        user_id: Option[String],
+                        gateway_token: Option[Token],
+                        role: Option[String],
+                        affinityGroup: Option[String]
+                      )

@@ -18,48 +18,31 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, Enrolment}
-import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, UserDetails}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector {
-  val authBaseUrl: String
+trait UserDetailsConnector {
 
   val http: HttpGet
 
-  def fetchEnrolments(auth: Authority)(implicit headerCarrier: HeaderCarrier): Future[Option[Seq[Enrolment]]] = {
-    auth.enrolments map { enrolmentsUri =>
-      http.GET(s"$authBaseUrl$enrolmentsUri") map { response =>
-        response.json.asOpt[Seq[Enrolment]]
+  def fetchUserDetails(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
+    auth.userDetailsLink map { url =>
+      http.GET[UserDetails](url) map {ud =>
+        Some(ud)
       } recover {
         case e: Throwable => {
           Logger.error(e.getMessage, e)
           None
         }
       }
-    } getOrElse {
-      Logger.debug("No enrolment uri.")
-      Future.successful(None)
-    }
-  }
-
-  def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
-    http.GET(s"$authBaseUrl/auth/authority") map { response =>
-      response.json.asOpt[Authority]
-    } recover {
-      case e: Throwable => {
-        Logger.error(e.getMessage, e)
-        None
-      }
-    }
+    } getOrElse (Future.successful(None))
   }
 }
 
-object AuthConnector extends AuthConnector with ServicesConfig {
-  override lazy val authBaseUrl = baseUrl("auth")
-  lazy val http = WSHttp
+object UserDetailsConnector extends UserDetailsConnector with ServicesConfig {
+  override val http = WSHttp
 }

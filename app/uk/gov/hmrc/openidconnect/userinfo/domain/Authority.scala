@@ -16,17 +16,10 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-case class EnrolmentIdentifier(key: String, value: String)
-
-case class Enrolment(key: String,
-                     identifiers: Seq[EnrolmentIdentifier] = Seq(),
-                     state: String = "Activated") {
-
-  def isActivated = state.toLowerCase == "activated"
-}
-
-case object ActiveEnrolment {
-  def unapply(enrolment: Enrolment): Option[String] =
-    if (enrolment.isActivated) Some(enrolment.key)
-    else None
-}
+case class Authority(credentialStrength: Option[String] = None,
+                     confidenceLevel: Option[Int] = None,
+                     nino: Option[String] = None,
+                     userDetailsLink: Option[String] = None,
+                     enrolments: Option[String] = None,
+                     affinityGroup: Option[String] = None,
+                     credId: Option[String] = None)

@@ -25,10 +25,10 @@ import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, Token}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
@@ -38,10 +38,11 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some("Smith"),
     Some("Hannibal"),
     Some(Address("221B\\BAKER STREET\\nLONDON\\NW1 9NT\\nUnited Kingdom", Some("NW1 9NT"), Some("United Kingdom"))),
+    Some("John.Smith@a.b.c.com"),
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
-    Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
-  )
+    Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))),
+    Some(GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))))
 
   trait Setup extends MicroserviceFilterSupport {
     val mockLiveUserInfoService = mock[LiveUserInfoService]

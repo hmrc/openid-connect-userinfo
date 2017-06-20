@@ -21,6 +21,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
+import uk.gov.hmrc.play.http.Token
 
 import scalaj.http.Http
 
@@ -32,15 +33,19 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Token("ggToken")),Some("Admin"),Some("Individual"))
+  val email = "my-email@abc.uk"
 
   val userInfo = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
-    Some(enrolments))
+    Some(enrolments),
+    Some(government_gateway))
   val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFirstName = UserInfo(
@@ -48,9 +53,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("Smith"),
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
-    Some(enrolments)
+    Some(enrolments),
+    Some(government_gateway)
   )
   val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
@@ -59,9 +66,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     None,
     Some("A"),
     Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
-    Some(enrolments))
+    Some(enrolments),
+    Some(government_gateway))
   val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithPartialAddress = UserInfo(
@@ -69,17 +78,20 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("Smith"),
     Some("A"),
     Some(Address("1 Station Road\nLancaster\nEngland\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"))),
+    Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
-    None)
+    None,
+    Some(government_gateway))
 
   feature("fetch user information") {
 
     scenario("fetch user profile") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments', " +
+        "'email' and 'openid:government_gateway' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
@@ -90,9 +102,12 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfo, nino)
 
+      And("UserDeails for the user")
+      userDetailsStub.willReturnUserDetailsWith(email)
+
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
       Then("The user information is returned")
@@ -102,9 +117,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
     scenario("fetch user profile without first name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments', 'email' and 'openid:government_gateway' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
@@ -115,9 +130,12 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithoutFirstName, nino)
 
+      And("UserDeails for the user")
+      userDetailsStub.willReturnUserDetailsWith(email)
+
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
       Then("The user information is returned")
@@ -147,20 +165,23 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName)
+      Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName.copy(government_gateway = None, email = None))
     }
 
     scenario("fetch user profile with partial address") {
 
-      Given("A Auth token with 'openid', 'profile', 'address' and 'openid:gov-uk-identifiers' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'email', and 'openid:gov-uk-identifiers' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "email"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
 
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfoWithPartialAddress, nino)
+
+      And("UserDeails for the user")
+      userDetailsStub.willReturnUserDetailsWith(email)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -169,14 +190,14 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.toJson(userInfoWithPartialAddress)
+      Json.parse(result.body) shouldBe Json.toJson(userInfoWithPartialAddress.copy(government_gateway = None))
     }
 
     scenario("fetch user data without enrolments when there are no enrolments") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government_gateway' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email"))
 
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
@@ -184,9 +205,12 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
       And("DES contains user information for the NINO")
       desStub.willReturnUserInformation(desUserInfo, nino)
 
+      And("UserDeails for the user")
+      userDetailsStub.willReturnUserDetailsWith(email)
+
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
       Then("The user information is returned")
@@ -213,7 +237,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None)
+      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, government_gateway = None, email = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
     }
 
@@ -236,8 +260,34 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None)
+      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None, government_gateway = None, email = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
+    }
+
+    scenario("fetch government gateway details only when scope contains 'openid:government_gateway'") {
+
+      Given("A Auth token with 'openid:government_gateway' scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway"))
+
+      And("The Auth token has a confidence level above 200 and a NINO")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+
+      And("The authority has enrolments")
+      authStub.willReturnEnrolmentsWith()
+
+      And("UserDeails for the user")
+      userDetailsStub.willReturnUserDetailsWith(email)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
+        .asString
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+      val userWithGovernmentDetailsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None, hmrc_enrolments = None, email = None)
+      Json.parse(result.body) shouldBe Json.toJson(userWithGovernmentDetailsOnly)
     }
 
     scenario("return 401 - unauthorized when confidence level is less than 200") {

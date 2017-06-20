@@ -28,11 +28,15 @@ object AuthStub extends Stub {
     stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
       .willReturn(aResponse().withBody(
         s"""
-          |{
-          |   "confidenceLevel": ${confidenceLevel.level},
-          |   "nino": "${nino.nino}",
-          |   "enrolments": "/auth/oid/2/enrolments"
-          |}
+           |{
+           |   "credentialStrength:": "strong",
+           |   "confidenceLevel": ${confidenceLevel.level},
+           |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
+           |   "nino": "${nino.nino}",
+           |   "enrolments": "/auth/oid/2/enrolments",
+           |   "affinityGroup": "Individual",
+           |   "credId": "1304372065861347"
+           |}
         """.stripMargin
       )))
   }

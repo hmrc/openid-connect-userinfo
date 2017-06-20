@@ -14,19 +14,25 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.openidconnect.userinfo.domain
+package it.stubs
 
-case class EnrolmentIdentifier(key: String, value: String)
+import com.github.tomakehurst.wiremock.client.WireMock._
+import it.{MockHost, Stub}
 
-case class Enrolment(key: String,
-                     identifiers: Seq[EnrolmentIdentifier] = Seq(),
-                     state: String = "Activated") {
+object UserDetailsStub extends Stub {
+  override val stub: MockHost = new MockHost(22224)
 
-  def isActivated = state.toLowerCase == "activated"
-}
+  def willReturnUserDetailsWith(email: String) = {
+    stub.mock.register(get(urlPathEqualTo(s"/uri/to/userDetails"))
+      .willReturn(aResponse().withBody(
+        s"""
+           |{
+           |   "affinityGroup": "Individual",
+           |   "credentialRole": "Admin",
+           |   "email": "$email"
+           |}
+        """.stripMargin
+      )))
+  }
 
-case object ActiveEnrolment {
-  def unapply(enrolment: Enrolment): Option[String] =
-    if (enrolment.isActivated) Some(enrolment.key)
-    else None
 }
