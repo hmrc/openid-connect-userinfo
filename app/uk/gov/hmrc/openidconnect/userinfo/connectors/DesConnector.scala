@@ -40,13 +40,13 @@ trait DesConnector {
     val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken"))).withExtraHeaders("Environment" -> desEnvironment)
 
     authority.nino map { ninoString =>
-      val nino = Nino(ninoString) // validates and handles invalid nino value
-      val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(nino.nino)}"
+      require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
+      val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(ninoString)}"
       Logger.debug(s"GET $url with environment=$desEnvironment")
 
       http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
         case _: NotFoundException | _: BadRequestException =>
-          Logger.debug(s"User information for nino $nino is not available in DES")
+          Logger.debug(s"User information for nino $ninoString is not available in DES")
           None
       }
     } getOrElse {
