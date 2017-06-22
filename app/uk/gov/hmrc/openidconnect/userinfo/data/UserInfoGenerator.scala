@@ -46,7 +46,12 @@ trait UserInfoGenerator {
   private val prefixGen = Gen.oneOf(ninoPrefixes)
   private val suffixGen = Gen.oneOf(ninoSuffixes)
   private val numbersGen = Gen.choose(100000, 999999)
-  private val email = s"${nameGen}.${lastNameGen}@abc.uk"
+  private def email(name: Option[String], lastName: Option[String]): Option[String] = (name, lastName) match {
+      case (Some(n),None) ⇒ Some(s"$n@abc.com")
+      case (None, Some(l)) ⇒ Some(s"$l@abc.com")
+      case (Some(n), Some(l)) ⇒ Some(s"$n.$l@abc.com")
+      case (None, None) ⇒ None
+    }
 
   private def dateOfBirth = {
     for {
@@ -72,7 +77,7 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, Some(email), Some(dob), Some(nino), Some(enrolments), Some(government_gateway))
+  } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments), Some(government_gateway))
 }
 
 object UserInfoGenerator extends UserInfoGenerator
