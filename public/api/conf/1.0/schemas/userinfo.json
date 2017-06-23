@@ -56,36 +56,47 @@
     "hmrc_enrolments": {
       "type": "array",
       "description": "End-user's HMRC enrolments.",
-      "properties": {
-        "key": {
-          "type": "string",
-          "description": "HMRC service name.",
-          "example": "IR-SA"
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "HMRC service name.",
+            "example": "IR-SA"
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "End-user's identifiers associated to this HMRC service.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "example": "UTR"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "174371121"
+                }
+              },
+              "required": ["key", "value"]
+            },
+            "example": "[{\"key\": \"UTR\", \"value\": \"174371121\"}]"
+          },
+          "state": {
+            "type": "string",
+            "description": "End-user's HMRC enrolment status.",
+            "enum": [
+              "awaitingActivation",
+              "activated",
+              "Active",
+              "Activated",
+              "pending",
+              "givenToAgent"
+            ]
+          }
         },
-        "identifiers": {
-          "type": "array",
-          "description": "End-user's identifiers associated to this HMRC service.",
-          "example": [
-            {
-              "key": "UTR",
-              "value": "174371121"
-            }
-          ]
-        },
-        "state": {
-          "type": "string",
-          "description": "End-user's HMRC enrolment status.",
-          "enum": [
-            "awaitingActivation",
-            "activated",
-            "Active",
-            "Activated",
-            "pending",
-            "givenToAgent"
-          ]
-        }
-      },
-      "required": ["key", "identifiers", "state"]
+        "required": ["key", "identifiers", "state"  ]
     },
     "government_gateway": {
       "type": "object",
@@ -111,6 +122,7 @@
           "description" : "User affinity group",
           "example" : "Individual"
         }
+      }
       }
     }
   }
