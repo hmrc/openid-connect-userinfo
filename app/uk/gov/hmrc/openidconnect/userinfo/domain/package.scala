@@ -27,6 +27,13 @@ package object domain {
 
   implicit val desAddress = Json.format[DesAddress]
 
+  implicit val country: Reads[Country] = (
+    (__ \ "short_name").readNullable[String] and
+    (__ \ "alpha_two_code").readNullable[String]
+  )(Country.apply _)
+
+  implicit val countriesMap = Reads.mapReads[Country]
+
   implicit val desUserInfo : Reads[DesUserInfo] = (
   (JsPath \ "names" \ "1").read[DesUserName] and
   (JsPath \ "dateOfBirth").readNullable[LocalDate] and

@@ -16,23 +16,25 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import play.api.libs.json.Json
+import uk.gov.hmrc.openidconnect.userinfo.domain.Country
+
 import scala.io.Source
 
 trait CountryService {
 
-  val countries: Map[String, String]
+  val countries: Map[String, Country]
 
-  def getCountry(countryCode: Int): Option[String] = countries.get(countryCode.toString)
+  def getCountry(countryCode: Int): Option[Country] = countries.get(countryCode.toString)
 }
 
 object CountryService extends CountryService {
-  override val countries = loadCountriesFromFile("/resources/country.properties")
+  override val countries = loadCountriesFromFile("/resources/country.json")
 
   private def loadCountriesFromFile(file: String) = {
     val is = getClass.getResourceAsStream(file)
     try {
-      val lines = Source.fromInputStream(is).getLines().toSeq
-      lines.map(_.split("=")).map(t => (t(0), t(1))).toMap
+      Json.parse(Source.fromInputStream(is).mkString).as[Map[String, Country]]
     } finally is.close()
   }
 }
