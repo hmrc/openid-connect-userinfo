@@ -39,7 +39,7 @@
         "formatted": {
           "type": "string",
           "description": "End-user's mailing address, formatted for display or use on a mailing label.",
-          "example": "221B Baker Street\nLondon\nNW1 9NT\nGreat Britain"
+          "example": "221B Baker Street\nLondon\nNW1 9NT\nGreat Britain\nGB"
         },
         "postal_code": {
           "type": "string",
@@ -50,6 +50,11 @@
           "type": "string",
           "description": "End-user's country name.",
           "example": "Great Britain"
+        },
+        "code": {
+          "type": "string",
+          "description": "ISO 3166 Alpha-2-code of a given country",
+          "example": "GB"
         }
       }
     },

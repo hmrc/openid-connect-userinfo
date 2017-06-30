@@ -16,6 +16,7 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
+import uk.gov.hmrc.openidconnect.userinfo.domain.Country
 import uk.gov.hmrc.openidconnect.userinfo.services.CountryService
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -24,8 +25,10 @@ class CountryServiceSpec extends UnitSpec {
   "getCountry" should {
     "return the country when the country is in the file" in {
 
-      CountryService.getCountry(1) shouldBe Some("GREAT BRITAIN")
-      CountryService.getCountry(283) shouldBe Some("REPUBLIC OF MONTENEGRO")
+      CountryService.countries should not be empty
+      CountryService.getCountry(1) shouldBe Some(Country(Some("GREAT BRITAIN"), Some("GB")))
+      CountryService.getCountry(283) shouldBe Some(Country(Some("REPUBLIC OF MONTENEGRO"), Some("ME")))
+      CountryService.getCountry(248) shouldBe Some(Country(Some("ABROAD - NOT KNOWN"), Some("")))
     }
 
     "return None when the country is not in the file" in {

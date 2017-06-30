@@ -34,7 +34,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
 
-  val userAddress: Address = Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"))
+  val userAddress: Address = Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom\nGB", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
 
   val authority: Authority = Authority(Some("weak"),Some(200),Some("AB123456A"),Some("/uri/to/userDetails"),
     Some("/uri/to/enrolments"),Some("Individual"),Some("1304372065861347"))
@@ -64,7 +64,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
     val transformer = new UserInfoTransformer {
       override val countryService = mock[CountryService]
     }
-    given(transformer.countryService.getCountry(ukCountryCode)).willReturn(Some("United Kingdom"))
+    given(transformer.countryService.getCountry(ukCountryCode)).willReturn(Some(Country(Some("United Kingdom"), Some("GB"))))
   }
 
   "transform" should {
@@ -140,7 +140,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
       val desUserMissingline1 = desUserInfo.copy(address = desAddress.copy(line1=None))
       val result = await(transformer.transform(scopes, Some(desUserMissingline1), Some(enrolments), Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingLine1 = userInfo.copy(address = Some(userAddress.copy(formatted = "Town Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom")))
+      val userInfoMissingLine1 = userInfo.copy(address = Some(userAddress.copy(formatted = "Town Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom\nGB")))
       result shouldBe userInfoMissingLine1
     }
 
@@ -150,7 +150,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
       val desUserMissingLine2 = desUserInfo.copy(address = desAddress.copy(line2=None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine2), Some(enrolments), Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingLine2 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nLondon\nEngland\nNW1 6XE\nUnited Kingdom")))
+      val userInfoMissingLine2 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nLondon\nEngland\nNW1 6XE\nUnited Kingdom\nGB")))
       result shouldBe userInfoMissingLine2
     }
 
@@ -160,7 +160,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
       val desUserMissingLine3 = desUserInfo.copy(address = desAddress.copy(line3=None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine3), Some(enrolments),Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingLine3 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nEngland\nNW1 6XE\nUnited Kingdom")))
+      val userInfoMissingLine3 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nEngland\nNW1 6XE\nUnited Kingdom\nGB")))
       result shouldBe userInfoMissingLine3
     }
 
@@ -170,7 +170,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
       val desUserMissingLine4 = desUserInfo.copy(address = desAddress.copy(line4=None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine4), None, Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingLine4 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nNW1 6XE\nUnited Kingdom")),hmrc_enrolments = None)
+      val userInfoMissingLine4 = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nNW1 6XE\nUnited Kingdom\nGB")),hmrc_enrolments = None)
       result shouldBe userInfoMissingLine4
     }
 
@@ -180,7 +180,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
 
       val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postcode = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingPostCode), None, Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUnited Kingdom",postal_code = None)), hmrc_enrolments = None, email = None)
+      val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUnited Kingdom\nGB",postal_code = None)), hmrc_enrolments = None, email = None)
       result shouldBe userInfoMissingPostCode
     }
   }
