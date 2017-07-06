@@ -20,7 +20,8 @@ import org.joda.time.LocalDate
 
 case class Address(formatted: String,
                    postal_code: Option[String],
-                   country: Option[String])
+                   country: Option[String],
+                   code: Option[String])
 
 case class UserInfo(given_name: Option[String],
                     family_name: Option[String],
@@ -55,3 +56,6 @@ case class DesAddress(line1: Option[String],
                       line4: Option[String],
                       postcode: Option[String],
                       countryCode: Option[Int])
+
+case class Country(shortName: Option[String],
+                   alphaTwoCode: Option[String])

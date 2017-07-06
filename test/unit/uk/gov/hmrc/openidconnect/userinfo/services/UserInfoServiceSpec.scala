@@ -49,7 +49,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val ggToken = Token("ggToken")
 
-  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None)),None, None, Some(nino).map(_.nino), Some(enrolments), Some(governmentGateway))
+  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None, None)),None, None, Some(nino).map(_.nino), Some(enrolments), Some(governmentGateway))
 
   trait Setup {
     implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
