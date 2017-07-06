@@ -29,7 +29,7 @@ trait UserInfoGenerator {
     """221B Baker Street
       |London
       |NW1 9NT
-      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain")))
+      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
 

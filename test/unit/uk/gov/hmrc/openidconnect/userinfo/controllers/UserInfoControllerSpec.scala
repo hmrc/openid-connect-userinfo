@@ -37,7 +37,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some("John"),
     Some("Smith"),
     Some("Hannibal"),
-    Some(Address("221B\\BAKER STREET\\nLONDON\\NW1 9NT\\nUnited Kingdom", Some("NW1 9NT"), Some("United Kingdom"))),
+    Some(Address("221B\\BAKER STREET\\nLONDON\\NW1 9NT\\nUnited Kingdom", Some("NW1 9NT"), Some("United Kingdom"), Some("GB"))),
     Some("John.Smith@a.b.c.com"),
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
