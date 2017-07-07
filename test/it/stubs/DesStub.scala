@@ -27,7 +27,7 @@ object DesStub extends Stub {
 
   def willReturnUserInformation(desUserInfo: DesUserInfo, nino: String) = {
     val ninoWithoutSuffix = nino.take(8)
-    stub.mock.register(get(urlPathEqualTo(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))
+    stub.mock.register(get(urlPathEqualTo(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))
       .withHeader("Authorization", equalTo("Bearer local"))
       .withHeader("Environment", equalTo("local"))
       .willReturn(aResponse().withBody(
