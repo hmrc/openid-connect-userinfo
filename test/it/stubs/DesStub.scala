@@ -47,6 +47,7 @@ object DesStub extends Stub {
           |      "line2": ${optionalElement(desUserInfo.address.line2)},
           |      "line3": ${optionalElement(desUserInfo.address.line3)},
           |      "line4": ${optionalElement(desUserInfo.address.line4)},
+          |      "line5": ${optionalElement(desUserInfo.address.line5)},
           |      "postcode": ${optionalElement(desUserInfo.address.postcode)},
           |      "countryCode": ${desUserInfo.address.countryCode.get}
           |    }

@@ -94,6 +94,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
               |      "line2": "Town Centre",
               |      "line3": "Sometown",
               |      "line4": "Anyshire",
+              |      "line5": "UK",
               |      "postcode": "AB12 3CD",
               |      "countryCode": 1
               |    }
@@ -107,7 +108,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       result shouldBe Some(DesUserInfo(
         DesUserName(Some("Andrew"), Some("John"), Some("Smith")),
         Some(LocalDate.parse("1980-01-01")),
-        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
+        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some(1))))
     }
 
     "replace the Auth Authorization header by Des Authorization header" in new Setup {
