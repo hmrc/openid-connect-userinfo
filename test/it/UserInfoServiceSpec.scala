@@ -31,7 +31,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
   val nino = "AB123456A"
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Token("ggToken")),Some("Admin"),Some("Individual"))
   val email = "my-email@abc.uk"
@@ -40,19 +40,19 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some("John"),
     Some("Smith"),
     Some("A"),
-    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
+    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
     Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
     Some(government_gateway))
   val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFirstName = UserInfo(
     None,
     Some("Smith"),
     Some("A"),
-    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
+    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
     Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
@@ -60,24 +60,24 @@ class UserInfoServiceSpec extends BaseFeatureSpec {
     Some(government_gateway)
   )
   val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithoutFamilyName = UserInfo(
     Some("John"),
     None,
     Some("A"),
-    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
+    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
     Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
     Some(government_gateway))
   val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("NW1 6XE"), Some(ukCountryCode)))
+    DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val userInfoWithPartialAddress = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
-    Some(Address("1 Station Road\nLancaster\nEngland\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
+    Some(Address("1 Station Road\nLancaster\nEngland\nUK\nNW1 6XE\nGREAT BRITAIN\nGB", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
     Some(email),
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
