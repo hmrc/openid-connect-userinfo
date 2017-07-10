@@ -59,7 +59,7 @@ trait UserInfoTransformer {
   private def formattedAddress(desAddress: DesAddress, country: Option[Country]) = {
     val countryName = country flatMap {c => c.shortName}
     val countryCode = country flatMap {c => c.alphaTwoCode}
-    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
+    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.line5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
   }
 
   private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): Option[GovernmentGatewayDetails] = {

@@ -27,7 +27,7 @@ object DesStub extends Stub {
 
   def willReturnUserInformation(desUserInfo: DesUserInfo, nino: String) = {
     val ninoWithoutSuffix = nino.take(8)
-    stub.mock.register(get(urlPathEqualTo(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))
+    stub.mock.register(get(urlPathEqualTo(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))
       .withHeader("Authorization", equalTo("Bearer local"))
       .withHeader("Environment", equalTo("local"))
       .willReturn(aResponse().withBody(
@@ -47,6 +47,7 @@ object DesStub extends Stub {
           |      "line2": ${optionalElement(desUserInfo.address.line2)},
           |      "line3": ${optionalElement(desUserInfo.address.line3)},
           |      "line4": ${optionalElement(desUserInfo.address.line4)},
+          |      "line5": ${optionalElement(desUserInfo.address.line5)},
           |      "postcode": ${optionalElement(desUserInfo.address.postcode)},
           |      "countryCode": ${desUserInfo.address.countryCode.get}
           |    }

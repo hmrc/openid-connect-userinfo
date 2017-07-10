@@ -54,6 +54,7 @@ case class DesAddress(line1: Option[String],
                       line2: Option[String],
                       line3: Option[String],
                       line4: Option[String],
+                      line5: Option[String],
                       postcode: Option[String],
                       countryCode: Option[Int])
 
