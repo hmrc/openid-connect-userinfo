@@ -35,13 +35,14 @@ trait DesConnector {
   val serviceUrl: String
   val desEnvironment: String
   val desBearerToken: String
+  val desIndividualEndpoint: String
 
   def fetchUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken"))).withExtraHeaders("Environment" -> desEnvironment)
 
     authority.nino map { ninoString =>
       require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
-      val url = s"$serviceUrl/pay-as-you-earn/02.00.00/individuals/${withoutSuffix(ninoString)}"
+      val url = s"${serviceUrl}${desIndividualEndpoint}${withoutSuffix(ninoString)}"
       Logger.debug(s"GET $url with environment=$desEnvironment")
 
       http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
@@ -63,4 +64,5 @@ object DesConnector extends DesConnector with ServicesConfig {
   override val serviceUrl = baseUrl("des")
   override val desEnvironment = AppContext.desEnvironment
   override val desBearerToken = AppContext.desBearerToken
-}
+  override val desIndividualEndpoint = getString("des.individual.endpoint")
+} 
