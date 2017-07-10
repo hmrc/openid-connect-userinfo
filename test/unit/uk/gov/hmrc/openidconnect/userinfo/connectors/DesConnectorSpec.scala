@@ -39,6 +39,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
   val desEnv = "local"
   val desToken = "aToken"
+  val desIndividualUrl = "/pay-as-you-earn/02.00.00/individuals/"
 
   trait Setup {
     implicit val hc = HeaderCarrier()
@@ -48,6 +49,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       override val desEnvironment: String = desEnv
       override val desBearerToken: String = desToken
       override val http: HttpGet = WSHttp
+      override val desIndividualEndpoint: String = desIndividualUrl
     }
   }
 
