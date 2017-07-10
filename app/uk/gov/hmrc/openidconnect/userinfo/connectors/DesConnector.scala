@@ -41,7 +41,7 @@ trait DesConnector {
 
     authority.nino map { ninoString =>
       require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
-      val url = s"$serviceUrl/pay-as-you-earn/individuals/${withoutSuffix(ninoString)}"
+      val url = s"$serviceUrl/pay-as-you-earn/02.00.00/individuals/${withoutSuffix(ninoString)}"
       Logger.debug(s"GET $url with environment=$desEnvironment")
 
       http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {

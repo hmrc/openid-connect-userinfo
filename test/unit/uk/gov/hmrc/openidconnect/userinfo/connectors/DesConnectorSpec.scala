@@ -69,7 +69,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "return the user info" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))
         .withHeader("Authorization", equalTo(s"Bearer $desToken"))
         .withHeader("Environment", equalTo(desEnv)).willReturn(
         aResponse()
@@ -94,6 +94,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
               |      "line2": "Town Centre",
               |      "line3": "Sometown",
               |      "line4": "Anyshire",
+              |      "line5": "UK",
               |      "postcode": "AB12 3CD",
               |      "countryCode": 1
               |    }
@@ -107,7 +108,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       result shouldBe Some(DesUserInfo(
         DesUserName(Some("Andrew"), Some("John"), Some("Smith")),
         Some(LocalDate.parse("1980-01-01")),
-        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("AB12 3CD"), Some(1))))
+        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some(1))))
     }
 
     "replace the Auth Authorization header by Des Authorization header" in new Setup {
@@ -116,13 +117,13 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
       await(connector.fetchUserInfo(authority)(headerCarrierWithAuthBearerToken))
 
-      val requestToDes = findAll(getRequestedFor(urlEqualTo(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix"))).get(0)
+      val requestToDes = findAll(getRequestedFor(urlEqualTo(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))).get(0)
       requestToDes.getHeaders.getHeader("Authorization").values().asScala shouldBe List("Bearer aToken")
     }
 
     "return None when DES does not have an entry for the NINO" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(404)))
 
       val result = await(connector.fetchUserInfo(authority))
@@ -132,7 +133,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "return None when DES does not have validated data" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(400)))
 
       val result = await(connector.fetchUserInfo(authority))
@@ -142,7 +143,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
 
     "fail when DES returns a 500 response" in new Setup {
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/individuals/$ninoWithoutSuffix")).willReturn(
+      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
         aResponse().withStatus(500)))
 
       intercept[Upstream5xxResponse]{await(connector.fetchUserInfo(authority))}
