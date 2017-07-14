@@ -35,7 +35,7 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
   }
 
   override protected def afterEach(): Unit = {
-      FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+      FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
   }
 
   "userInfo" should {

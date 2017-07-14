@@ -17,15 +17,20 @@
 package it
 
 import org.joda.time.LocalDate
+import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.http.Token
 
 import scalaj.http.Http
 
-class UserInfoServiceSpec extends BaseFeatureSpec {
+class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
+
+  override protected def beforeAll() = {FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)}
+  override protected def afterAll() = {FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)}
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val nino = "AB123456A"
