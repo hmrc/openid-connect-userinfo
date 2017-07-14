@@ -205,13 +205,11 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
     "not return country code when feature flag is off" in new Setup {
 
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email")
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails), Some(ggToken)))
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway")
-
-      val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postcode = None))
-      val result = await(transformer.transform(scopes, Some(desUserMissingPostCode), None, Some(authority), Some(userDetails), Some(ggToken)))
-      val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nUnited Kingdom", postal_code = None,  code = None)), hmrc_enrolments = None, email = None)
-      result shouldBe userInfoMissingPostCode
+      val userInfoMissingCountryCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom",  code = None)))
+      result shouldBe userInfoMissingCountryCode
     }
 
   }
