@@ -34,6 +34,10 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
       FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
   }
 
+  override protected def afterEach(): Unit = {
+      FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+  }
+
   "userInfo" should {
     "generate an OpenID Connect compliant UserInfo response" in forAll(UserInfoGenerator.userInfo) { userInfo: UserInfo =>
       UserInfoGenerator.firstNames should contain (userInfo.given_name)

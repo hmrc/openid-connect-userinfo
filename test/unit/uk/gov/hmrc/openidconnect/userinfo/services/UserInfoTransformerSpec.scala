@@ -66,6 +66,10 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
     FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
   }
 
+  override protected def afterEach() = {
+    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+  }
+
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
