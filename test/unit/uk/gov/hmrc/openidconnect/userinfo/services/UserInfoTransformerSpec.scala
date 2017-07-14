@@ -18,8 +18,10 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{CountryService, UserInfoTransformer}
 import uk.gov.hmrc.play.http.{HeaderCarrier, Token}
@@ -27,7 +29,8 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
+class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
+
   val ukCountryCode = 10
   val nino = Nino("AB123456A")
   val desAddress: DesAddress = DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode))
@@ -57,6 +60,11 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
     Some(enrolments),
     Some(government_gateway)
   )
+
+
+  override protected def beforeEach() = {
+    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+  }
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -193,5 +201,16 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar {
       val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nUnited Kingdom\nGB", postal_code = None)), hmrc_enrolments = None, email = None)
       result shouldBe userInfoMissingPostCode
     }
+
+    "not return country code when feature flag is off" in new Setup {
+
+      FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email")
+      val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails), Some(ggToken)))
+
+      val userInfoMissingCountryCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom",  code = None)))
+      result shouldBe userInfoMissingCountryCode
+    }
+
   }
 }
