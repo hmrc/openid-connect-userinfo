@@ -18,6 +18,7 @@ package uk.gov.hmrc.openidconnect.userinfo.data
 
 import org.joda.time._
 import org.scalacheck.Gen
+import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.play.http.Token
 
@@ -25,11 +26,22 @@ trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
   val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
-  val address = Some(Address(
+
+  val addressWithCountryCode = Some(Address(
     """221B Baker Street
       |London
       |NW1 9NT
-      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
+      |Great Britain
+      |GB""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
+
+  val addressWithoutCountryCode = Some(Address(
+    """221B Baker Street
+      |London
+      |NW1 9NT
+      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), None))
+
+  def address = if (UserInfoFeatureSwitches.countryCode.isEnabled) {addressWithCountryCode} else {addressWithoutCountryCode}
+
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
 
