@@ -17,6 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, Country, DesAddress, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
 import uk.gov.hmrc.play.http.Token
 
@@ -31,8 +32,9 @@ trait UserInfoTransformer {
     def address = if (scopes.contains("address")) {
       val country = desUserInfo flatMap (u => u.address.countryCode flatMap countryService.getCountry)
       val countryName = country flatMap {c => c.shortName}
-      val countryCode = country flatMap {c => c.alphaTwoCode}
+      val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled){ country flatMap { c => c.alphaTwoCode} } else None
       desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, countryName, countryCode))
+
     } else None
 
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap  {a => a.nino map {n => n}} else None
@@ -58,7 +60,7 @@ trait UserInfoTransformer {
 
   private def formattedAddress(desAddress: DesAddress, country: Option[Country]) = {
     val countryName = country flatMap {c => c.shortName}
-    val countryCode = country flatMap {c => c.alphaTwoCode}
+    val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled){ country flatMap { c => c.alphaTwoCode} } else None
     Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.line5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
   }
 
