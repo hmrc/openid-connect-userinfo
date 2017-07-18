@@ -64,10 +64,12 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
   override protected def beforeEach() = {
     FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
   }
 
   override protected def afterEach() = {
     FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
   }
 
   trait Setup {

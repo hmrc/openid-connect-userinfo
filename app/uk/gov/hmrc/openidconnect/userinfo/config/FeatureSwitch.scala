@@ -39,5 +39,6 @@ object FeatureSwitch {
 object UserInfoFeatureSwitches {
 
   def countryCode = FeatureSwitch.forName("countryCode")
+  def addressLine5 = FeatureSwitch.forName("addressLine5")
 
 }

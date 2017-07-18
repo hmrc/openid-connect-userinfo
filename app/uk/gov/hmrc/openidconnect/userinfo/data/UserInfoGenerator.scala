@@ -27,20 +27,31 @@ trait UserInfoGenerator {
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
   val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
 
-  val addressWithCountryCode = Some(Address(
+  val fullAddress = Some(Address(
     """221B Baker Street
+      |Town centre
       |London
+      |England
+      |Line5
       |NW1 9NT
       |Great Britain
       |GB""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
 
-  val addressWithoutCountryCode = Some(Address(
-    """221B Baker Street
-      |London
-      |NW1 9NT
-      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), None))
+  def addressWithToggleableFeatures(isAddressLine5: Boolean = false, isCountryCode: Boolean = false): Option[Address] = {
+    val addressLine5 = if (isAddressLine5) "\n|Line5" else ""
+    val code = if (isCountryCode) Some("GB") else None
+    val countryCode = if (isCountryCode) "\n|GB" else ""
 
-  def address = if (UserInfoFeatureSwitches.countryCode.isEnabled) {addressWithCountryCode} else {addressWithoutCountryCode}
+    Some(Address(
+      s"""221B Baker Street
+        |Town centre
+        |London
+        |England${addressLine5}
+        |NW1 9NT
+        |Great Britain${countryCode}""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), code))
+  }
+
+  def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
