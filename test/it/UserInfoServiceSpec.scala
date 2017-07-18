@@ -29,8 +29,14 @@ import scalaj.http.Http
 
 class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
-  override protected def beforeAll() = {FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)}
-  override protected def afterAll() = {FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)}
+  override protected def beforeAll() = {
+    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
+  }
+  override protected def afterAll() = {
+    FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
+  }
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val nino = "AB123456A"
