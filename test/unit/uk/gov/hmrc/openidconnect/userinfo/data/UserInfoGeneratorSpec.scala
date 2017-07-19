@@ -31,43 +31,51 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
 
 
   override protected def beforeEach(): Unit = {
-      FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
   }
 
   override protected def afterEach(): Unit = {
-      FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
+    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
   }
 
   "userInfo" should {
     "generate an OpenID Connect compliant UserInfo response" in forAll(UserInfoGenerator.userInfo) { userInfo: UserInfo =>
-      UserInfoGenerator.firstNames should contain (userInfo.given_name)
-      UserInfoGenerator.middleNames should contain (userInfo.middle_name)
-      UserInfoGenerator.lastNames should contain (userInfo.family_name)
-      userInfo.address shouldBe UserInfoGenerator.addressWithCountryCode
+      UserInfoGenerator.firstNames should contain(userInfo.given_name)
+      UserInfoGenerator.middleNames should contain(userInfo.middle_name)
+      UserInfoGenerator.lastNames should contain(userInfo.family_name)
+      userInfo.address shouldBe UserInfoGenerator.fullAddress
       assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
     }
-  }
 
-  "userInfo" should {
-    "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in forAll( {
+    "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in forAll({
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-      UserInfoGenerator.userInfo } ) { userInfo: UserInfo =>
-      userInfo.address shouldBe UserInfoGenerator.addressWithoutCountryCode
+      UserInfoGenerator.userInfo
+    }) { userInfo: UserInfo =>
+      userInfo.address shouldBe UserInfoGenerator.addressWithToggleableFeatures(true, false)
     }
-  }
 
+    "generate an OpenID Connect UserInfo response without addressLine5 when feature flag is disabled" in forAll({
+      FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
+      UserInfoGenerator.userInfo
+    }) { userInfo: UserInfo =>
+      userInfo.address shouldBe UserInfoGenerator.addressWithToggleableFeatures(false, true)
+    }
+
+  }
 
   private def assertValid(name: String, expected: List[String], actual: Option[String]): Unit = {
-    expected should contain (actual.getOrElse(fail(s"Generated user's $name is not defined")))
+    expected should contain(actual.getOrElse(fail(s"Generated user's $name is not defined")))
   }
 
   private def assertValidDob(dob: LocalDate): Unit = {
 
-      dob.isAfter(from) && dob.isBefore(until) match {
-        case true =>
-        case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")
-      }
+    dob.isAfter(from) && dob.isBefore(until) match {
+      case true =>
+      case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")
+    }
   }
 
   private def assertValidNino(nino: String) = {

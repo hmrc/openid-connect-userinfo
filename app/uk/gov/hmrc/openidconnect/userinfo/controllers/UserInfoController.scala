@@ -34,10 +34,8 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.Request
-import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.api.controllers.HeaderValidator
-import uk.gov.hmrc.play.http.{HeaderCarrier, NotImplementedException}
+import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
