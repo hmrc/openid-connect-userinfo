@@ -17,7 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
+import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, Country, DesAddress, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
 import uk.gov.hmrc.play.http.Token
 
@@ -60,8 +60,9 @@ trait UserInfoTransformer {
 
   private def formattedAddress(desAddress: DesAddress, country: Option[Country]) = {
     val countryName = country flatMap {c => c.shortName}
-    val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled){ country flatMap { c => c.alphaTwoCode} } else None
-    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.line5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
+    val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled) country flatMap { c => c.alphaTwoCode} else None
+    val addressLine5 = if (UserInfoFeatureSwitches.addressLine5.isEnabled) desAddress.line5 else None
+    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
   }
 
   private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): Option[GovernmentGatewayDetails] = {

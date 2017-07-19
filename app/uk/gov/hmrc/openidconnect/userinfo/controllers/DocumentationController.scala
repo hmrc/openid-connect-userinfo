@@ -19,10 +19,8 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 import controllers.Assets
 import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
 import play.api.mvc.{Action, AnyContent}
-import play.twirl.api.Xml
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, AppContext}
-import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
-import uk.gov.hmrc.openidconnect.userinfo.domain.{APIAccess, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.APIAccess
 import uk.gov.hmrc.openidconnect.userinfo.views._
 
 import scala.language.dynamics
