@@ -38,7 +38,8 @@ trait DesConnector {
   val desIndividualEndpoint: String
 
   def fetchUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
-    val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken"))).withExtraHeaders("Environment" -> desEnvironment)
+    val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken")))
+      .withExtraHeaders("Environment" -> desEnvironment, "Originator-Id" -> "DA_PTA")
 
     authority.nino map { ninoString =>
       require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
