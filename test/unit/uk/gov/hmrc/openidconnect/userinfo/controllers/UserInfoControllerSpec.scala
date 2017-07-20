@@ -28,7 +28,7 @@ import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, S
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.{HeaderCarrier, Token}
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
@@ -42,7 +42,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
     Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))),
-    Some(GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))))
+    Some(GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"))))
 
   trait Setup extends MicroserviceFilterSupport {
     val mockLiveUserInfoService = mock[LiveUserInfoService]

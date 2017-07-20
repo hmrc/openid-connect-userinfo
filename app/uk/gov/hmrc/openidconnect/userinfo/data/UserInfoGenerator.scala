@@ -20,7 +20,6 @@ import org.joda.time._
 import org.scalacheck.Gen
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
-import uk.gov.hmrc.play.http.Token
 
 trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
@@ -43,7 +42,7 @@ trait UserInfoGenerator {
   def address = if (UserInfoFeatureSwitches.countryCode.isEnabled) {addressWithCountryCode} else {addressWithoutCountryCode}
 
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"))
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
 

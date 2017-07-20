@@ -79,7 +79,7 @@ trait LiveUserInfoService extends UserInfoService {
         desUserInfo <- maybeDesUserInfo
         authority <- maybeAuthority
         userDetails <- maybeUserDetails
-      } yield userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails, hc.token)
+      } yield userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails)
 
       future map (Some((_: UserInfo))) recover {
         case e: Throwable => {

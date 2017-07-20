@@ -17,15 +17,14 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
+import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, Country, DesAddress, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
-import uk.gov.hmrc.play.http.Token
 
 trait UserInfoTransformer {
 
   val countryService: CountryService
 
-  def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], enrolments: Option[Seq[Enrolment]], authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): UserInfo = {
+  def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], enrolments: Option[Seq[Enrolment]], authority: Option[Authority], userDetails: Option[UserDetails]): UserInfo = {
 
     def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.firstForenameOrInitial, u.name.surname, u.name.secondForenameOrInitial, u.dateOfBirth)) else None
 
@@ -42,7 +41,7 @@ trait UserInfoTransformer {
     val userEnrolments = if (scopes.contains("openid:hmrc_enrolments")) enrolments else None
 
     val ggInfo = if (scopes.contains("openid:government_gateway")) {
-      formatGGInfo(authority, userDetails, token)
+      formatGGInfo(authority, userDetails)
     } else None
 
     val email = if (scopes.contains("email")) userDetails flatMap {_.email} else None
@@ -64,11 +63,14 @@ trait UserInfoTransformer {
     Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, desAddress.line5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
   }
 
-  private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails], token: Option[Token]): Option[GovernmentGatewayDetails] = {
-    val (credentialRole, affinityGroup) = (userDetails flatMap {_.credentialRole}, userDetails flatMap {_.affinityGroup})
+  private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails]): Option[GovernmentGatewayDetails] = {
+    val affinityGroup = userDetails flatMap {_.affinityGroup}
+    val role = userDetails flatMap {_.credentialRole}
+    val credentialRoles = role.map(Seq(_))
     val credId = authority flatMap {_.credId}
 
-    Some(GovernmentGatewayDetails(credId, token, credentialRole, affinityGroup))
+
+    Some(GovernmentGatewayDetails(credId, credentialRoles, affinityGroup))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
