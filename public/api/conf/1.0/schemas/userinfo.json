@@ -123,11 +123,6 @@
           "description": "Cred id",
           "example": "1012345"
         },
-        "gateway_token": {
-          "type": "string",
-          "description": "Government gateway token",
-          "example": "c29tZSBtYWdpYyBobXJjIGdnIHRva2Vu"
-        },
         "roles": {
           "type": "array",
           "description": "List of user's roles",

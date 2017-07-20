@@ -26,7 +26,6 @@
   "government_gateway":
   {
     "user_id": "019283",
-    "gateway_token": "gg7063",
     "roles": ["User"],
     "affinity_group": "Individual"
   }
