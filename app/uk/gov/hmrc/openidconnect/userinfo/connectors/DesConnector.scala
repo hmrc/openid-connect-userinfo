@@ -18,7 +18,7 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import play.api.Logger
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.config.{AppContext, WSHttp}
+import uk.gov.hmrc.openidconnect.userinfo.config.{AppContext, UserInfoFeatureSwitches, WSHttp}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
@@ -38,8 +38,10 @@ trait DesConnector {
   val desIndividualEndpoint: String
 
   def fetchUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+    var extraHeaders = List[(String, String)]("Environment" -> desEnvironment)
+    if (UserInfoFeatureSwitches.addressLine5.isEnabled) extraHeaders = "Originator-Id" -> "DA_PTA" :: extraHeaders
     val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken")))
-      .withExtraHeaders("Environment" -> desEnvironment, "Originator-Id" -> "DA_PTA")
+      .withExtraHeaders(extraHeaders: _*)
 
     authority.nino map { ninoString =>
       require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
