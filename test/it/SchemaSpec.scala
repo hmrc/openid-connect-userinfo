@@ -19,9 +19,9 @@ package it
 import java.nio.file.Paths
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.scalatest.FlatSpec
-
 
 class SchemaSpec extends FlatSpec {
   val validator = JsonSchemaFactory.byDefault().getValidator
@@ -37,6 +37,7 @@ class SchemaSpec extends FlatSpec {
     assert(syntaxValidator.schemaIsValid(schema), "Schema is NOT valid.")
 
     val report = validator.validate(schema, exampleJSON)
-    assert(report.isSuccess)
+    import scala.collection.JavaConversions._
+    assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
   }
 }
