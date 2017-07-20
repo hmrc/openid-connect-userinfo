@@ -126,9 +126,10 @@
         "roles": {
           "type": "array",
           "description": "List of user's roles",
-          "example": [
-            "User"
-          ]
+          "items": {
+            "type": "string",
+            "example": "User"
+          }
         },
         "affinity_group": {
           "type": "string",
