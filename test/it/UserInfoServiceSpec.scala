@@ -16,14 +16,18 @@
 
 package it
 
+import java.nio.file.Paths
+
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.github.fge.jsonschema.core.report.LogLevel
+import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.joda.time.LocalDate
-import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
+import org.scalatest.BeforeAndAfterAll
 import play.api.libs.json.Json
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
-import uk.gov.hmrc.play.http.Token
 
 import scalaj.http.Http
 
@@ -38,7 +42,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Token("ggToken")),Some("Admin"),Some("Individual"))
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")),Some("Individual"))
   val email = "my-email@abc.uk"
 
   val userInfo = UserInfo(
@@ -115,9 +119,23 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
+      val validator = JsonSchemaFactory.byDefault().getValidator
+      val root = System.getProperty("user.dir")
+      val public10 = Paths.get(root, "public", "api", "conf", "1.0").toString
+      val mapper = new ObjectMapper
+
+      val schema = mapper.readTree(Paths.get(public10, "schemas", "userinfo.json").toFile)
+      val json = Json.parse(result.body)
+
+      val report = validator.validate(schema, mapper.readTree(json.toString()))
+
       Then("The user information is returned")
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.toJson(userInfo)
+
+      import scala.collection.JavaConversions._
+      assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+
+      json shouldBe Json.toJson(userInfo)
     }
 
     scenario("fetch user profile without first name") {

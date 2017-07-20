@@ -18,10 +18,10 @@
       "description": "End-user's last name.",
       "example": "Delgado"
     },
-    "email" : {
-      "type" : "string",
-      "description" : "User email",
-      "example" : "Cling.Eastwood@wildwest.com"
+    "email": {
+      "type": "string",
+      "description": "User email",
+      "example": "Cling.Eastwood@wildwest.com"
     },
     "birthdate": {
       "type": "string",
@@ -51,12 +51,13 @@
           "description": "End-user's country name.",
           "example": "Great Britain"
         },
-        "code": {
+        "country_code": {
           "type": "string",
           "description": "ISO 3166 Alpha-2-code of a given country",
           "example": "GB"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "hmrc_enrolments": {
       "type": "array",
@@ -84,8 +85,13 @@
                   "example": "174371121"
                 }
               },
-              "required": ["key", "value"]
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "value"
+              ]
             },
+            "additionalProperties": false,
             "example": "[{\"key\": \"UTR\", \"value\": \"174371121\"}]"
           },
           "state": {
@@ -101,34 +107,42 @@
             ]
           }
         },
-        "required": ["key", "identifiers", "state"  ]
+        "required": [
+          "key",
+          "identifiers",
+          "state"
+        ]
+      }
     },
     "government_gateway": {
       "type": "object",
       "description": "Legacy properties based on government gateway input.",
-      "properties" : {
-        "user_id" : {
+      "properties": {
+        "user_id": {
           "type": "string",
           "description": "Cred id",
-          "example" : "1012345"
+          "example": "1012345"
         },
-        "gateway_token" : {
-          "type" : "string",
+        "gateway_token": {
+          "type": "string",
           "description": "Government gateway token",
           "example": "c29tZSBtYWdpYyBobXJjIGdnIHRva2Vu"
         },
-        "roles" : {
-          "type" : "array",
-          "description" : "List of user's roles",
-          "example" : ["User"]
+        "roles": {
+          "type": "array",
+          "description": "List of user's roles",
+          "example": [
+            "User"
+          ]
         },
-        "affinity_group" : {
-          "type" : "string",
-          "description" : "User affinity group",
-          "example" : "Individual"
+        "affinity_group": {
+          "type": "string",
+          "description": "User affinity group",
+          "example": "Individual"
         }
-      }
-      }
+      },
+      "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }
