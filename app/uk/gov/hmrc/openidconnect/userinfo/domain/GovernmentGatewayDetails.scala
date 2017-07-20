@@ -16,11 +16,8 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-import uk.gov.hmrc.play.http.Token
-
 case class GovernmentGatewayDetails(
-                        user_id: Option[String],
-                        gateway_token: Option[Token],
-                        role: Option[String],
-                        affinityGroup: Option[String]
+                                     user_id: Option[String],
+                                     roles: Option[Seq[String]],
+                                     affinity_group: Option[String]
                       )

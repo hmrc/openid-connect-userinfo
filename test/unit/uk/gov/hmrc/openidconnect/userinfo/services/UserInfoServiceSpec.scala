@@ -45,7 +45,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
     Some("User"), None, None)
 
-  val governmentGateway: GovernmentGatewayDetails =  GovernmentGatewayDetails(Some("32131"),Some(Token("ggToken")),Some("User"),Some("affinityGroup"))
+  val governmentGateway: GovernmentGatewayDetails =  GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"))
 
   val ggToken = Token("ggToken")
 
@@ -77,7 +77,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(liveInfoService.authConnector.fetchEnrolments(authority)(headers)).willReturn(Some(enrolments))
       given(liveInfoService.userDetailsConnector.fetchUserDetails(authority)(headers)).willReturn(Some(userDetails))
       given(liveInfoService.desConnector.fetchUserInfo(authority)(headers)).willReturn(Some(desUserInfo))
-      given(liveInfoService.userInfoTransformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), None, None)).willReturn(any[UserInfo], any[UserInfo])
+      given(liveInfoService.userInfoTransformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority),None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
@@ -103,7 +103,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority)))
-      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), Some(authority), Some(userDetails), Some(ggToken))).willReturn(any[UserInfo], any[UserInfo])
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), Some(authority), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
@@ -118,7 +118,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Option(authority))
       given(liveInfoService.authConnector.fetchEnrolments(authority)(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), Some(authority), None, None)).willReturn(any[UserInfo], any[UserInfo])
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), Some(authority), None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
@@ -133,7 +133,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority)))
       given(liveInfoService.desConnector.fetchUserInfo(authority)(headers)).willReturn(None)
-      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), None, None, None)).willReturn(any[UserInfo], any[UserInfo])
+      given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), None, None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
