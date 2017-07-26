@@ -144,7 +144,7 @@
         "agent_friendly_name": {
           "type": "string",
           "description": "Agent friendly name",
-          "example": "AC Acounting"
+          "example": "AC Accounting"
         },
         "agent_id": {
           "type": "string",
