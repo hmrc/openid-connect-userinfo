@@ -42,12 +42,12 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   val authority: Authority = Authority(Some("weak"), Some(200), Some("AB123456A"), Some("/uri/to/userDetails"),
     Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
 
-  val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, Some("John.Smith@a.b.c.com"), Some("affinityGroup"), None, None,
-    Some("User"), None, None)
+  val userDetails: UserDetails = UserDetails(email = Some("John.Smith@a.b.c.com"), affinityGroup = Some("affinityGroup"),
+    credentialRole = Some("User"), agentCode = Some("agent-code-12345"), agentId = Some("agent-id-12345"), agentFriendlyName = Some("agent-friendly-name"))
 
   val ggToken = Token("ggToken")
 
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("affinityGroup"))
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("affinityGroup"), userDetails.agentCode, agent_id = userDetails.agentId, agent_friendly_name = userDetails.agentFriendlyName)
 
   val userInfo = UserInfo(
     Some("John"),
