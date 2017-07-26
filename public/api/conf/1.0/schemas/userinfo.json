@@ -138,17 +138,17 @@
         },
         "agent_code": {
           "type": "string",
-          "description": "User affinity group",
+          "description": "Agent code",
           "example": "123456-abc"
         },
         "agent_friendly_name": {
           "type": "string",
-          "description": "User affinity group",
+          "description": "Agent friendly name",
           "example": "AC Acounting"
         },
         "agent_id": {
           "type": "string",
-          "description": "User affinity group",
+          "description": "Agent id",
           "example": "AC"
         }
       },
