@@ -69,9 +69,11 @@ trait UserInfoTransformer {
     val role = userDetails flatMap {_.credentialRole}
     val credentialRoles = role.map(Seq(_))
     val credId = authority flatMap {_.credId}
+    val agentCode = userDetails flatMap { _.agentCode}
+    val agentFriendlyName = userDetails flatMap { _.agentFriendlyName}
+    val agentId = userDetails flatMap { _.agentId}
 
-
-    Some(GovernmentGatewayDetails(credId, credentialRoles, affinityGroup))
+    Some(GovernmentGatewayDetails(credId, credentialRoles, affinityGroup, agentCode, agentId, agentFriendlyName))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
