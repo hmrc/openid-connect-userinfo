@@ -42,7 +42,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
     Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))),
-    Some(GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"))))
+    Some(GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"))))
 
   trait Setup extends MicroserviceFilterSupport {
     val mockLiveUserInfoService = mock[LiveUserInfoService]
