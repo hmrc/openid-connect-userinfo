@@ -31,5 +31,6 @@ case class UserDetails (
                          agentFriendlyName: Option[String] = None,
                          credentialRole: Option[String] = None,
                          description: Option[String] = None,
-                         groupIdentifier: Option[String] = None
+                         groupIdentifier: Option[String] = None,
+                         agentId: Option[String] = None
                        )

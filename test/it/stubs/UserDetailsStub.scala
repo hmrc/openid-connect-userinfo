@@ -29,7 +29,10 @@ object UserDetailsStub extends Stub {
            |{
            |   "affinityGroup": "Individual",
            |   "credentialRole": "Admin",
-           |   "email": "$email"
+           |   "email": "$email",
+           |   "agentId": "ACC",
+           |   "agentCode": "AC-12345",
+           |   "agentFriendlyName": "AC Accounting"
            |}
         """.stripMargin
       )))
