@@ -340,4 +340,142 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       Json.parse(result.body) shouldBe Json.parse(s"""{"code":"UNAUTHORIZED","message":"Bearer token is missing or not authorized"}""".stripMargin)
     }
   }
+
+  feature("fetching user information propagates Unauthorized errors from upstream services") {
+
+    scenario("return 401 when user-details returns Unauthorized") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      authStub.willReturnEnrolmentsWith()
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      And("UserDeails returns unauthorized")
+      userDetailsStub.willReturnUserDetailsWith(401)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 401
+    }
+
+    scenario("return 401 when DES returns Unauthorized") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      authStub.willReturnEnrolmentsWith()
+      userDetailsStub.willReturnUserDetailsWith(email)
+
+      And("DES returns unauthorized")
+      desStub.willReturnUserInformation(401, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 401
+    }
+
+    scenario("return 401 when Auth returns Unauthorized") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      userDetailsStub.willReturnUserDetailsWith(email)
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      And("Auth returns unauthorized")
+      authStub.willReturnAuthorityWith(401)
+      authStub.willReturnEnrolmentsWith(401)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 401
+    }
+  }
+
+  feature("fetching user information handles upstream errors") {
+
+    scenario("return 500 when user-details returns error") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      authStub.willReturnEnrolmentsWith()
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      And("UserDeails returns unauthorized")
+      userDetailsStub.willReturnUserDetailsWith(503)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 500
+    }
+
+    scenario("return 500 when DES returns error") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      authStub.willReturnEnrolmentsWith()
+      userDetailsStub.willReturnUserDetailsWith(email)
+
+      And("DES returns unauthorized")
+      desStub.willReturnUserInformation(503, nino)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 500
+    }
+
+    scenario("return 500 when Auth returns error") {
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      userDetailsStub.willReturnUserDetailsWith(email)
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      And("Auth returns unauthorized")
+      authStub.willReturnAuthorityWith(503)
+      authStub.willReturnEnrolmentsWith(503)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Unauthorized status is returned")
+      result.code shouldBe 500
+    }
+  }
 }

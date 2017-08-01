@@ -24,26 +24,32 @@ import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
 
-  def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino) = {
-    stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
-      .willReturn(aResponse().withBody(
-        s"""
-           |{
-           |   "credentialStrength:": "strong",
-           |   "confidenceLevel": ${confidenceLevel.level},
-           |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
-           |   "nino": "${nino.nino}",
-           |   "enrolments": "/auth/oid/2/enrolments",
-           |   "affinityGroup": "Individual",
-           |   "credId": "1304372065861347"
-           |}
+  def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
+    val body =
+      s"""
+         |{
+         |   "credentialStrength:": "strong",
+         |   "confidenceLevel": ${confidenceLevel.level},
+         |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
+         |   "nino": "${nino.nino}",
+         |   "enrolments": "/auth/oid/2/enrolments",
+         |   "affinityGroup": "Individual",
+         |   "credId": "1304372065861347"
+         |}
         """.stripMargin
-      )))
+    willReturnAuthorityWith(200, body)
   }
 
-  def willReturnEnrolmentsWith() = {
-    stub.mock.register(get(urlPathEqualTo(s"/auth/oid/2/enrolments"))
-      .willReturn(aResponse().withBody(
+  def willReturnAuthorityWith(statusCode: Int, body: String = ""): Unit = {
+    stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
+      .willReturn(aResponse()
+        .withBody(body)
+        .withStatus(statusCode))
+    )
+  }
+
+  def willReturnEnrolmentsWith(): Unit = {
+    val body =
       s"""
          |[
          |  {
@@ -58,6 +64,13 @@ object AuthStub extends Stub {
          |  }
          |]
      """.stripMargin
-    )))
+    willReturnEnrolmentsWith(200, body)
+  }
+
+  def willReturnEnrolmentsWith(statusCode: Int, body: String = ""): Unit = {
+    stub.mock.register(get(urlPathEqualTo(s"/auth/oid/2/enrolments"))
+      .willReturn(aResponse()
+        .withBody(body)
+        .withStatus(statusCode)))
   }
 }
