@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
-import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -81,12 +80,7 @@ trait LiveUserInfoService extends UserInfoService {
         userDetails <- maybeUserDetails
       } yield userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails)
 
-      future map (Some((_: UserInfo))) recover {
-        case e: Throwable => {
-          Logger.debug(e.getMessage, e)
-          None
-        }
-      }
+      future map (Some((_: UserInfo)))
     }
   }
 }
