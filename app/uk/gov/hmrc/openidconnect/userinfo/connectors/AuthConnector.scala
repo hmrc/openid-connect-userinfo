@@ -21,7 +21,7 @@ import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, Enrolment}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,8 +36,7 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
       http.GET(s"$authBaseUrl$enrolmentsUri") map { response =>
         response.json.asOpt[Seq[Enrolment]]
       } recover {
-        case e: Throwable => {
-          Logger.error(e.getMessage, e)
+        case e: NotFoundException => {
           None
         }
       }
@@ -50,11 +49,6 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
   def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
     http.GET(s"$authBaseUrl/auth/authority") map { response =>
       response.json.asOpt[Authority]
-    } recover {
-      case e: Throwable => {
-        Logger.error(e.getMessage, e)
-        None
-      }
     }
   }
 }

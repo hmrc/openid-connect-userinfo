@@ -32,7 +32,6 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
  * limitations under the License.
  */
 
-import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
@@ -47,10 +46,6 @@ trait UserInfoController extends BaseController with HeaderValidator {
     service.fetchUserInfo() map {
       case Some(userInfo) => Ok(Json.toJson(userInfo))
       case None => Ok(Json.obj())
-    } recover {
-      case e: Throwable =>
-        Logger.error(s"Internal server error: ${e.getMessage}", e)
-        Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
     }
   }
 }
