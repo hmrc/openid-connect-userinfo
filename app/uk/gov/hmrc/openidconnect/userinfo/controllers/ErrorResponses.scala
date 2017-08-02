@@ -22,16 +22,10 @@ sealed abstract class ErrorResponse(val httpStatusCode: Int,
                                     val errorCode: String,
                                     val message: String)
 
-case object ErrorSaUtrInvalid extends ErrorResponse(BAD_REQUEST, "SA_UTR_INVALID", "The provided SA UTR is invalid")
+case class ErrorUnauthorized(msg: String = "Bearer token is missing or not authorized") extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
 
-case object ErrorUnauthorized extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", "Bearer token is missing or not authorized")
+case class ErrorNotFound(msg: String = "Resource was not found") extends ErrorResponse(NOT_FOUND, "NOT_FOUND", msg)
 
-case object ErrorNotFound extends ErrorResponse(NOT_FOUND, "NOT_FOUND", "Resource was not found")
+case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is missing or invalid") extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
 
-case object ErrorGenericBadRequest extends ErrorResponse(BAD_REQUEST, "BAD_REQUEST", "Bad Request")
-
-case object ErrorNotImplemented extends ErrorResponse(NOT_IMPLEMENTED, "NOT_IMPLEMENTED", "Live service endpoint is not implemented")
-
-case object ErrorAcceptHeaderInvalid extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", "The accept header is missing or invalid")
-
-case object ErrorInternalServerError extends ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal server error")
+case class ErrorInternalServerError(msg: String = "Internal server error") extends ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", msg)

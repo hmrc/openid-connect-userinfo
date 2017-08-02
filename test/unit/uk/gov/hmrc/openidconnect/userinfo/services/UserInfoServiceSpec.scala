@@ -17,6 +17,7 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.mockito.BDDMockito.given
+import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
@@ -91,6 +92,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority.copy(nino = None))))
+      given(liveInfoService.authConnector.fetchEnrolments(any())(any())).willReturn(Future(None))
 
       val result = await(liveInfoService.fetchUserInfo())
 
@@ -101,8 +103,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc_enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
-
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority)))
+      given(liveInfoService.authConnector.fetchEnrolments(any())(any())).willReturn(Future(None))
       given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), Some(authority), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())

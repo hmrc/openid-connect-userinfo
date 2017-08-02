@@ -44,7 +44,7 @@ trait MicroserviceAuthFilter extends Filter {
     authConfig(rh) match {
       case Some(authConfig) => authService.isAuthorised().flatMap {
         case true => next(rh)
-        case _ => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized)))
+        case _ => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
       }
       case _ => next(rh)
     }

@@ -100,7 +100,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     None,
     Some(government_gateway))
 
-  feature("fetch user information") {
+    feature("fetch user information") {
 
     scenario("fetch user profile") {
 
@@ -346,7 +346,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     scenario("return 401 when user-details returns Unauthorized") {
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address", "email"))
 
       And("All upstream services excluding user-info have valid reponse")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
@@ -413,9 +413,10 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   feature("fetching user information handles upstream errors") {
 
     scenario("return 500 when user-details returns error") {
+      val expectedErrorMessage = """{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22224/uri/to/userDetails' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address", "email"))
 
       And("All upstream services excluding user-info have valid reponse")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
@@ -432,9 +433,12 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("Unauthorized status is returned")
       result.code shouldBe 500
+      Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
+
     }
 
     scenario("return 500 when DES returns error") {
+      val expectedErrorMessage = """{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22222/pay-as-you-earn/02.00.00/individuals/AB123456' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
@@ -454,9 +458,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("Unauthorized status is returned")
       result.code shouldBe 500
+      Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
     scenario("return 500 when Auth returns error") {
+      val expectedErrorMessage = s"""{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
@@ -476,6 +482,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("Unauthorized status is returned")
       result.code shouldBe 500
+      Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
   }
 }

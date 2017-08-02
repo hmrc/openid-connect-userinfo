@@ -90,11 +90,11 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Se
     super.onError(request, ex) map (res => {
       res.header.status
       match {
-        case 401 => Status(ErrorUnauthorized.httpStatusCode)(Json.toJson(ErrorUnauthorized))
-        case _ => Status(ErrorInternalServerError.httpStatusCode)(Json.toJson(ErrorInternalServerError))
+        case 401 => Status(ErrorUnauthorized().httpStatusCode)(Json.toJson(ErrorUnauthorized()))
+        case _ => Status(ErrorInternalServerError().httpStatusCode)(Json.toJson(ErrorInternalServerError(ex.getMessage)))
       }
     })
   }
 
-  override def onHandlerNotFound(request: RequestHeader): Future[Result] = Future.successful(NotFound(Json.toJson(ErrorNotFound)))
+  override def onHandlerNotFound(request: RequestHeader): Future[Result] = Future.successful(NotFound(Json.toJson(ErrorNotFound())))
 }

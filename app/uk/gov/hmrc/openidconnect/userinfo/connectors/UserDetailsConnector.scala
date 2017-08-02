@@ -31,14 +31,8 @@ trait UserDetailsConnector {
 
   def fetchUserDetails(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
     auth.userDetailsLink map { url =>
-      http.GET[UserDetails](url) map {ud =>
-        Some(ud)
-      } recover {
-        case e: Throwable => {
-          Logger.error(e.getMessage, e)
-          None
-        }
-      }
+      http.GET[UserDetails](url)
+        .map(Some(_))
     } getOrElse (Future.successful(None))
   }
 }
