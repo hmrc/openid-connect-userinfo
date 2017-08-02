@@ -35,6 +35,7 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 import play.api.libs.json.Json
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
+import uk.gov.hmrc.play.http.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -46,6 +47,10 @@ trait UserInfoController extends BaseController with HeaderValidator {
     service.fetchUserInfo() map {
       case Some(userInfo) => Ok(Json.toJson(userInfo))
       case None => Ok(Json.obj())
+    } recover {
+      case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
+      case Upstream4xxResponse(msg4xx, _, _ , _) => InternalServerError(Json.toJson(ErrorInternalServerError(msg4xx)))
+      case Upstream5xxResponse(msg5xx, _, _) => InternalServerError(Json.toJson(ErrorInternalServerError(msg5xx)))
     }
   }
 }
