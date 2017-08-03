@@ -19,7 +19,7 @@ package uk.gov.hmrc.openidconnect.userinfo.services
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel.L200
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,6 +30,8 @@ trait AuthService {
     authConnector.fetchAuthority().map {
       case Some(auth) => auth.confidenceLevel.getOrElse(ConfidenceLevel.L0.level) >= L200.level
       case None => false
+    } recover {
+      case Upstream4xxResponse(_, 401, _, _) => false
     }
   }
 }

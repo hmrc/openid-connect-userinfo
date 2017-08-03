@@ -25,34 +25,41 @@ object DesStub extends Stub {
 
   val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
 
-  def willReturnUserInformation(desUserInfo: DesUserInfo, nino: String) = {
+  def willReturnUserInformation(statusCode: Int, nino: String, body: String = ""): Unit = {
     val ninoWithoutSuffix = nino.take(8)
     stub.mock.register(get(urlPathEqualTo(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))
       .withHeader("Authorization", equalTo("Bearer local"))
       .withHeader("Environment", equalTo("local"))
-      .willReturn(aResponse().withBody(
-        s"""
-          |{
-          |  "names": {
-          |    "1": {
-          |      "firstForenameOrInitial" : ${optionalElement(desUserInfo.name.firstForenameOrInitial)},
-          |      "secondForenameOrInitial": ${optionalElement(desUserInfo.name.secondForenameOrInitial)},
-          |      "surname": ${optionalElement(desUserInfo.name.surname)}
-          |      }
-          |   },
-          |  "dateOfBirth": "${desUserInfo.dateOfBirth.get}",
-          |  "addresses": {
-          |    "1": {
-          |      "line1": ${optionalElement(desUserInfo.address.line1)},
-          |      "line2": ${optionalElement(desUserInfo.address.line2)},
-          |      "line3": ${optionalElement(desUserInfo.address.line3)},
-          |      "line4": ${optionalElement(desUserInfo.address.line4)},
-          |      "line5": ${optionalElement(desUserInfo.address.line5)},
-          |      "postcode": ${optionalElement(desUserInfo.address.postcode)},
-          |      "countryCode": ${desUserInfo.address.countryCode.get}
-          |    }
-          |  }
-          |}
-        """.stripMargin)))
+      .willReturn(aResponse()
+        .withBody(body)
+        .withStatus(statusCode)))
+  }
+
+  def willReturnUserInformation(desUserInfo: DesUserInfo, ninoWithoutSuffix: String): Unit = {
+    val body =
+      s"""
+         |{
+         |  "names": {
+         |    "1": {
+         |      "firstForenameOrInitial" : ${optionalElement(desUserInfo.name.firstForenameOrInitial)},
+         |      "secondForenameOrInitial": ${optionalElement(desUserInfo.name.secondForenameOrInitial)},
+         |      "surname": ${optionalElement(desUserInfo.name.surname)}
+         |      }
+         |   },
+         |  "dateOfBirth": "${desUserInfo.dateOfBirth.get}",
+         |  "addresses": {
+         |    "1": {
+         |      "line1": ${optionalElement(desUserInfo.address.line1)},
+         |      "line2": ${optionalElement(desUserInfo.address.line2)},
+         |      "line3": ${optionalElement(desUserInfo.address.line3)},
+         |      "line4": ${optionalElement(desUserInfo.address.line4)},
+         |      "line5": ${optionalElement(desUserInfo.address.line5)},
+         |      "postcode": ${optionalElement(desUserInfo.address.postcode)},
+         |      "countryCode": ${desUserInfo.address.countryCode.get}
+         |    }
+         |  }
+         |}
+        """.stripMargin
+    willReturnUserInformation(200, ninoWithoutSuffix, body)
   }
 }

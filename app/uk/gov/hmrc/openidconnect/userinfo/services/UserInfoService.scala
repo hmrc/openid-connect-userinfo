@@ -16,7 +16,6 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
-import play.api.Logger
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -47,12 +46,12 @@ trait LiveUserInfoService extends UserInfoService {
 
     scopes flatMap { scopes =>
       def getMaybeForScopes[T](maybeScopes: Set[String], allScopes: Set[String], f: => Future[Option[T]]): Future[Option[T]] = {
-        if ((maybeScopes intersect allScopes).size > 0) f
+        if ((maybeScopes intersect allScopes).nonEmpty) f
         else Future.successful(None)
       }
 
       def getMaybeByParamForScopes[I, O](maybeScopes: Set[String], allScopes: Set[String], param: I, f: I => Future[Option[O]]): Future[Option[O]] = {
-        if ((maybeScopes intersect allScopes).size > 0) f(param)
+        if ((maybeScopes intersect allScopes).nonEmpty) f(param)
         else Future.successful(None)
       }
 
@@ -61,7 +60,10 @@ trait LiveUserInfoService extends UserInfoService {
 
       val scopesForDes = Set("profile", "address")
       val maybeDesUserInfo = maybeAuthority flatMap { authority =>
-        getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, authority.getOrElse(Authority()), desConnector.fetchUserInfo)
+        val concreteAuthority = authority.getOrElse(Authority())
+        if (concreteAuthority.nino.isDefined)
+          getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority, desConnector.fetchUserInfo)
+        else Future.successful(None)
       }
 
       val scopesForUserDetails = Set("openid:government_gateway", "email")
@@ -74,19 +76,15 @@ trait LiveUserInfoService extends UserInfoService {
           authority.getOrElse(Authority()), authConnector.fetchEnrolments)
       }
 
-      val future: Future[UserInfo] = for {
+      for {
+        authority <- maybeAuthority
         enrolments <- maybeEnrolments
         desUserInfo <- maybeDesUserInfo
-        authority <- maybeAuthority
         userDetails <- maybeUserDetails
-      } yield userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails)
-
-      future map (Some((_: UserInfo))) recover {
-        case e: Throwable => {
-          Logger.debug(e.getMessage, e)
-          None
-        }
-      }
+      } yield
+        if (authority.flatMap(_.nino).isDefined)
+          Some(userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails))
+        else None
     }
   }
 }
