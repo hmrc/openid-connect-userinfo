@@ -22,20 +22,27 @@ import it.{MockHost, Stub}
 object UserDetailsStub extends Stub {
   override val stub: MockHost = new MockHost(22224)
 
-  def willReturnUserDetailsWith(email: String) = {
-    stub.mock.register(get(urlPathEqualTo(s"/uri/to/userDetails"))
-      .willReturn(aResponse().withBody(
-        s"""
-           |{
-           |   "affinityGroup": "Individual",
-           |   "credentialRole": "Admin",
-           |   "email": "$email",
-           |   "agentId": "ACC",
-           |   "agentCode": "AC-12345",
-           |   "agentFriendlyName": "AC Accounting"
-           |}
+  def willReturnUserDetailsWith(email: String): Unit = {
+    val body =
+      s"""
+         |{
+         |   "affinityGroup": "Individual",
+         |   "credentialRole": "Admin",
+         |   "email": "$email",
+         |   "agentId": "ACC",
+         |   "agentCode": "AC-12345",
+         |   "agentFriendlyName": "AC Accounting"
+         |}
         """.stripMargin
-      )))
+    willReturnUserDetailsWith(200, body)
+  }
+
+  def willReturnUserDetailsWith(statusCode: Int, body: String = ""): Unit = {
+    stub.mock.register(get(urlPathEqualTo(s"/uri/to/userDetails"))
+      .willReturn(aResponse()
+        .withBody(body)
+        .withStatus(statusCode)
+      ))
   }
 
 }
