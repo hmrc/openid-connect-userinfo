@@ -28,4 +28,4 @@ case class ErrorNotFound(msg: String = "Resource was not found") extends ErrorRe
 
 case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is missing or invalid") extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
 
-case class ErrorInternalServerError(msg: String = "Internal server error") extends ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", msg)
+case class ErrorBadGateway(msg: String = "Bad gateway") extends ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
