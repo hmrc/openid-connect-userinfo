@@ -412,8 +412,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
   feature("fetching user information handles upstream errors") {
 
-    scenario("return 500 when user-details returns error") {
-      val expectedErrorMessage = """{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22224/uri/to/userDetails' returned 503. Response body: ''"}"""
+    scenario("return 502 when user-details returns error") {
+      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22224/uri/to/userDetails' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address", "email"))
@@ -432,13 +432,13 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .asString
 
       Then("Unauthorized status is returned")
-      result.code shouldBe 500
+      result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
 
     }
 
-    scenario("return 500 when DES returns error") {
-      val expectedErrorMessage = """{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22222/pay-as-you-earn/02.00.00/individuals/AB123456' returned 503. Response body: ''"}"""
+    scenario("return 502 when DES returns error") {
+      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22222/pay-as-you-earn/02.00.00/individuals/AB123456' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
@@ -457,12 +457,12 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .asString
 
       Then("Unauthorized status is returned")
-      result.code shouldBe 500
+      result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
-    scenario("return 500 when Auth returns error") {
-      val expectedErrorMessage = s"""{"code":"INTERNAL_SERVER_ERROR","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: ''"}"""
+    scenario("return 502 when Auth returns error") {
+      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
@@ -481,7 +481,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .asString
 
       Then("Unauthorized status is returned")
-      result.code shouldBe 500
+      result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
   }

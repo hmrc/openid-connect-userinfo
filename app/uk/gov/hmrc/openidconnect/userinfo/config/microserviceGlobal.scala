@@ -91,7 +91,7 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with RunMode with Se
       res.header.status
       match {
         case 401 => Status(ErrorUnauthorized().httpStatusCode)(Json.toJson(ErrorUnauthorized()))
-        case _ => Status(ErrorInternalServerError().httpStatusCode)(Json.toJson(ErrorInternalServerError(ex.getMessage)))
+        case _ => Status(ErrorBadGateway().httpStatusCode)(Json.toJson(ErrorBadGateway(ex.getMessage)))
       }
     })
   }
