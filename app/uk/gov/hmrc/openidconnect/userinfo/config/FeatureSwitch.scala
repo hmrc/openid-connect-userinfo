@@ -41,4 +41,6 @@ object UserInfoFeatureSwitches {
   def countryCode = FeatureSwitch.forName("countryCode")
   def addressLine5 = FeatureSwitch.forName("addressLine5")
 
+  def allSwitches: Seq[FeatureSwitch] = Seq(countryCode, addressLine5)
+
 }

@@ -1,0 +1,4 @@
+GET     /feature-switches            uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly.FeatureSwitchController.getFlags
+POST    /feature-switches            uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly.FeatureSwitchController.setFlags
+
+->      /                       prod.Routes
