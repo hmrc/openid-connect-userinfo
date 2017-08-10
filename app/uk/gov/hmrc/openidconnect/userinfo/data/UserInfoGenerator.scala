@@ -33,13 +33,11 @@ trait UserInfoGenerator {
       |England
       |Line5
       |NW1 9NT
-      |Great Britain
-      |GB""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
+      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
 
   def addressWithToggleableFeatures(isAddressLine5: Boolean = false, isCountryCode: Boolean = false): Option[Address] = {
     val addressLine5 = if (isAddressLine5) "\n|Line5" else ""
     val code = if (isCountryCode) Some("GB") else None
-    val countryCode = if (isCountryCode) "\n|GB" else ""
 
     Some(Address(
       s"""221B Baker Street
@@ -47,7 +45,7 @@ trait UserInfoGenerator {
         |London
         |England${addressLine5}
         |NW1 9NT
-        |Great Britain${countryCode}""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), code))
+        |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), code))
   }
 
   def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)

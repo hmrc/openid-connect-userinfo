@@ -59,9 +59,8 @@ trait UserInfoTransformer {
 
   private def formattedAddress(desAddress: DesAddress, country: Option[Country]) = {
     val countryName = country flatMap {c => c.shortName}
-    val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled) country flatMap { c => c.alphaTwoCode} else None
     val addressLine5 = if (UserInfoFeatureSwitches.addressLine5.isEnabled) desAddress.line5 else None
-    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postcode, countryName, countryCode).flatten.mkString("\n")
+    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postcode, countryName).flatten.mkString("\n")
   }
 
   private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails]): Option[GovernmentGatewayDetails] = {
