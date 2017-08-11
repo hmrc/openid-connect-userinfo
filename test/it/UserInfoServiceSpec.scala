@@ -423,7 +423,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
       desStub.willReturnUserInformation(desUserInfo, nino)
 
-      And("UserDeails returns unauthorized")
+      And("UserDeails returns error")
       userDetailsStub.willReturnUserDetailsWith(503)
 
       When("We request the user information")
@@ -431,7 +431,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
         .asString
 
-      Then("Unauthorized status is returned")
+      Then("Bad gateway status is returned")
       result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
 
@@ -456,7 +456,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
         .asString
 
-      Then("Unauthorized status is returned")
+      Then("Bad gateway status is returned")
       result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
@@ -480,7 +480,31 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
         .asString
 
-      Then("Unauthorized status is returned")
+      Then("Bad gateway status is returned")
+      result.code shouldBe 502
+      Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
+    }
+
+    scenario("return 502 when Auth returns not found") {
+      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 404 (Not Found). Response body: ''"}"""
+      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+
+      And("All upstream services excluding user-info have valid reponse")
+      userDetailsStub.willReturnUserDetailsWith(email)
+      desStub.willReturnUserInformation(desUserInfo, nino)
+
+      And("Auth returns not found")
+      authStub.willReturnAuthorityWith(404)
+      authStub.willReturnEnrolmentsWith(404)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .asString
+
+      Then("Bad gateway status is returned")
       result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
