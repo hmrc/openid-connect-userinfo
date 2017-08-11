@@ -49,7 +49,7 @@ trait UserInfoController extends BaseController with HeaderValidator {
       case None => Ok(Json.obj())
     } recover {
       case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
-      case Upstream4xxResponse(msg4xx, _, _ , _) => InternalServerError(Json.toJson(ErrorBadGateway(msg4xx)))
+      case Upstream4xxResponse(msg4xx, _, _ , _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
       case Upstream5xxResponse(msg5xx, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
     }
   }
