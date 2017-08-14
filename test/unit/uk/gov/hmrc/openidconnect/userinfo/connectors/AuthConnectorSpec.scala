@@ -28,10 +28,10 @@ import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
 
 class AuthConnectorSpec extends WireMockSugar {
 
-  "fetchEnrloments" should {
+  "fetchEnrolments" should {
     val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
       Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
-    "return the authority enrloments" in new TestAuthConnector(wiremockBaseUrl) {
+    "return the authority enrolments" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/uri/to/enrolments")).returns(enrolmentsJson())
       fetchEnrolments(authority).futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))
     }

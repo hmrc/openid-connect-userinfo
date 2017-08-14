@@ -150,6 +150,11 @@
           "type": "string",
           "description": "Agent id",
           "example": "AC"
+        },
+        "gateway_token": {
+          "type": "string",
+          "description": "Government gateway token",
+          "example": "123456789"
         }
       },
       "additionalProperties": false
