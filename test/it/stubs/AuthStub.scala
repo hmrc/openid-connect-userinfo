@@ -34,7 +34,8 @@ object AuthStub extends Stub {
          |   "nino": "${nino.nino}",
          |   "enrolments": "/auth/oid/2/enrolments",
          |   "affinityGroup": "Individual",
-         |   "credId": "1304372065861347"
+         |   "credId": "1304372065861347",
+         |   "gatewayToken": "gateway-token-qwert"
          |}
         """.stripMargin
     willReturnAuthorityWith(200, body)

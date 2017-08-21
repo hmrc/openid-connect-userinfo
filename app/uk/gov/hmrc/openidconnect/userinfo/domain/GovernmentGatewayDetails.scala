@@ -22,5 +22,6 @@ case class GovernmentGatewayDetails(
                                      affinity_group: Option[String],
                                      agent_code: Option[String],
                                      agent_id: Option[String],
-                                     agent_friendly_name: Option[String]
+                                     agent_friendly_name: Option[String],
+                                     gateway_token: Option[String]
                       )

@@ -40,14 +40,16 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   val userAddress: Address = Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
 
   val authority: Authority = Authority(Some("weak"), Some(200), Some("AB123456A"), Some("/uri/to/userDetails"),
-    Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
+    Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"), Some("gateway-token-qwert"))
 
   val userDetails: UserDetails = UserDetails(email = Some("John.Smith@a.b.c.com"), affinityGroup = Some("affinityGroup"),
     credentialRole = Some("User"), agentCode = Some("agent-code-12345"), agentId = Some("agent-id-12345"), agentFriendlyName = Some("agent-friendly-name"))
 
   val ggToken = Token("ggToken")
 
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("affinityGroup"), userDetails.agentCode, agent_id = userDetails.agentId, agent_friendly_name = userDetails.agentFriendlyName)
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")),
+    Some("affinityGroup"), userDetails.agentCode, agent_id = userDetails.agentId, agent_friendly_name = userDetails.agentFriendlyName,
+    gateway_token = Some("gateway-token-qwert"))
 
   val userInfo = UserInfo(
     Some("John"),

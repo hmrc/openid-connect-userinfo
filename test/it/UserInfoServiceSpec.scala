@@ -49,7 +49,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin"))
-    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"))
+    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"))
   val email = "my-email@abc.uk"
 
   val userInfo = UserInfo(
