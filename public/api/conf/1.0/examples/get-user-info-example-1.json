@@ -30,6 +30,7 @@
     "affinity_group": "Individual",
     "agent_code": "123456-abc",
     "agent_friendly_name": "AC Accounting",
-    "agent_id": "AC"
+    "agent_id": "AC",
+    "gateway_token": "token-value-1234"
   }
 }
