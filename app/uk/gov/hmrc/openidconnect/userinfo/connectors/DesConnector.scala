@@ -16,56 +16,37 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import play.api.Logger
-import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.config.{AppContext, UserInfoFeatureSwitches, WSHttp}
+import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, PlayAuthConnector}
+import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
-import uk.gov.hmrc.play.http.logging.Authorization
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait DesConnector {
-
-  val NINO_LENGTH = 8
+trait DesConnector extends AuthorisedFunctions {
 
   val http: HttpGet
-  val serviceUrl: String
-  val desEnvironment: String
-  val desBearerToken: String
-  val desIndividualEndpoint: String
 
   def fetchUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
-    var extraHeaders = List[(String, String)]("Environment" -> desEnvironment)
-    if (UserInfoFeatureSwitches.addressLine5.isEnabled) extraHeaders = "Originator-Id" -> "DA_PTA" :: extraHeaders
-    val newHc = hc.copy(authorization = Some(Authorization(s"Bearer $desBearerToken")))
-      .withExtraHeaders(extraHeaders: _*)
-
-    authority.nino map { ninoString =>
-      require(Nino.isValid(ninoString), s"$ninoString is not a valid nino.")
-      val url = s"${serviceUrl}${desIndividualEndpoint}${withoutSuffix(ninoString)}"
-      Logger.debug(s"GET $url with environment=$desEnvironment")
-
-      http.GET[DesUserInfo](url)(implicitly[HttpReads[DesUserInfo]], newHc) map (Some(_)) recover {
-        case _: NotFoundException | _: BadRequestException =>
-          Logger.debug(s"User information for nino $ninoString is not available in DES")
-          None
+    val nothing = Future.successful(None)
+    if (authority.nino.isDefined)
+      authorised().retrieve(Retrievals.allItmpUserDetails) {
+        case name ~ dateOfBirth ~ address =>
+          Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
+        case _ => nothing
       }
-    } getOrElse {
-      Future.successful(None)
-    }
+    else nothing
   }
-
-  private def withoutSuffix(nino: String) = nino.take(NINO_LENGTH)
 }
 
 
 object DesConnector extends DesConnector with ServicesConfig {
   override val http = WSHttp
-  override val serviceUrl = baseUrl("des")
-  override val desEnvironment = AppContext.desEnvironment
-  override val desBearerToken = AppContext.desBearerToken
-  override val desIndividualEndpoint = getString("des.individual.endpoint")
-} 
+  override def authConnector = new PlayAuthConnector {
+    override val serviceUrl = baseUrl("auth")
+
+    override def http = WSHttp
+  }
+}

@@ -19,26 +19,20 @@ package uk.gov.hmrc.openidconnect.userinfo
 import org.joda.time.LocalDate
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.play.http.Token
 
 package object domain {
 
-  implicit val desUserName = Json.format[DesUserName]
+  implicit val desUserName = Json.format[ItmpName]
 
-  implicit val desAddress = Json.format[DesAddress]
+  implicit val desAddress = Json.format[ItmpAddress]
 
-  implicit val country: Reads[Country] = (
-    (__ \ "short_name").readNullable[String] and
-    (__ \ "alpha_two_code").readNullable[String]
-  )(Country.apply _)
-
-  implicit val countriesMap = Reads.mapReads[Country]
-
-  implicit val desUserInfo : Reads[DesUserInfo] = (
-  (JsPath \ "names" \ "1").read[DesUserName] and
-  (JsPath \ "dateOfBirth").readNullable[LocalDate] and
-  (JsPath \ "addresses" \ "1").read[DesAddress]
-  )(DesUserInfo.apply _)
+//  implicit val desUserInfo : Reads[DesUserInfo] = (
+//  (JsPath \ "names" \ "1").read[ItmpName] and
+//  (JsPath \ "dateOfBirth").readNullable[LocalDate] and
+//  (JsPath \ "addresses" \ "1").read[ItmpAddress]
+//  )(DesUserInfo.apply _)
 
   implicit val enrolmentIdentifier = Json.format[EnrolmentIdentifier]
   implicit val enrloment = Json.format[Enrolment]

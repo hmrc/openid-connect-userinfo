@@ -18,11 +18,15 @@ package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
+import play.api.libs.json.Json
+import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
+  val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
 
   def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
     val body =
@@ -45,6 +49,48 @@ object AuthStub extends Stub {
     stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
       .willReturn(aResponse()
         .withBody(body)
+        .withStatus(statusCode))
+    )
+  }
+
+  def willAuthorise(desUserInfo: DesUserInfo): Unit = {
+    val name = desUserInfo.name
+    val address = desUserInfo.address
+    val jsonAddress = Json.parse(s"""{
+                                     |		"line1": ${optionalElement(address.line1)},
+                                     |		"line2": ${optionalElement(address.line2)},
+                                     |		"line3": ${optionalElement(address.line3)},
+                                     |		"line4": ${optionalElement(address.line4)},
+                                     |		"line5": ${optionalElement(address.line5)},
+                                     |		"postCode": ${optionalElement(address.postCode)},
+                                     |		"countryName": ${optionalElement(address.countryName)},
+                                     |		"countryCode": ${optionalElement(address.countryCode)}
+                                     |	}""".stripMargin)
+    val jsonName =
+      Json.parse(s"""{
+         |		"givenName": ${optionalElement(name.givenName)},
+         |		"middleName": ${optionalElement(name.middleName)},
+         |		"familyName": ${optionalElement(name.familyName)}
+         |}""".stripMargin)
+
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody(Json.obj("itmpName" -> jsonName, "itmpDateOfBirth" -> desUserInfo.dateOfBirth, "itmpAddress" -> jsonAddress).toString())
+        .withStatus(200))
+    )
+  }
+
+  def willAuthoriseWithEmptyResponse: Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody("{}")
+        .withStatus(200))
+    )
+  }
+
+  def willNotAuthorise(statusCode: Int = 401): Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
         .withStatus(statusCode))
     )
   }
@@ -73,5 +119,11 @@ object AuthStub extends Stub {
       .willReturn(aResponse()
         .withBody(body)
         .withStatus(statusCode)))
+  }
+
+  private def displayAddress(address: ItmpAddress): Boolean = {
+    val ia = address
+    Seq(ia.countryCode, ia.countryName, ia.postCode, ia.line1, ia.line2, ia.line3, ia.line4,
+      ia.line5, ia.postCode).nonEmpty
   }
 }

@@ -16,51 +16,44 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
+import uk.gov.hmrc.auth.core.AuthConnector
+import uk.gov.hmrc.auth.core.authorise.Predicate
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, ~, _}
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.connectors.DesConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain._
-import uk.gov.hmrc.play.http.logging.Authorization
 import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, Upstream5xxResponse}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
-import scala.collection.JavaConverters._
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
 
-  val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
-  val stubHost = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
-  val desEnv = "local"
-  val desToken = "aToken"
-  val desIndividualUrl = "/pay-as-you-earn/02.00.00/individuals/"
+  type ItmpDataType = ~[~[ItmpName, Option[LocalDate]], ItmpAddress]
+  var itmpDataFuture: Future[ItmpDataType] = _
 
   trait Setup {
     implicit val hc = HeaderCarrier()
 
     val connector = new DesConnector {
-      override val serviceUrl: String = wireMockUrl
-      override val desEnvironment: String = desEnv
-      override val desBearerToken: String = desToken
       override val http: HttpGet = WSHttp
-      override val desIndividualEndpoint: String = desIndividualUrl
+
+      def authConnector = new AuthConnector {
+        override def authorise[A](predicate: Predicate, retrieval: Retrieval[A])(implicit hc: HeaderCarrier): Future[A] = {
+          itmpDataFuture.map(_.asInstanceOf[A])
+        }
+      }
     }
   }
 
   override def beforeEach() {
-    wireMockServer.start()
-    WireMock.configureFor(stubHost, stubPort)
+    itmpDataFuture = Future.failed(new IllegalMonitorStateException("Initialisation required"))
   }
 
   override def afterEach() {
-    wireMockServer.resetMappings()
-    wireMockServer.stop()
   }
 
   "fetch user info" should {
@@ -70,85 +63,32 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
       Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
 
     "return the user info" in new Setup {
-
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))
-        .withHeader("Authorization", equalTo(s"Bearer $desToken"))
-        .withHeader("Environment", equalTo(desEnv)).willReturn(
-        aResponse()
-          .withStatus(200)
-          .withHeader("Content-Type", "application/json")
-          .withBody(
-            s"""
-              |{
-              |  "nino": "$ninoWithoutSuffix",
-              |  "names": {
-              |    "1": {
-              |      "firstForenameOrInitial": "Andrew",
-              |      "secondForenameOrInitial": "John",
-              |      "surname": "Smith"
-              |    }
-              |  },
-              |  "sex": "M",
-              |  "dateOfBirth": "1980-01-01",
-              |  "addresses": {
-              |    "1": {
-              |      "line1": "1 Station Road",
-              |      "line2": "Town Centre",
-              |      "line3": "Sometown",
-              |      "line4": "Anyshire",
-              |      "line5": "UK",
-              |      "postcode": "AB12 3CD",
-              |      "countryCode": 1
-              |    }
-              |  }
-              |}
-              |
-            """.stripMargin)))
+      val profile = ItmpName(Some("Andrew"), Some("John"), Some("Smith"))
+      val address = ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"),
+        Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some("UK"), Some("1"))
+      itmpDataFuture = Future.successful(new ~(new ~(profile, Option(LocalDate.parse("1980-01-01"))), address))
 
       val result = await(connector.fetchUserInfo(authority))
 
       result shouldBe Some(DesUserInfo(
-        DesUserName(Some("Andrew"), Some("John"), Some("Smith")),
+        ItmpName(Some("Andrew"), Some("John"), Some("Smith")),
         Some(LocalDate.parse("1980-01-01")),
-        DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some(1))))
-    }
-
-    "replace the Auth Authorization header by Des Authorization header" in new Setup {
-
-      val headerCarrierWithAuthBearerToken = hc.copy(authorization = Some(Authorization("auth_bearer_token")))
-
-      await(connector.fetchUserInfo(authority)(headerCarrierWithAuthBearerToken))
-
-      val requestToDes = findAll(getRequestedFor(urlEqualTo(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix"))).get(0)
-      requestToDes.getHeaders.getHeader("Authorization").values().asScala shouldBe List("Bearer aToken")
+        ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"), Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some("Great Britain"), Some("GB"))))
     }
 
     "return None when DES does not have an entry for the NINO" in new Setup {
-
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
-        aResponse().withStatus(404)))
-
-      val result = await(connector.fetchUserInfo(authority))
-
-      result shouldBe None
-    }
-
-    "return None when DES does not have validated data" in new Setup {
-
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
-        aResponse().withStatus(400)))
-
+      itmpDataFuture = Future.successful(null)
       val result = await(connector.fetchUserInfo(authority))
 
       result shouldBe None
     }
 
     "fail when DES returns a 500 response" in new Setup {
+      itmpDataFuture = Future.failed(Upstream5xxResponse("Failure", 500, 500))
 
-      stubFor(get(urlPathMatching(s"/pay-as-you-earn/02.00.00/individuals/$ninoWithoutSuffix")).willReturn(
-        aResponse().withStatus(500)))
-
-      intercept[Upstream5xxResponse]{await(connector.fetchUserInfo(authority))}
+      intercept[Upstream5xxResponse] {
+        await(connector.fetchUserInfo(authority))
+      }
     }
   }
 }

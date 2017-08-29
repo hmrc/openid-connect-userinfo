@@ -22,6 +22,7 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector, ThirdPartyDelegatedAuthorityConnector, UserDetailsConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
@@ -38,7 +39,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = Nino("AB123456A")
   val authBearerToken = "AUTH_BEARER_TOKEN"
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, Some("Smith")), None, DesAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None))
+  val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")), None, ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val authority: Authority = Authority(Some("weak"),Some(200),Some("AB123456A"),Some("/uri/to/userDetails"),
     Some("/uri/to/enrolments"),Some("Individual"),Some("1304372065861347"))

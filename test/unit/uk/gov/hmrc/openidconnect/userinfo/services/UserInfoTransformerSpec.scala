@@ -20,10 +20,11 @@ import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain._
-import uk.gov.hmrc.openidconnect.userinfo.services.{CountryService, UserInfoTransformer}
+import uk.gov.hmrc.openidconnect.userinfo.services.UserInfoTransformer
 import uk.gov.hmrc.play.http.{HeaderCarrier, Token}
 import uk.gov.hmrc.play.test.UnitSpec
 
@@ -33,8 +34,9 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
   val ukCountryCode = 10
   val nino = Nino("AB123456A")
-  val desAddress: DesAddress = DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode))
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
+  val desAddress: ItmpAddress = ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),
+    Some("UK"), Some("NW1 6XE"), Some("Great Britain"), Some("GB"))
+  val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
 
   val userAddress: Address = Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
@@ -77,10 +79,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val transformer = new UserInfoTransformer {
-      override val countryService = mock[CountryService]
-    }
-    given(transformer.countryService.getCountry(ukCountryCode)).willReturn(Some(Country(Some("United Kingdom"), Some("GB"))))
+    val transformer = new UserInfoTransformer {}
   }
 
   "transform" should {
@@ -204,7 +203,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway")
 
-      val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postcode = None))
+      val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postCode = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingPostCode), None, Some(authority), Some(userDetails)))
       val userInfoMissingPostCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nUnited Kingdom", postal_code = None)), hmrc_enrolments = None, email = None)
       result shouldBe userInfoMissingPostCode

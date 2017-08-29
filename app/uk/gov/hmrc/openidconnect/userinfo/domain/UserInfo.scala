@@ -17,6 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 
 case class Address(formatted: String,
                    postal_code: Option[String],
@@ -42,21 +43,21 @@ case class UserProfile(given_name: Option[String],
                        middle_name: Option[String],
                        birthdate: Option[LocalDate])
 
-case class DesUserInfo(name: DesUserName,
+case class DesUserInfo(name: ItmpName,
                        dateOfBirth: Option[LocalDate],
-                       address: DesAddress)
+                       address: ItmpAddress)
 
-case class DesUserName(firstForenameOrInitial: Option[String],
-                       secondForenameOrInitial: Option[String],
-                       surname: Option[String])
-
-case class DesAddress(line1: Option[String],
-                      line2: Option[String],
-                      line3: Option[String],
-                      line4: Option[String],
-                      line5: Option[String],
-                      postcode: Option[String],
-                      countryCode: Option[Int])
-
-case class Country(shortName: Option[String],
-                   alphaTwoCode: Option[String])
+//case class DesUserName(firstForenameOrInitial: Option[String],
+//                       secondForenameOrInitial: Option[String],
+//                       surname: Option[String])
+//
+//case class DesAddress(line1: Option[String],
+//                      line2: Option[String],
+//                      line3: Option[String],
+//                      line4: Option[String],
+//                      line5: Option[String],
+//                      postcode: Option[String],
+//                      countryCode: Option[Int])
+//
+//case class Country(shortName: Option[String],
+//                   alphaTwoCode: Option[String])
