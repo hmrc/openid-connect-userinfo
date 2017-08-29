@@ -24,6 +24,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterAll
 import play.api.libs.json.Json
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.domain._
@@ -45,8 +46,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val nino = "AB123456A"
   val ukCountryCode = 1
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin"))
     ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"))
@@ -62,8 +63,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some("AB123456A"),
     Some(enrolments),
     Some(government_gateway))
-  val desUserInfoWithoutFirstName = DesUserInfo(DesUserName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfoWithoutFirstName = DesUserInfo(ItmpName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithoutFirstName = UserInfo(
     None,
     Some("Smith"),
@@ -75,8 +76,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some(enrolments),
     Some(government_gateway)
   )
-  val desUserInfoWithoutFamilyName = DesUserInfo(DesUserName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfoWithoutFamilyName = DesUserInfo(ItmpName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
+    ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithoutFamilyName = UserInfo(
     Some("John"),
     None,
@@ -87,8 +88,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some("AB123456A"),
     Some(enrolments),
     Some(government_gateway))
-  val desUserInfoWithPartialAddress = DesUserInfo(DesUserName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
-    DesAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some(ukCountryCode)))
+  val desUserInfoWithPartialAddress = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
+    ItmpAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithPartialAddress = UserInfo(
     Some("John"),
     Some("Smith"),
@@ -115,8 +116,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
 
-      And("DES contains user information for the NINO")
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      And("The auth will authorise DES contains user information for the NINO")
+      authStub.willAuthorise(desUserInfo)
 
       And("UserDeails for the user")
       userDetailsStub.willReturnUserDetailsWith(email)
@@ -157,8 +158,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
 
-      And("DES contains user information for the NINO")
-      desStub.willReturnUserInformation(desUserInfoWithoutFirstName, nino)
+      And("The auth will authorise and DES contains user information for the NINO")
+      authStub.willAuthorise(desUserInfoWithoutFirstName)
 
       And("UserDeails for the user")
       userDetailsStub.willReturnUserDetailsWith(email)
@@ -185,8 +186,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
 
-      And("DES contains user information for the NINO")
-      desStub.willReturnUserInformation(desUserInfoWithoutFamilyName, nino)
+      And("The auth will authorise and DES contains user information for the NINO")
+      authStub.willAuthorise(desUserInfoWithoutFamilyName)
+
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -207,8 +209,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
 
-      And("DES contains user information for the NINO")
-      desStub.willReturnUserInformation(desUserInfoWithPartialAddress, nino)
+      And("The auth will authorise and DES contains user information for the NINO")
+      authStub.willAuthorise(desUserInfoWithPartialAddress)
 
       And("UserDeails for the user")
       userDetailsStub.willReturnUserDetailsWith(email)
@@ -232,8 +234,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The Auth token has a confidence level above 200 and a NINO")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
 
-      And("DES contains user information for the NINO")
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      And("The auth will authorise and DES contains user information for the NINO")
+      authStub.willAuthorise(desUserInfo)
 
       And("UserDeails for the user")
       userDetailsStub.willReturnUserDetailsWith(email)
@@ -259,6 +261,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
+
+      And("The auth will authorise and DES contains user information for the NINO")
+      authStub.willAuthorise(DesUserInfo(ItmpName(None, None, None), None, ItmpAddress(None, None, None, None, None, None, None, None)))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -351,7 +356,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("All upstream services excluding user-info have valid reponse")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
       authStub.willReturnEnrolmentsWith()
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      authStub.willAuthorise(desUserInfo)
 
       And("UserDeails returns unauthorized")
       userDetailsStub.willReturnUserDetailsWith(401)
@@ -375,8 +380,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
       userDetailsStub.willReturnUserDetailsWith(email)
 
-      And("DES returns unauthorized")
-      desStub.willReturnUserInformation(401, nino)
+      And("Auth returns unauthorized")
+      authStub.willNotAuthorise()
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -394,7 +399,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("All upstream services excluding user-info have valid reponse")
       userDetailsStub.willReturnUserDetailsWith(email)
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      authStub.willAuthorise(desUserInfo)
 
       And("Auth returns unauthorized")
       authStub.willReturnAuthorityWith(401)
@@ -421,7 +426,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("All upstream services excluding user-info have valid reponse")
       authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
       authStub.willReturnEnrolmentsWith()
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      authStub.willAuthorise(desUserInfo)
 
       And("UserDeails returns error")
       userDetailsStub.willReturnUserDetailsWith(503)
@@ -448,8 +453,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
       userDetailsStub.willReturnUserDetailsWith(email)
 
-      And("DES returns unauthorized")
-      desStub.willReturnUserInformation(503, nino)
+      And("Auth returns unauthorized")
+      authStub.willNotAuthorise(503)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -469,7 +474,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("All upstream services excluding user-info have valid reponse")
       userDetailsStub.willReturnUserDetailsWith(email)
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      authStub.willAuthorise(desUserInfo)
 
       And("Auth returns unauthorized")
       authStub.willReturnAuthorityWith(503)
@@ -493,7 +498,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("All upstream services excluding user-info have valid reponse")
       userDetailsStub.willReturnUserDetailsWith(email)
-      desStub.willReturnUserInformation(desUserInfo, nino)
+      authStub.willAuthorise(desUserInfo)
 
       And("Auth returns not found")
       authStub.willReturnAuthorityWith(404)
