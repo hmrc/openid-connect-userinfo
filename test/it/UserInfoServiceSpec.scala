@@ -263,7 +263,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
 
       And("The auth will authorise and DES contains user information for the NINO")
-      authStub.willAuthorise(DesUserInfo(ItmpName(None, None, None), None, ItmpAddress(None, None, None, None, None, None, None, None)))
+//      authStub.willAuthorise(DesUserInfo(ItmpName(None, None, None), None, ItmpAddress(None, None, None, None, None, None, None, None)))
+      authStub.willNotFindUser()
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -443,7 +444,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     }
 
     scenario("return 502 when DES returns error") {
-      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22222/pay-as-you-earn/02.00.00/individuals/AB123456' returned 503. Response body: ''"}"""
+      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:22221/auth/authorise' returned 503. Response body: ''"}"""
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
