@@ -19,10 +19,11 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, PlayAuthConnector}
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, NinoNotFoundException}
 import uk.gov.hmrc.play.config.ServicesConfig
 import uk.gov.hmrc.play.http._
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait DesConnector extends AuthorisedFunctions {
@@ -36,6 +37,8 @@ trait DesConnector extends AuthorisedFunctions {
         case name ~ dateOfBirth ~ address =>
           Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
         case _ => nothing
+      }.recoverWith {
+        case ex: NotFoundException => nothing
       }
     else nothing
   }

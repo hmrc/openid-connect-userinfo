@@ -65,7 +65,7 @@ class DesConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApp
     "return the user info" in new Setup {
       val profile = ItmpName(Some("Andrew"), Some("John"), Some("Smith"))
       val address = ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("Sometown"),
-        Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some("UK"), Some("1"))
+        Some("Anyshire"), Some("UK"), Some("AB12 3CD"), Some("Great Britain"), Some("GB"))
       itmpDataFuture = Future.successful(new ~(new ~(profile, Option(LocalDate.parse("1980-01-01"))), address))
 
       val result = await(connector.fetchUserInfo(authority))

@@ -80,6 +80,14 @@ object AuthStub extends Stub {
     )
   }
 
+  def willNotFindUser(): Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody("{}")
+        .withStatus(404))
+    )
+  }
+
   def willAuthoriseWithEmptyResponse: Unit = {
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
@@ -91,6 +99,7 @@ object AuthStub extends Stub {
   def willNotAuthorise(statusCode: Int = 401): Unit = {
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
+          .withHeader("WWW-Authenticate", """MDTP detail="InsufficientConfidenceLevel"""")
         .withStatus(statusCode))
     )
   }
