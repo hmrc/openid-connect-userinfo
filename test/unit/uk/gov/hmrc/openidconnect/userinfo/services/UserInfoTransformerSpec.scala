@@ -35,7 +35,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   val ukCountryCode = 10
   val nino = Nino("AB123456A")
   val desAddress: ItmpAddress = ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),
-    Some("UK"), Some("NW1 6XE"), Some("Great Britain"), Some("GB"))
+    Some("UK"), Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
 

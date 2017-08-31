@@ -18,15 +18,27 @@ package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
-import play.api.libs.json.Json
-import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
+import play.api.libs.json.Json.JsValueWrapper
+import play.api.libs.json._
+import uk.gov.hmrc.auth.core.authorise.{AffinityGroup, CredentialRole}
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
+import uk.gov.hmrc.play.controllers.RestFormats.localDateFormats
+import uk.gov.hmrc.auth.core.authorise.AffinityGroup.jsonFormat
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
   val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
+
+  implicit class JsOptAppendable(jsObject: JsObject) {
+    def appendOptional(key: String, value: Option[JsValue]): JsObject = value.map(js => jsObject + (key -> js))
+      .getOrElse(jsObject)
+//
+//    def appendOptional[A: Writes](key: String, value: Option[A]): JsObject = value.map(js => jsObject + (key -> js))
+//      .getOrElse(jsObject)
+  }
 
   def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
     val body =
@@ -53,29 +65,55 @@ object AuthStub extends Stub {
     )
   }
 
-  def willAuthorise(desUserInfo: DesUserInfo): Unit = {
-    val name = desUserInfo.name
-    val address = desUserInfo.address
-    val jsonAddress = Json.parse(s"""{
-                                     |		"line1": ${optionalElement(address.line1)},
-                                     |		"line2": ${optionalElement(address.line2)},
-                                     |		"line3": ${optionalElement(address.line3)},
-                                     |		"line4": ${optionalElement(address.line4)},
-                                     |		"line5": ${optionalElement(address.line5)},
-                                     |		"postCode": ${optionalElement(address.postCode)},
-                                     |		"countryName": ${optionalElement(address.countryName)},
-                                     |		"countryCode": ${optionalElement(address.countryCode)}
-                                     |	}""".stripMargin)
-    val jsonName =
-      Json.parse(s"""{
-         |		"givenName": ${optionalElement(name.givenName)},
-         |		"middleName": ${optionalElement(name.middleName)},
-         |		"familyName": ${optionalElement(name.familyName)}
-         |}""".stripMargin)
+  def willAuthorise(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
+                    credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
+                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None): Unit = {
+    implicit val addressWrites = Json.writes[ItmpAddress]
+    implicit val itmpNameWrites = Json.writes[ItmpName]
+    implicit val agentWrites = Json.writes[AgentInformation]
+    implicit val credentialWrites = Json.writes[Credentials]
+    implicit val nameWrites = Json.writes[Name]
+    implicit val emailWrites = Json.writes[Email]
+    val jsonAddress: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
+    val jsonItmpName: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
+    val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
+    val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
+    val jsonName : Option[JsValue] = name.map(Json.toJson(_))
+    val jsonEmail : Option[JsValue] = email.map(Json.toJson(_))
+//    val jsonAddress: Option[JsValue] = desUserInfo.map(_.address).map(address => Json.parse(
+//      s"""{
+//         |		"line1": ${optionalElement(address.line1)},
+//         |		"line2": ${optionalElement(address.line2)},
+//         |		"line3": ${optionalElement(address.line3)},
+//         |		"line4": ${optionalElement(address.line4)},
+//         |		"line5": ${optionalElement(address.line5)},
+//         |		"postCode": ${optionalElement(address.postCode)},
+//         |		"countryName": ${optionalElement(address.countryName)},
+//         |		"countryCode": ${optionalElement(address.countryCode)}
+//         |	}""".stripMargin))
+//    val jsonName: Option[JsValue] = desUserInfo.map(_.name).map(name => Json.parse(
+//      s"""{
+//         |		"givenName": ${optionalElement(name.givenName)},
+//         |		"middleName": ${optionalElement(name.middleName)},
+//         |		"familyName": ${optionalElement(name.familyName)}
+//         |}""".stripMargin))
+    val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
+
+    val response = Json.obj()
+      .appendOptional("itmpName", jsonItmpName)
+      .appendOptional("itmpDateOfBirth", jsonDob.map(localDateFormats.writes))
+      .appendOptional("itmpAddress", jsonAddress)
+      .appendOptional("agentInformation", jsonAgent)
+      .appendOptional("name", jsonName)
+      .appendOptional("credentials", jsonCredentials)
+      .appendOptional("email", email.map(e => JsString(e.value)))
+      .appendOptional("affinityGroup", affinityGroup.map(ag => AffinityGroup.jsonFormat.writes(ag)))
+      .appendOptional("credentialRole", role.map(r => CredentialRole.jsonFormat.writes(r)))
+      .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
 
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
-        .withBody(Json.obj("itmpName" -> jsonName, "itmpDateOfBirth" -> desUserInfo.dateOfBirth, "itmpAddress" -> jsonAddress).toString())
+        .withBody(response.toString())
         .withStatus(200))
     )
   }
@@ -99,7 +137,7 @@ object AuthStub extends Stub {
   def willNotAuthorise(statusCode: Int = 401): Unit = {
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
-          .withHeader("WWW-Authenticate", """MDTP detail="InsufficientConfidenceLevel"""")
+        .withHeader("WWW-Authenticate", """MDTP detail="InsufficientConfidenceLevel"""")
         .withStatus(statusCode))
     )
   }

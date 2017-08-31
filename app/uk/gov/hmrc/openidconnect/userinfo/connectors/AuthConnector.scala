@@ -17,16 +17,18 @@
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import play.api.Logger
+import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, PlayAuthConnector}
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, Enrolment}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, Enrolment, UserDetails}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException, Upstream4xxResponse}
+import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector {
+trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector with AuthorisedFunctions{
   val authBaseUrl: String
 
   val http: HttpGet
@@ -46,6 +48,32 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
     }
   }
 
+  def fetchUserDetails(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
+    authorised().retrieve(Retrievals.allUserDetails) {
+      case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
+        credentialRole ~ description ~ groupId =>
+        Future.successful(Some(UserDetails(authProviderId = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
+          name = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
+          affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
+          agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
+          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId)))
+      case _ => Future.successful(None)
+    }
+  }
+
+  def fetchDesUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+    val nothing = Future.successful(None)
+    if (authority.nino.isDefined)
+      authorised().retrieve(Retrievals.allItmpUserDetails) {
+        case name ~ dateOfBirth ~ address =>
+          Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
+        case _ => nothing
+      }.recoverWith {
+        case ex: NotFoundException => nothing
+      }
+    else nothing
+  }
+
   def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
     http.GET(s"$authBaseUrl/auth/authority") map { response =>
       response.json.asOpt[Authority]
@@ -56,4 +84,9 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
 object AuthConnector extends AuthConnector with ServicesConfig {
   override lazy val authBaseUrl = baseUrl("auth")
   lazy val http = WSHttp
+
+  override def authConnector = new PlayAuthConnector {
+    override val serviceUrl = baseUrl("auth")
+    override def http = WSHttp
+  }
 }
