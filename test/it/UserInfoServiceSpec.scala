@@ -207,7 +207,6 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
 
       And("The auth will authorise and DES contains user information for the NINO")
-//      authStub.willAuthorise(DesUserInfo(ItmpName(None, None, None), None, ItmpAddress(None, None, None, None, None, None, None, None)))
       authStub.willNotFindUser()
 
       When("We request the user information")
@@ -323,9 +322,6 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
-
-//      And("All upstream services excluding user-info have valid reponse")
-//      authStub.willAuthorise(Some(desUserInfo))
 
       And("Auth returns unauthorized")
       authStub.willReturnAuthorityWith(503)
