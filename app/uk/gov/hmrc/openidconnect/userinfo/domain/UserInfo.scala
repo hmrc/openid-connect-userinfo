@@ -46,18 +46,3 @@ case class UserProfile(given_name: Option[String],
 case class DesUserInfo(name: ItmpName,
                        dateOfBirth: Option[LocalDate],
                        address: ItmpAddress)
-
-//case class DesUserName(firstForenameOrInitial: Option[String],
-//                       secondForenameOrInitial: Option[String],
-//                       surname: Option[String])
-//
-//case class DesAddress(line1: Option[String],
-//                      line2: Option[String],
-//                      line3: Option[String],
-//                      line4: Option[String],
-//                      line5: Option[String],
-//                      postcode: Option[String],
-//                      countryCode: Option[Int])
-//
-//case class Country(shortName: Option[String],
-//                   alphaTwoCode: Option[String])
