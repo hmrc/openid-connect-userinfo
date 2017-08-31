@@ -17,7 +17,6 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
-import org.mockito.BDDMockito.given
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}

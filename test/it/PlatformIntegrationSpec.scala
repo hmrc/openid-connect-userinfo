@@ -20,9 +20,9 @@ import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
-import org.scalatest.{BeforeAndAfterEach, TestData}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import org.scalatest.{BeforeAndAfterEach, TestData}
 import org.scalatestplus.play.OneAppPerTest
 import play.api.Mode
 import play.api.inject.guice.GuiceApplicationBuilder

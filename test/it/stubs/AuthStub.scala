@@ -18,7 +18,6 @@ package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
-import play.api.libs.json.Json.JsValueWrapper
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.authorise.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.auth.core.retrieve._
@@ -26,7 +25,6 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.controllers.RestFormats.localDateFormats
-import uk.gov.hmrc.auth.core.authorise.AffinityGroup.jsonFormat
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
@@ -35,9 +33,6 @@ object AuthStub extends Stub {
   implicit class JsOptAppendable(jsObject: JsObject) {
     def appendOptional(key: String, value: Option[JsValue]): JsObject = value.map(js => jsObject + (key -> js))
       .getOrElse(jsObject)
-//
-//    def appendOptional[A: Writes](key: String, value: Option[A]): JsObject = value.map(js => jsObject + (key -> js))
-//      .getOrElse(jsObject)
   }
 
   def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
@@ -79,24 +74,6 @@ object AuthStub extends Stub {
     val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
     val jsonName : Option[JsValue] = name.map(Json.toJson(_))
-    val jsonEmail : Option[JsValue] = email.map(Json.toJson(_))
-//    val jsonAddress: Option[JsValue] = desUserInfo.map(_.address).map(address => Json.parse(
-//      s"""{
-//         |		"line1": ${optionalElement(address.line1)},
-//         |		"line2": ${optionalElement(address.line2)},
-//         |		"line3": ${optionalElement(address.line3)},
-//         |		"line4": ${optionalElement(address.line4)},
-//         |		"line5": ${optionalElement(address.line5)},
-//         |		"postCode": ${optionalElement(address.postCode)},
-//         |		"countryName": ${optionalElement(address.countryName)},
-//         |		"countryCode": ${optionalElement(address.countryCode)}
-//         |	}""".stripMargin))
-//    val jsonName: Option[JsValue] = desUserInfo.map(_.name).map(name => Json.parse(
-//      s"""{
-//         |		"givenName": ${optionalElement(name.givenName)},
-//         |		"middleName": ${optionalElement(name.middleName)},
-//         |		"familyName": ${optionalElement(name.familyName)}
-//         |}""".stripMargin))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
 
     val response = Json.obj()
