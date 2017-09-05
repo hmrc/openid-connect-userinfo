@@ -91,4 +91,6 @@ class TestAuthConnector(wiremockBaseUrl: String) extends AuthConnector with Mock
        |]
      """.stripMargin
   }
+
+  override def authConnector = ???
 }

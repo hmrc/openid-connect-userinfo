@@ -17,22 +17,20 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, Country, DesAddress, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
 
 trait UserInfoTransformer {
 
-  val countryService: CountryService
-
   def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], enrolments: Option[Seq[Enrolment]], authority: Option[Authority], userDetails: Option[UserDetails]): UserInfo = {
 
-    def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.firstForenameOrInitial, u.name.surname, u.name.secondForenameOrInitial, u.dateOfBirth)) else None
+    def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.givenName, u.name.familyName, u.name.middleName, u.dateOfBirth)) else None
 
     def address = if (scopes.contains("address")) {
-      val country = desUserInfo flatMap (u => u.address.countryCode flatMap countryService.getCountry)
-      val countryName = country flatMap {c => c.shortName}
-      val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled){ country flatMap { c => c.alphaTwoCode} } else None
-      desUserInfo map (u => Address(formattedAddress(u.address, country), u.address.postcode, countryName, countryCode))
+      val countryName = desUserInfo flatMap {c => c.address.countryName}
+      val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled){ desUserInfo flatMap { u => u.address.countryCode} } else None
+      desUserInfo map (u => Address(formattedAddress(u.address), u.address.postCode, countryName, countryCode))
 
     } else None
 
@@ -57,10 +55,10 @@ trait UserInfoTransformer {
       ggInfo)
   }
 
-  private def formattedAddress(desAddress: DesAddress, country: Option[Country]) = {
-    val countryName = country flatMap {c => c.shortName}
+  private def formattedAddress(desAddress: ItmpAddress) = {
+    val countryName = desAddress.countryName
     val addressLine5 = if (UserInfoFeatureSwitches.addressLine5.isEnabled) desAddress.line5 else None
-    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postcode, countryName).flatten.mkString("\n")
+    Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postCode, countryName).flatten.mkString("\n")
   }
 
   private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails]): Option[GovernmentGatewayDetails] = {
@@ -81,6 +79,4 @@ trait UserInfoTransformer {
 
 }
 
-object UserInfoTransformer extends UserInfoTransformer {
-  override val countryService = CountryService
-}
+object UserInfoTransformer extends UserInfoTransformer
