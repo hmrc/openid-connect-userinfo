@@ -18,11 +18,22 @@ package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
+import play.api.libs.json._
+import uk.gov.hmrc.auth.core.authorise.{AffinityGroup, CredentialRole}
+import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
+import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
+import uk.gov.hmrc.play.controllers.RestFormats.localDateFormats
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
+  val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
+
+  implicit class JsOptAppendable(jsObject: JsObject) {
+    def appendOptional(key: String, value: Option[JsValue]): JsObject = value.map(js => jsObject + (key -> js))
+      .getOrElse(jsObject)
+  }
 
   def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
     val body =
@@ -45,6 +56,65 @@ object AuthStub extends Stub {
     stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
       .willReturn(aResponse()
         .withBody(body)
+        .withStatus(statusCode))
+    )
+  }
+
+  def willAuthorise(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
+                    credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
+                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None): Unit = {
+    implicit val addressWrites = Json.writes[ItmpAddress]
+    implicit val itmpNameWrites = Json.writes[ItmpName]
+    implicit val agentWrites = Json.writes[AgentInformation]
+    implicit val credentialWrites = Json.writes[Credentials]
+    implicit val nameWrites = Json.writes[Name]
+    implicit val emailWrites = Json.writes[Email]
+    val jsonAddress: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
+    val jsonItmpName: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
+    val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
+    val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
+    val jsonName : Option[JsValue] = name.map(Json.toJson(_))
+    val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
+
+    val response = Json.obj()
+      .appendOptional("itmpName", jsonItmpName)
+      .appendOptional("itmpDateOfBirth", jsonDob.map(localDateFormats.writes))
+      .appendOptional("itmpAddress", jsonAddress)
+      .appendOptional("agentInformation", jsonAgent)
+      .appendOptional("name", jsonName)
+      .appendOptional("credentials", jsonCredentials)
+      .appendOptional("email", email.map(e => JsString(e.value)))
+      .appendOptional("affinityGroup", affinityGroup.map(ag => AffinityGroup.jsonFormat.writes(ag)))
+      .appendOptional("credentialRole", role.map(r => CredentialRole.jsonFormat.writes(r)))
+      .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
+
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody(response.toString())
+        .withStatus(200))
+    )
+  }
+
+  def willNotFindUser(): Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody("{}")
+        .withStatus(404))
+    )
+  }
+
+  def willAuthoriseWithEmptyResponse: Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withBody("{}")
+        .withStatus(200))
+    )
+  }
+
+  def willNotAuthorise(statusCode: Int = 401): Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .willReturn(aResponse()
+        .withHeader("WWW-Authenticate", """MDTP detail="InsufficientConfidenceLevel"""")
         .withStatus(statusCode))
     )
   }
@@ -73,5 +143,11 @@ object AuthStub extends Stub {
       .willReturn(aResponse()
         .withBody(body)
         .withStatus(statusCode)))
+  }
+
+  private def displayAddress(address: ItmpAddress): Boolean = {
+    val ia = address
+    Seq(ia.countryCode, ia.countryName, ia.postCode, ia.line1, ia.line2, ia.line3, ia.line4,
+      ia.line5, ia.postCode).nonEmpty
   }
 }

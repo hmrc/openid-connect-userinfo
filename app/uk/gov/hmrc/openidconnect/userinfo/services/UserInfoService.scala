@@ -31,10 +31,8 @@ trait UserInfoService {
 
 trait LiveUserInfoService extends UserInfoService {
   val authConnector: AuthConnector
-  val desConnector: DesConnector
   val userInfoTransformer: UserInfoTransformer
   val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
-  val userDetailsConnector: UserDetailsConnector
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
@@ -62,13 +60,13 @@ trait LiveUserInfoService extends UserInfoService {
       val maybeDesUserInfo = maybeAuthority flatMap { authority =>
         val concreteAuthority = authority.getOrElse(Authority())
         if (concreteAuthority.nino.isDefined)
-          getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority, desConnector.fetchUserInfo)
+          getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority, authConnector.fetchDesUserInfo)
         else Future.successful(None)
       }
 
       val scopesForUserDetails = Set("openid:government_gateway", "email")
       val maybeUserDetails = maybeAuthority flatMap { authority =>
-        getMaybeByParamForScopes[Authority, UserDetails](scopesForUserDetails, scopes, authority.getOrElse(Authority()), userDetailsConnector.fetchUserDetails)
+        getMaybeByParamForScopes[Authority, UserDetails](scopesForUserDetails, scopes, authority.getOrElse(Authority()), authConnector.fetchUserDetails)
       }
 
       def maybeEnrolments = maybeAuthority flatMap { authority =>
@@ -98,11 +96,9 @@ trait SandboxUserInfoService extends UserInfoService {
 }
 
 object LiveUserInfoService extends LiveUserInfoService {
-  override val desConnector = DesConnector
   override val authConnector = AuthConnector
   override val userInfoTransformer = UserInfoTransformer
   override val thirdPartyDelegatedAuthorityConnector = ThirdPartyDelegatedAuthorityConnector
-  override val userDetailsConnector = UserDetailsConnector
 }
 
 object SandboxUserInfoService extends SandboxUserInfoService {

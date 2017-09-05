@@ -17,13 +17,13 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, DesConnector, ThirdPartyDelegatedAuthorityConnector, UserDetailsConnector}
+import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, ThirdPartyDelegatedAuthorityConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
@@ -38,7 +38,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = Nino("AB123456A")
   val authBearerToken = "AUTH_BEARER_TOKEN"
-  val desUserInfo = DesUserInfo(DesUserName(Some("John"), None, Some("Smith")), None, DesAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None))
+  val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")), None, ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val authority: Authority = Authority(Some("weak"),Some(200),Some("AB123456A"),Some("/uri/to/userDetails"),
     Some("/uri/to/enrolments"),Some("Individual"),Some("1304372065861347"))
@@ -62,10 +62,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     val liveInfoService = new LiveUserInfoService {
       override val authConnector: AuthConnector =  mock[AuthConnector]
-      override val desConnector: DesConnector = mock[DesConnector]
       override val userInfoTransformer = mock[UserInfoTransformer]
       override val thirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
-      override val userDetailsConnector = mock[UserDetailsConnector]
     }
   }
 
@@ -77,16 +75,16 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
       given(liveInfoService.authConnector.fetchEnrolments(authority)(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.userDetailsConnector.fetchUserDetails(authority)(headers)).willReturn(Some(userDetails))
-      given(liveInfoService.desConnector.fetchUserInfo(authority)(headers)).willReturn(Some(desUserInfo))
+      given(liveInfoService.authConnector.fetchUserDetails(authority)(headers)).willReturn(Some(userDetails))
+      given(liveInfoService.authConnector.fetchDesUserInfo(authority)(headers)).willReturn(Some(desUserInfo))
       given(liveInfoService.userInfoTransformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority),None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.desConnector).fetchUserInfo(authority)
+      verify(liveInfoService.authConnector).fetchDesUserInfo(authority)
       verify(liveInfoService.authConnector).fetchEnrolments(authority)
       verify(liveInfoService.authConnector).fetchAuthority()
-      verify(liveInfoService.userDetailsConnector).fetchUserDetails(any[Authority])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector).fetchUserDetails(any[Authority])(any[HeaderCarrier])
     }
 
     "return None when the NINO is not in the authority" in new Setup {
@@ -110,7 +108,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.desConnector, never).fetchUserInfo(any[Authority])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector, never).fetchDesUserInfo(any[Authority])(any[HeaderCarrier])
       verify(liveInfoService.authConnector).fetchEnrolments(authority)
     }
 
@@ -125,7 +123,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.desConnector, never).fetchUserInfo(any[Authority])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector, never).fetchDesUserInfo(any[Authority])(any[HeaderCarrier])
       verify(liveInfoService.authConnector).fetchEnrolments(authority)
     }
 
@@ -135,13 +133,13 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority)))
-      given(liveInfoService.desConnector.fetchUserInfo(authority)(headers)).willReturn(None)
+      given(liveInfoService.authConnector.fetchDesUserInfo(authority)(headers)).willReturn(None)
       given(liveInfoService.userInfoTransformer.transform(scopes, None, Some(enrolments), None, None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
       verify(liveInfoService.authConnector, never).fetchEnrolments(any[Authority])(any[HeaderCarrier])
-      verify(liveInfoService.desConnector).fetchUserInfo(any[Authority])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector).fetchDesUserInfo(any[Authority])(any[HeaderCarrier])
     }
   }
 

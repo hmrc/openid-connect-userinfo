@@ -16,12 +16,12 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.data
 
-import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
-import uk.gov.hmrc.openidconnect.userinfo.domain.UserInfo
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.prop.PropertyChecks
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
+import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
+import uk.gov.hmrc.openidconnect.userinfo.domain.UserInfo
 import uk.gov.hmrc.play.test.UnitSpec
 
 class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndAfterEach {
