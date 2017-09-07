@@ -35,12 +35,12 @@ object AuthStub extends Stub {
       .getOrElse(jsObject)
   }
 
-  def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
+  def willReturnAuthorityWith(nino: Nino): Unit = {
     val body =
       s"""
          |{
          |   "credentialStrength:": "strong",
-         |   "confidenceLevel": ${confidenceLevel.level},
+         |   "confidenceLevel": 0,
          |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
          |   "nino": "${nino.nino}",
          |   "enrolments": "/auth/oid/2/enrolments",
