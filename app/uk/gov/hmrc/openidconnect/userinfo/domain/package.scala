@@ -17,7 +17,7 @@
 package uk.gov.hmrc.openidconnect.userinfo
 
 import play.api.libs.json._
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
+import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.play.http.Token
 
 package object domain {
@@ -30,7 +30,10 @@ package object domain {
   implicit val enrloment = Json.format[Enrolment]
 
   implicit val token = Json.format[Token]
+  implicit val gatewayInformationFmt: Format[GatewayInformation] = Json.format[GatewayInformation]
+  implicit val mdtpInformationFmt: Format[MdtpInformation] = Json.format[MdtpInformation]
   implicit val userDetails = Json.format[UserDetails]
+  implicit val mdtp = Json.format[Mdtp]
   implicit val governmentGatewayDetails = Json.format[GovernmentGatewayDetails]
 
   implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd")

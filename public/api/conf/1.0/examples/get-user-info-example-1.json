@@ -31,6 +31,11 @@
     "agent_code": "123456-abc",
     "agent_friendly_name": "AC Accounting",
     "agent_id": "AC",
-    "gateway_token": "token-value-1234"
+    "gateway_token": "token-value-1234",
+    "unread_message_count": 0
+  },
+  "mdtp": {
+    "device_id": "device_id-12345",
+    "session_id": "session_id_123455"
   }
 }

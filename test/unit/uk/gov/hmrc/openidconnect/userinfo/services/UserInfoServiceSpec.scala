@@ -21,7 +21,7 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, ThirdPartyDelegatedAuthorityConnector}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
@@ -41,17 +41,19 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")), None, ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val authority: Authority = Authority(Some("weak"),Some(200),Some("AB123456A"),Some("/uri/to/userDetails"),
-    Some("/uri/to/enrolments"),Some("Individual"),Some("1304372065861347"))
+    Some("/uri/to/enrolments"),Some("Individual"))
 
   val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
-    Some("User"), None, None)
+    Some("User"), None, None, None, None, None)
 
   val governmentGateway: GovernmentGatewayDetails =  GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),
-    Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"))
+    Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11))
+  val mdtp = Mdtp("device-id-12", "session-id-133")
 
   val ggToken = Token("ggToken")
 
-  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None, None)),None, None, Some(nino).map(_.nino), Some(enrolments), Some(governmentGateway))
+  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None, None)),
+    None, None, Some(nino).map(_.nino), Some(enrolments), Some(governmentGateway), Some(mdtp))
 
   trait Setup {
     implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
@@ -75,7 +77,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
       given(liveInfoService.authConnector.fetchEnrolments(authority)(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.authConnector.fetchUserDetails(authority)(headers)).willReturn(Some(userDetails))
+      given(liveInfoService.authConnector.fetchUserDetails()(headers)).willReturn(Some(userDetails))
       given(liveInfoService.authConnector.fetchDesUserInfo(authority)(headers)).willReturn(Some(desUserInfo))
       given(liveInfoService.userInfoTransformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority),None)).willReturn(any[UserInfo], any[UserInfo])
 
@@ -84,7 +86,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(liveInfoService.authConnector).fetchDesUserInfo(authority)
       verify(liveInfoService.authConnector).fetchEnrolments(authority)
       verify(liveInfoService.authConnector).fetchAuthority()
-      verify(liveInfoService.authConnector).fetchUserDetails(any[Authority])(any[HeaderCarrier])
+      verify(liveInfoService.authConnector).fetchUserDetails()(any[HeaderCarrier])
     }
 
     "return None when the NINO is not in the authority" in new Setup {

@@ -50,8 +50,13 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val deviceId = "device-id-12345"
+  val sessionId = "session-id-12345"
+  val mdtp = Mdtp(deviceId, sessionId)
+  val authMdtp = MdtpInformation(deviceId, sessionId)
+  val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"), Some(10))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin"))
-    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"))
+    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10))
   val email = "my-email@abc.uk"
 
   val userInfo = UserInfo(
@@ -63,7 +68,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway))
+    Some(government_gateway),
+    Some(mdtp))
   val desUserInfoWithoutFirstName = DesUserInfo(ItmpName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithoutFirstName = UserInfo(
@@ -75,7 +81,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway)
+    Some(government_gateway),
+    Some(mdtp)
   )
   val desUserInfoWithoutFamilyName = DesUserInfo(ItmpName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
@@ -88,7 +95,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway))
+    Some(government_gateway),
+    Some(mdtp))
   val desUserInfoWithPartialAddress = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithPartialAddress = UserInfo(
@@ -100,16 +108,18 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     None,
-    Some(government_gateway))
+    Some(government_gateway),
+    Some(mdtp))
 
     feature("fetch user information") {
 
     scenario("fetch user profile") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments', " +
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government_gateway' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email", "agentInformation"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments",
+          "openid:government_gateway", "email", "agentInformation", "openid:mdtp"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -119,7 +129,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("The auth will authorise DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin))
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual),
+        Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -168,21 +179,22 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName.copy(government_gateway = None, email = None))
+      Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName.copy(government_gateway = None, email = None,
+        mdtp = None))
     }
 
     scenario("fetch user data without enrolments when there are no enrolments") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government_gateway' and 'openid:hmrc_enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email", "openid:mdtp"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The auth will authorise and DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin))
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -216,7 +228,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, government_gateway = None, email = None)
+      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+        address = None, birthdate = None, government_gateway = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
     }
 
@@ -239,7 +252,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None, government_gateway = None, email = None)
+      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+        address = None, birthdate = None, uk_gov_nino = None, government_gateway = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
     }
 
@@ -257,7 +271,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("The auth will authorise DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin))
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), None, gatewayInformation = Some(gatewayInformation))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -266,7 +280,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithGovernmentDetailsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None, address = None, birthdate = None, uk_gov_nino = None, hmrc_enrolments = None, email = None)
+      val userWithGovernmentDetailsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+        address = None, birthdate = None, uk_gov_nino = None, hmrc_enrolments = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithGovernmentDetailsOnly)
     }
 

@@ -28,7 +28,7 @@ import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector with AuthorisedFunctions{
+trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector with AuthorisedFunctions {
   val authBaseUrl: String
 
   val http: HttpGet
@@ -48,22 +48,25 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
     }
   }
 
-  def fetchUserDetails(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
-    authorised().retrieve(Retrievals.allUserDetails) {
+  def fetchUserDetails()(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
+    authorised().retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
       case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
-        credentialRole ~ description ~ groupId =>
+        credentialRole ~ description ~ groupId ~ mdtp ~ gatewayInformation =>
         Future.successful(Some(UserDetails(authProviderId = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
           name = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
           affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
           agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
-          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId)))
+          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
+          gatewayInformation = gatewayInformation, mdtpInformation = mdtp)))
       case _ => Future.successful(None)
+    }.recover {
+      case e: NotFoundException => None
     }
   }
 
-  def fetchDesUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+  def fetchDesUserInfo(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
-    if (authority.nino.isDefined)
+    if (auth.nino.isDefined)
       authorised().retrieve(Retrievals.allItmpUserDetails) {
         case name ~ dateOfBirth ~ address =>
           Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
@@ -87,6 +90,7 @@ object AuthConnector extends AuthConnector with ServicesConfig {
 
   override def authConnector = new PlayAuthConnector {
     override val serviceUrl = baseUrl("auth")
+
     override def http = WSHttp
   }
 }
