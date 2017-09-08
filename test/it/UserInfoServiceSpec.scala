@@ -121,8 +121,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments",
           "openid:government_gateway", "email", "agentInformation", "openid:mdtp"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
@@ -162,8 +162,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
@@ -189,8 +189,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email", "openid:mdtp"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The auth will authorise and DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
@@ -212,8 +212,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
@@ -239,8 +239,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:hmrc_enrolments"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
@@ -263,8 +263,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government_gateway"))
 
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L200, Nino(nino))
+      And("The Auth token has a NINO")
+      authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The authority has enrolments")
       authStub.willReturnEnrolmentsWith()
@@ -285,25 +285,6 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       Json.parse(result.body) shouldBe Json.toJson(userWithGovernmentDetailsOnly)
     }
 
-    scenario("return 401 - unauthorized when confidence level is less than 200") {
-
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
-      thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
-
-      And("The Auth token has a confidence level above 200 and a NINO")
-      authStub.willReturnAuthorityWith(ConfidenceLevel.L100, Nino(nino))
-
-      When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.0+json"))
-        .asString
-
-      Then("The user information is returned")
-      result.code shouldBe 401
-
-      Json.parse(result.body) shouldBe Json.parse(s"""{"code":"UNAUTHORIZED","message":"Bearer token is missing or not authorized"}""".stripMargin)
-    }
   }
 
   feature("fetching user information propagates Unauthorized errors from upstream services") {
