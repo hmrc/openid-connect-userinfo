@@ -30,7 +30,7 @@ class AuthConnectorSpec extends WireMockSugar {
 
   "fetchEnrolments" should {
     val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
-      Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
+      Some("/uri/to/enrolments"), Some("Individual"))
     "return the authority enrolments" in new TestAuthConnector(wiremockBaseUrl) {
       given().get(urlPathEqualTo("/uri/to/enrolments")).returns(enrolmentsJson())
       fetchEnrolments(authority).futureValue shouldBe Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")))))

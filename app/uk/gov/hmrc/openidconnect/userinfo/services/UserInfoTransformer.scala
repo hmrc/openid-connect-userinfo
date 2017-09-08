@@ -19,7 +19,7 @@ package uk.gov.hmrc.openidconnect.userinfo.services
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, DesUserInfo, Enrolment, GovernmentGatewayDetails, UserDetails, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, DesUserInfo, Enrolment, GovernmentGatewayDetails, Mdtp, UserDetails, UserInfo}
 
 trait UserInfoTransformer {
 
@@ -44,6 +44,9 @@ trait UserInfoTransformer {
 
     val email = if (scopes.contains("email")) userDetails flatMap {_.email} else None
 
+    val mdtp = if (scopes.contains("openid:mdtp")) userDetails.flatMap(_.mdtpInformation.map(m => Mdtp(m.deviceId, m.sessionId))) else None
+
+
     UserInfo(profile.flatMap(_.firstName),
       profile.flatMap(_.familyName),
       profile.flatMap(_.middleName),
@@ -52,7 +55,8 @@ trait UserInfoTransformer {
       profile.flatMap(_.birthDate),
       identifier,
       userEnrolments,
-      ggInfo)
+      ggInfo,
+      mdtp)
   }
 
   private def formattedAddress(desAddress: ItmpAddress) = {
@@ -69,10 +73,13 @@ trait UserInfoTransformer {
     val agentCode = userDetails flatMap { _.agentCode}
     val agentFriendlyName = userDetails flatMap { _.agentFriendlyName}
     val agentId = userDetails flatMap { _.agentId}
-    val gatewayToken = authority flatMap { _.gatewayToken }
+    val gatewayInformation = userDetails flatMap { _.gatewayInformation }
+    val mdtp = userDetails flatMap { _.mdtpInformation }
 
     Some(GovernmentGatewayDetails(user_id = credId, roles = credentialRoles, affinity_group = affinityGroup,
-      agent_code = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName, gateway_token = gatewayToken))
+      agent_code = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
+      gateway_token = gatewayInformation.flatMap(_.gatewayToken),
+      unread_message_count = gatewayInformation.flatMap(_.unreadMessageCount)))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])

@@ -18,13 +18,16 @@ package uk.gov.hmrc.openidconnect.userinfo.data
 
 import org.joda.time._
 import org.scalacheck.Gen
+import uk.gov.hmrc.auth.core.retrieve.MdtpInformation
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, Mdtp, UserInfo}
 
 trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
   val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
+  val deviceId = "device-id-abc"
+  val sessionId = "session-id-abcd"
 
   val fullAddress = Some(Address(
     """221B Baker Street
@@ -52,7 +55,8 @@ trait UserInfoGenerator {
 
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"),
-    Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"))
+    Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10))
+  val mdtp = Mdtp(deviceId, sessionId)
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
 
@@ -98,7 +102,8 @@ trait UserInfoGenerator {
     middleName <- middleNameGen
     dob <- dateOfBirth
     nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments), Some(government_gateway))
+  } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
+    Some(government_gateway), Some(mdtp))
 }
 
 object UserInfoGenerator extends UserInfoGenerator

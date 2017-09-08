@@ -25,6 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.controllers.RestFormats.localDateFormats
+import uk.gov.hmrc.openidconnect.userinfo.domain._
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
@@ -62,9 +63,8 @@ object AuthStub extends Stub {
 
   def willAuthorise(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
                     credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
-                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None): Unit = {
-    implicit val addressWrites = Json.writes[ItmpAddress]
-    implicit val itmpNameWrites = Json.writes[ItmpName]
+                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
+                    mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None): Unit = {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
@@ -74,7 +74,10 @@ object AuthStub extends Stub {
     val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
     val jsonName : Option[JsValue] = name.map(Json.toJson(_))
+    val jsonEmail : Option[JsValue] = email.map(Json.toJson(_))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
+    val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
+    val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
 
     val response = Json.obj()
       .appendOptional("itmpName", jsonItmpName)
@@ -87,6 +90,8 @@ object AuthStub extends Stub {
       .appendOptional("affinityGroup", affinityGroup.map(ag => AffinityGroup.jsonFormat.writes(ag)))
       .appendOptional("credentialRole", role.map(r => CredentialRole.jsonFormat.writes(r)))
       .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
+      .appendOptional("mdtpInformation", jsonMdtp)
+      .appendOptional("gatewayInformation", jsonGatewayInformation)
 
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
