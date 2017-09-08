@@ -17,12 +17,14 @@
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
 import org.joda.time.LocalDate
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName, MdtpInformation}
 
 case class Address(formatted: String,
                    postal_code: Option[String],
                    country: Option[String],
                    country_code: Option[String])
+
+case class Mdtp(device_id: String, session_id: String)
 
 case class UserInfo(given_name: Option[String],
                     family_name: Option[String],
@@ -32,7 +34,8 @@ case class UserInfo(given_name: Option[String],
                     birthdate: Option[LocalDate],
                     uk_gov_nino: Option[String],
                     hmrc_enrolments: Option[Seq[Enrolment]],
-                    government_gateway: Option[GovernmentGatewayDetails])
+                    government_gateway: Option[GovernmentGatewayDetails],
+                    mdtp: Option[Mdtp])
 
 case class UserInformation(profile: Option[UserProfile],
                            address: Option[Address],

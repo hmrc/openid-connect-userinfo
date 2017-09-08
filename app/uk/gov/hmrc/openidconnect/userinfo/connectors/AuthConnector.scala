@@ -48,47 +48,49 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
     }
   }
 
-  def fetchUserDetails(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
-    authorised().retrieve(Retrievals.allUserDetails) {
+  def fetchUserDetails()(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
+    authorised().retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
       case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
-        credentialRole ~ description ~ groupId =>
+        credentialRole ~ description ~ groupId ~ mdtp ~ gatewayInformation =>
         Future.successful(Some(UserDetails(authProviderId = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
           name = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
           affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
           agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
-          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId)))
+          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
+          gatewayInformation = gatewayInformation, mdtpInformation = mdtp)))
       case _ => Future.successful(None)
     }.recover {
       case e: NotFoundException => None
     }
+  }
 
-    def fetchDesUserInfo(authority: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
-      val nothing = Future.successful(None)
-      if (authority.nino.isDefined)
-        authorised().retrieve(Retrievals.allItmpUserDetails) {
-          case name ~ dateOfBirth ~ address =>
-            Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
-          case _ => nothing
-        }.recoverWith {
-          case ex: NotFoundException => nothing
-        }
-      else nothing
-    }
-
-    def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
-      http.GET(s"$authBaseUrl/auth/authority") map { response =>
-        response.json.asOpt[Authority]
+  def fetchDesUserInfo(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+    val nothing = Future.successful(None)
+    if (auth.nino.isDefined)
+      authorised().retrieve(Retrievals.allItmpUserDetails) {
+        case name ~ dateOfBirth ~ address =>
+          Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
+        case _ => nothing
+      }.recoverWith {
+        case ex: NotFoundException => nothing
       }
-    }
+    else nothing
   }
 
-  object AuthConnector extends AuthConnector with ServicesConfig {
-    override lazy val authBaseUrl = baseUrl("auth")
-    lazy val http = WSHttp
-
-    override def authConnector = new PlayAuthConnector {
-      override val serviceUrl = baseUrl("auth")
-
-      override def http = WSHttp
+  def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
+    http.GET(s"$authBaseUrl/auth/authority") map { response =>
+      response.json.asOpt[Authority]
     }
   }
+}
+
+object AuthConnector extends AuthConnector with ServicesConfig {
+  override lazy val authBaseUrl = baseUrl("auth")
+  lazy val http = WSHttp
+
+  override def authConnector = new PlayAuthConnector {
+    override val serviceUrl = baseUrl("auth")
+
+    override def http = WSHttp
+  }
+}
