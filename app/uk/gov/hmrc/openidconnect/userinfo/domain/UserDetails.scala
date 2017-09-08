@@ -17,20 +17,23 @@
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, MdtpInformation}
 
-case class UserDetails (
-                         authProviderId: Option[String] = None,
-                         authProviderType: Option[String] = None,
-                         name: Option[String] = None,
-                         lastName: Option[String] = None,
-                         dateOfBirth: Option[LocalDate] = None,
-                         postCode: Option[String] = None,
-                         email: Option[String] = None,
-                         affinityGroup: Option[String] = None,
-                         agentCode: Option[String] = None,
-                         agentFriendlyName: Option[String] = None,
-                         credentialRole: Option[String] = None,
-                         description: Option[String] = None,
-                         groupIdentifier: Option[String] = None,
-                         agentId: Option[String] = None
-                       )
+case class UserDetails(
+                        authProviderId: Option[String] = None,
+                        authProviderType: Option[String] = None,
+                        name: Option[String] = None,
+                        lastName: Option[String] = None,
+                        dateOfBirth: Option[LocalDate] = None,
+                        postCode: Option[String] = None,
+                        email: Option[String] = None,
+                        affinityGroup: Option[String] = None,
+                        agentCode: Option[String] = None,
+                        agentFriendlyName: Option[String] = None,
+                        credentialRole: Option[String] = None,
+                        description: Option[String] = None,
+                        groupIdentifier: Option[String] = None,
+                        agentId: Option[String] = None,
+                        gatewayInformation: Option[GatewayInformation],
+                        mdtpInformation: Option[MdtpInformation]
+                      )

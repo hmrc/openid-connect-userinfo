@@ -22,5 +22,4 @@ case class Authority(credentialStrength: Option[String] = None,
                      userDetailsLink: Option[String] = None,
                      enrolments: Option[String] = None,
                      affinityGroup: Option[String] = None,
-                     credId: Option[String] = None,
-                     gatewayToken: Option[String] = None)
+                     credId: Option[String] = None)

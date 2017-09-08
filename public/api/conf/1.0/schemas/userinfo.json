@@ -114,6 +114,22 @@
         ]
       }
     },
+    "mdtp": {
+      "type": "object",
+      "description": "Mdtp information based on government gateway input",
+      "properties": {
+        "device_id": {
+          "type": "string",
+          "description": "Device id",
+          "example": "3012345"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Session id",
+          "example": "2012345"
+        }
+      }
+    },
     "government_gateway": {
       "type": "object",
       "description": "Legacy properties based on government gateway input.",
@@ -155,6 +171,11 @@
           "type": "string",
           "description": "Government gateway token",
           "example": "123456789"
+        },
+        "unread_message_count": {
+          "type": "integer",
+          "description": "Unread message count",
+          "example": 12345
         }
       },
       "additionalProperties": false

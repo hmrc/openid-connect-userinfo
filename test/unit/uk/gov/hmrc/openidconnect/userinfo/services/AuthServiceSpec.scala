@@ -41,7 +41,7 @@ class AuthServiceSpec extends UnitSpec with ScalaFutures with MockitoSugar {
 
   "isAuthorised" should {
     val authority = Authority(Some("weak"), Some(200), Some("AA111111A"), Some("/uri/to/userDetails"),
-      Some("/uri/to/enrolments"), Some("Individual"), Some("1304372065861347"))
+      Some("/uri/to/enrolments"), Some("Individual"))
     "return true if confidenceLevel is 200" in new Setup {
       when(authService.authConnector.fetchAuthority()(any())).thenReturn(Future(Option(authority)))
 
