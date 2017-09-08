@@ -36,12 +36,12 @@ object AuthStub extends Stub {
       .getOrElse(jsObject)
   }
 
-  def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
+  def willReturnAuthorityWith(nino: Nino): Unit = {
     val body =
       s"""
          |{
          |   "credentialStrength:": "strong",
-         |   "confidenceLevel": ${confidenceLevel.level},
+         |   "confidenceLevel": 0,
          |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
          |   "nino": "${nino.nino}",
          |   "enrolments": "/auth/oid/2/enrolments",
@@ -68,11 +68,13 @@ object AuthStub extends Stub {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
+    implicit val emailWrites = Json.writes[Email]
     val jsonAddress: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
     val jsonItmpName: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
     val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
     val jsonName : Option[JsValue] = name.map(Json.toJson(_))
+    val jsonEmail : Option[JsValue] = email.map(Json.toJson(_))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
     val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
     val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
