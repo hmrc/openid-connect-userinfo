@@ -24,12 +24,12 @@ import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
 
-  def willReturnAuthorityWith(confidenceLevel: ConfidenceLevel, nino: Nino): Unit = {
+  def willReturnAuthorityWith(nino: Nino): Unit = {
     val body =
       s"""
          |{
          |   "credentialStrength:": "strong",
-         |   "confidenceLevel": ${confidenceLevel.level},
+         |   "confidenceLevel": 0,
          |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
          |   "nino": "${nino.nino}",
          |   "enrolments": "/auth/oid/2/enrolments",
