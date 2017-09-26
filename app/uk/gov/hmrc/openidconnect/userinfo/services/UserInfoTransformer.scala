@@ -68,6 +68,7 @@ trait UserInfoTransformer {
   private def formatGGInfo(authority: Option[Authority], userDetails: Option[UserDetails]): Option[GovernmentGatewayDetails] = {
     val affinityGroup = userDetails flatMap {_.affinityGroup}
     val role = userDetails flatMap {_.credentialRole}
+    val userName = userDetails flatMap {_.name}
     val credentialRoles = role.map(Seq(_))
     val credId = authority flatMap {_.credId}
     val agentCode = userDetails flatMap { _.agentCode}
@@ -76,7 +77,7 @@ trait UserInfoTransformer {
     val gatewayInformation = userDetails flatMap { _.gatewayInformation }
     val mdtp = userDetails flatMap { _.mdtpInformation }
 
-    Some(GovernmentGatewayDetails(user_id = credId, roles = credentialRoles, affinity_group = affinityGroup,
+    Some(GovernmentGatewayDetails(user_id = credId, user_name = userName, roles = credentialRoles, affinity_group = affinityGroup,
       agent_code = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
       gateway_token = gatewayInformation.flatMap(_.gatewayToken),
       unread_message_count = userDetails.flatMap(_.unreadMessageCount)))

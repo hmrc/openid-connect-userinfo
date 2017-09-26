@@ -54,7 +54,7 @@ trait UserInfoGenerator {
   def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),Some("affinityGroup"),
+  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"),Some("affinityGroup"),
     Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10))
   val mdtp = Mdtp(deviceId, sessionId)
 

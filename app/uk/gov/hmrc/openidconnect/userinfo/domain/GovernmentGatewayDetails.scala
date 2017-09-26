@@ -19,6 +19,7 @@ package uk.gov.hmrc.openidconnect.userinfo.domain
 case class GovernmentGatewayDetails(
                                      user_id: Option[String],
                                      roles: Option[Seq[String]],
+                                     user_name: Option[String],
                                      affinity_group: Option[String],
                                      agent_code: Option[String],
                                      agent_id: Option[String],

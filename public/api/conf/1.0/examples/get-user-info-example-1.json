@@ -28,6 +28,7 @@
     "user_id": "019283",
     "roles": ["User"],
     "affinity_group": "Individual",
+    "user_name": "John",
     "agent_code": "123456-abc",
     "agent_friendly_name": "AC Accounting",
     "agent_id": "AC",
