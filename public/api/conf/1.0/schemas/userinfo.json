@@ -147,6 +147,11 @@
             "example": "User"
           }
         },
+        "user_name": {
+          "type": "string",
+          "description": "Government Gateway user name",
+          "example": "Bob"
+        },
         "affinity_group": {
           "type": "string",
           "description": "User affinity group",
