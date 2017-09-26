@@ -29,7 +29,7 @@ private object AppDependencies {
     "org.scalacheck" %% "scalacheck" % "1.12.5",
     "uk.gov.hmrc" %% "play-hmrc-api" % "1.2.0",
     "uk.gov.hmrc" %% "domain" % "4.0.0",
-    "uk.gov.hmrc" %% "play-auth" % "2.4.1"
+    "uk.gov.hmrc" %% "play-auth" % "2.5.0"
   )
 
   val test = Seq(
