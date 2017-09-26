@@ -44,7 +44,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     Some("/uri/to/enrolments"),Some("Individual"))
 
   val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
-    Some("User"), None, None, None, None, None)
+    Some("User"), None, None, None, None)
 
   val governmentGateway: GovernmentGatewayDetails =  GovernmentGatewayDetails(Some("32131"),Some(Seq("User")),
     Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11))
