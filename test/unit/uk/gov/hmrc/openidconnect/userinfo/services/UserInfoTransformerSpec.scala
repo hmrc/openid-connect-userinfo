@@ -38,7 +38,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")), desAddress)
   val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
 
-  val gatewayInformation = GatewayInformation(Some("gateway-token-abc"), Some(13))
+  val gatewayInformation = GatewayInformation(Some("gateway-token-abc"))
   val mdtp = Mdtp("device-id1234", "session-id-123")
   val authMdtp = MdtpInformation("device-id1234", "session-id-123")
   val userAddress: Address = Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
@@ -48,14 +48,15 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
   val userDetails: UserDetails = UserDetails(email = Some("John.Smith@a.b.c.com"), affinityGroup = Some("affinityGroup"),
     credentialRole = Some("User"), agentCode = Some("agent-code-12345"), agentId = Some("agent-id-12345"),
-    agentFriendlyName = Some("agent-friendly-name"), gatewayInformation = Some(gatewayInformation), mdtpInformation = Some(authMdtp)
+    agentFriendlyName = Some("agent-friendly-name"), gatewayInformation = Some(gatewayInformation), mdtpInformation = Some(authMdtp),
+    unreadMessageCount = Some(10)
   )
 
   val ggToken = Token("ggToken")
 
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")),
     Some("affinityGroup"), userDetails.agentCode, agent_id = userDetails.agentId, agent_friendly_name = userDetails.agentFriendlyName,
-    gateway_token = Some("gateway-token-abc"), unread_message_count = Some(13))
+    gateway_token = Some("gateway-token-abc"), unread_message_count = Some(10))
 
   val userInfo = UserInfo(
     Some("John"),
