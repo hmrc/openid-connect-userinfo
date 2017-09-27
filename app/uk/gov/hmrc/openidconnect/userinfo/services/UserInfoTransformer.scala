@@ -79,7 +79,7 @@ trait UserInfoTransformer {
     Some(GovernmentGatewayDetails(user_id = credId, roles = credentialRoles, affinity_group = affinityGroup,
       agent_code = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
       gateway_token = gatewayInformation.flatMap(_.gatewayToken),
-      unread_message_count = gatewayInformation.flatMap(_.unreadMessageCount)))
+      unread_message_count = userDetails.flatMap(_.unreadMessageCount)))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])

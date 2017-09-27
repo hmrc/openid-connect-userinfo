@@ -54,7 +54,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   val sessionId = "session-id-12345"
   val mdtp = Mdtp(deviceId, sessionId)
   val authMdtp = MdtpInformation(deviceId, sessionId)
-  val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"), Some(10))
+  val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin"))
     ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10))
   val email = "my-email@abc.uk"
@@ -130,7 +130,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The auth will authorise DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation))
+        Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -194,7 +194,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
       And("The auth will authorise and DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation))
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -270,8 +270,10 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willReturnEnrolmentsWith()
 
       And("The auth will authorise DES contains user information for the NINO")
-      authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), None, gatewayInformation = Some(gatewayInformation))
+      authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code,
+        government_gateway.agent_friendly_name)), Some(Credentials("", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(None, None)), Some(Email(email)), Some(AffinityGroup.Individual),
+        Some(CredentialRole.Admin), None, gatewayInformation = Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")

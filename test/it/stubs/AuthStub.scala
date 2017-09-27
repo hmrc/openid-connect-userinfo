@@ -64,7 +64,8 @@ object AuthStub extends Stub {
   def willAuthorise(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
                     credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
                     affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
-                    mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None): Unit = {
+                    mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None,
+                    unreadMessageCount: Option[Int] = None): Unit = {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
@@ -92,6 +93,7 @@ object AuthStub extends Stub {
       .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
       .appendOptional("mdtpInformation", jsonMdtp)
       .appendOptional("gatewayInformation", jsonGatewayInformation)
+      .appendOptional("unreadMessageCount", unreadMessageCount.map(Json.toJson(_)))
 
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
       .willReturn(aResponse()
