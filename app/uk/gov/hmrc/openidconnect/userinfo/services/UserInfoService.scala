@@ -53,7 +53,7 @@ trait LiveUserInfoService extends UserInfoService {
         else Future.successful(None)
       }
 
-      val scopesForAuthority = Set("openid:government_gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:mdtp")
+      val scopesForAuthority = Set("openid:government_gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:mdtp")
       val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority)
 
       val scopesForDes = Set("profile", "address")
@@ -70,7 +70,7 @@ trait LiveUserInfoService extends UserInfoService {
       }
 
       def maybeEnrolments = maybeAuthority flatMap { authority =>
-        getMaybeByParamForScopes[Authority, Seq[Enrolment]](Set("openid:hmrc_enrolments"), scopes,
+        getMaybeByParamForScopes[Authority, Seq[Enrolment]](Set("openid:hmrc-enrolments"), scopes,
           authority.getOrElse(Authority()), authConnector.fetchEnrolments)
       }
 

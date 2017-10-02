@@ -29,7 +29,7 @@
       "confidenceLevel": 200
     },
     {
-      "key":"openid:hmrc_enrolments",
+      "key":"openid:hmrc-enrolments",
       "name":"Access your enrolments",
       "description":"Access your enrolments",
       "confidenceLevel": 200
