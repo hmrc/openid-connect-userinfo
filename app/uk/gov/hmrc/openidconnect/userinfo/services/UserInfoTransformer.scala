@@ -38,7 +38,7 @@ trait UserInfoTransformer {
 
     val userEnrolments = if (scopes.contains("openid:hmrc-enrolments")) enrolments else None
 
-    val ggInfo = if (scopes.contains("openid:government_gateway")) {
+    val ggInfo = if (scopes.contains("openid:government-gateway")) {
       formatGGInfo(authority, userDetails)
     } else None
 

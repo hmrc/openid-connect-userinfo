@@ -90,9 +90,9 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
   "transform" should {
 
-    "return the full object when the delegated authority has scope 'address', 'profile', 'openid:gov-uk-identifiers', 'openid:hrmc_enrolments', 'email' and 'openid:government_gateway'" in new Setup {
+    "return the full object when the delegated authority has scope 'address', 'profile', 'openid:gov-uk-identifiers', 'openid:hrmc_enrolments', 'email' and 'openid:government-gateway'" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway"
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway"
         , "email", "openid:mdtp")
 
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
@@ -111,7 +111,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "does not return the address when the delegated authority does not have the scope 'address'" in new Setup {
 
-      val scopes = Set("profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
 
@@ -121,7 +121,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "does not return the enrolments when the delegated authority does not have the scope 'openid:hmrc-enrolments'" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government-gateway", "email", "openid:mdtp")
 
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
 
@@ -130,7 +130,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "does not return the user profile when the delegated authority does not have the scope 'profile'" in new Setup {
 
-      val scopes = Set("address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
 
@@ -139,7 +139,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "does not return the nino when the delegated authority does not have the scope 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments'" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
 
@@ -157,7 +157,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing first line of address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val desUserMissingline1 = desUserInfo.copy(address = desAddress.copy(line1 = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingline1), Some(enrolments), Some(authority), Some(userDetails)))
@@ -167,7 +167,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing second line of address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val desUserMissingLine2 = desUserInfo.copy(address = desAddress.copy(line2 = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine2), Some(enrolments), Some(authority), Some(userDetails)))
@@ -177,7 +177,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing third line of address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
 
       val desUserMissingLine3 = desUserInfo.copy(address = desAddress.copy(line3 = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine3), Some(enrolments), Some(authority), Some(userDetails)))
@@ -187,7 +187,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing fourth line of address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government-gateway", "email", "openid:mdtp")
 
       val desUserMissingLine4 = desUserInfo.copy(address = desAddress.copy(line4 = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine4), None, Some(authority), Some(userDetails)))
@@ -197,7 +197,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing fifth line of address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government-gateway", "email", "openid:mdtp")
 
       val desUserMissingLine5 = desUserInfo.copy(address = desAddress.copy(line5 = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingLine5), None, Some(authority), Some(userDetails)))
@@ -207,7 +207,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
 
     "handle missing post code in address" in new Setup {
 
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government_gateway", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:government-gateway", "openid:mdtp")
 
       val desUserMissingPostCode = desUserInfo.copy(address = desAddress.copy(postCode = None))
       val result = await(transformer.transform(scopes, Some(desUserMissingPostCode), None, Some(authority), Some(userDetails)))
@@ -218,7 +218,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
     "not return country code when feature flag is off" in new Setup {
 
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government_gateway", "email", "openid:mdtp")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
       val result = await(transformer.transform(scopes, Some(desUserInfo), Some(enrolments), Some(authority), Some(userDetails)))
 
       val userInfoMissingCountryCode = userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom",  country_code = None)))
