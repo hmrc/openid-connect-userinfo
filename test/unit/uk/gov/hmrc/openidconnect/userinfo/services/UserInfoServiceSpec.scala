@@ -73,7 +73,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     "requests all available data" in new Setup {
 
-      val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "email", "openid:government_gateway")
+      val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "email", "openid:government_gateway")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
       given(liveInfoService.authConnector.fetchEnrolments(authority)(headers)).willReturn(Some(enrolments))
@@ -90,7 +90,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     }
 
     "return None when the NINO is not in the authority" in new Setup {
-      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority.copy(nino = None))))
       given(liveInfoService.authConnector.fetchEnrolments(any())(any())).willReturn(Future(None))
@@ -102,7 +102,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
 
-      val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc_enrolments")
+      val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc-enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority)))
       given(liveInfoService.authConnector.fetchEnrolments(any())(any())).willReturn(Future(None))
@@ -116,7 +116,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
 
-      val scopes = Set("openid:hmrc_enrolments")
+      val scopes = Set("openid:hmrc-enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Option(authority))
@@ -129,7 +129,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(liveInfoService.authConnector).fetchEnrolments(authority)
     }
 
-    "does not request AUTH::fetchEnrloments when the scopes does not contain 'openid:hmrc_enrolments'" in new Setup {
+    "does not request AUTH::fetchEnrloments when the scopes does not contain 'openid:hmrc-enrolments'" in new Setup {
 
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
