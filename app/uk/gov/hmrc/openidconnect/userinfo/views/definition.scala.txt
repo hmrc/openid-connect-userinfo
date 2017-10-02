@@ -35,7 +35,7 @@
       "confidenceLevel": 200
     },
     {
-      "key":"openid:government_gateway",
+      "key":"openid:government-gateway",
       "name":"Shows subset of your government gateway details",
       "description":"Shows subset of yours government gateway details",
       "confidenceLevel": 200
