@@ -45,6 +45,12 @@
       "name":"Shows your email address",
       "description":"Shows your email address",
       "confidenceLevel": 200
+    },
+    {
+      "key":"mdtp",
+      "name":"Shows your sessionId and deviceId",
+      "description":"Shows your sessionId and deviceId",
+      "confidenceLevel": 200
     }
   ],
   "api":{
