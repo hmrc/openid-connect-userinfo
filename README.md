@@ -25,7 +25,7 @@ Install [Service Manager](https://github.com/hmrc/service-manager), if you want 
 Start the app:
 
     sbt run -Drun.mode=Dev
-
+ 
 Now you can test sandbox:
 
      curl -v http://localhost:9000/sandbox/userinfo -H 'Accept: application/vnd.hmrc.1.0+json'
