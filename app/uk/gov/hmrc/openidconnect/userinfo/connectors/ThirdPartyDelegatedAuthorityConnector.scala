@@ -18,10 +18,10 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, NotFoundException }
 
 trait ThirdPartyDelegatedAuthorityConnector {
   val http: HttpGet
