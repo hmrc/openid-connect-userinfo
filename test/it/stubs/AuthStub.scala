@@ -19,13 +19,11 @@ package it.stubs
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
 import play.api.libs.json._
-import uk.gov.hmrc.auth.core.authorise.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.openidconnect.userinfo.domain.DesUserInfo
-import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
-import uk.gov.hmrc.play.controllers.RestFormats.localDateFormats
-import uk.gov.hmrc.openidconnect.userinfo.domain._
+import uk.gov.hmrc.http.controllers.RestFormats.localDateFormats
+import uk.gov.hmrc.openidconnect.userinfo.domain.{DesUserInfo, _}
 
 object AuthStub extends Stub {
   override val stub: MockHost = new MockHost(22221)
@@ -89,7 +87,7 @@ object AuthStub extends Stub {
       .appendOptional("credentials", jsonCredentials)
       .appendOptional("email", email.map(e => JsString(e.value)))
       .appendOptional("affinityGroup", affinityGroup.map(ag => AffinityGroup.jsonFormat.writes(ag)))
-      .appendOptional("credentialRole", role.map(r => CredentialRole.jsonFormat.writes(r)))
+      .appendOptional("credentialRole", role.map(r => CredentialRole.reads.writes(r)))
       .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
       .appendOptional("mdtpInformation", jsonMdtp)
       .appendOptional("gatewayInformation", jsonGatewayInformation)

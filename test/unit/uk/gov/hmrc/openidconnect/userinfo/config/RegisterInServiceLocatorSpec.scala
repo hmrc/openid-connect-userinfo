@@ -21,10 +21,10 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import uk.gov.hmrc.api.connector.ServiceLocatorConnector
 import uk.gov.hmrc.openidconnect.userinfo.config.ServiceLocatorRegistration
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class RegisterInServiceLocatorSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
 

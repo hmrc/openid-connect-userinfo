@@ -17,9 +17,9 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.play.http.{HeaderCarrier, Upstream4xxResponse}
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.{ HeaderCarrier, Upstream4xxResponse }
 
 trait AuthService {
   val authConnector: AuthConnector

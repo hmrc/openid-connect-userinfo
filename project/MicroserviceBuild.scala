@@ -21,19 +21,15 @@ private object AppDependencies {
 
   val compile = Seq(
     ws,
-    "uk.gov.hmrc" %% "microservice-bootstrap" % "5.15.0",
-    "uk.gov.hmrc" %% "play-authorisation" % "4.2.0",
-    "uk.gov.hmrc" %% "play-config" % "3.0.0",
-    "uk.gov.hmrc" %% "logback-json-logger" % "3.1.0",
-    "uk.gov.hmrc" %% "play-health" % "2.0.0",
+    "uk.gov.hmrc" %% "microservice-bootstrap" % "6.9.0",
     "org.scalacheck" %% "scalacheck" % "1.12.5",
-    "uk.gov.hmrc" %% "play-hmrc-api" % "1.2.0",
-    "uk.gov.hmrc" %% "domain" % "4.0.0",
-    "uk.gov.hmrc" %% "play-auth" % "2.5.0"
+    "uk.gov.hmrc" %% "play-hmrc-api" % "2.0.0",
+    "uk.gov.hmrc" %% "domain" % "5.0.0",
+    "uk.gov.hmrc" %% "auth-client" % "2.3.0"
   )
 
   val test = Seq(
-    "uk.gov.hmrc" %% "hmrctest" % "2.2.0" % testScope,
+    "uk.gov.hmrc" %% "hmrctest" % "2.4.0" % testScope,
     "org.scalatest" %% "scalatest" % "2.2.6" % testScope,
     "org.scalatestplus.play" %% "scalatestplus-play" % "1.5.1" % testScope,
     "org.pegdown" % "pegdown" % "1.6.0" % testScope,
