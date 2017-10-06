@@ -29,11 +29,11 @@ import uk.gov.hmrc.openidconnect.userinfo.filters.MicroserviceAuthFilter
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with MockitoSugar with WithFakeApplication {
 

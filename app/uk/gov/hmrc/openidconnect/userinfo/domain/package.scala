@@ -18,7 +18,7 @@ package uk.gov.hmrc.openidconnect.userinfo
 
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
-import uk.gov.hmrc.play.http.Token
+import uk.gov.hmrc.http.Token
 
 package object domain {
 
