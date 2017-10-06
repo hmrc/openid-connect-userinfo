@@ -27,12 +27,12 @@ import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, ThirdPartyD
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
-import uk.gov.hmrc.play.http.logging.Authorization
-import uk.gov.hmrc.play.http.{HeaderCarrier, Token}
 import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.{ HeaderCarrier, Token }
+import uk.gov.hmrc.http.logging.Authorization
 
 class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
