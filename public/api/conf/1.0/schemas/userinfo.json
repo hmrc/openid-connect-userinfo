@@ -180,7 +180,7 @@
         "unread_message_count": {
           "type": "integer",
           "description": "Unread message count",
-          "example": 12345
+          "example": "234"
         }
       },
       "additionalProperties": false

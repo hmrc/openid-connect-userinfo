@@ -23,15 +23,15 @@ import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, Enrolment, UserDetails}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
 import uk.gov.hmrc.play.config.ServicesConfig
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet, NotFoundException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, NotFoundException}
 
-trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthConnector with AuthorisedFunctions {
+trait AuthConnector extends AuthorisedFunctions {
   val authBaseUrl: String
 
-  val http: HttpGet
+  val http: CoreGet
 
   def fetchEnrolments(auth: Authority)(implicit headerCarrier: HeaderCarrier): Future[Option[Seq[Enrolment]]] = {
     auth.enrolments map { enrolmentsUri =>
@@ -86,7 +86,7 @@ trait AuthConnector extends uk.gov.hmrc.play.auth.microservice.connectors.AuthCo
 
 object AuthConnector extends AuthConnector with ServicesConfig {
   override lazy val authBaseUrl = baseUrl("auth")
-  lazy val http = WSHttp
+  override lazy val http = WSHttp
 
   override def authConnector = new PlayAuthConnector {
     override val serviceUrl = baseUrl("auth")

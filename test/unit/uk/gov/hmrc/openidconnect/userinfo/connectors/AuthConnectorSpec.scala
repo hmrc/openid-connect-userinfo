@@ -23,8 +23,8 @@ import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
-import uk.gov.hmrc.play.http.{HeaderCarrier, HttpGet}
 import unit.uk.gov.hmrc.openidconnect.userinfo.WireMockSugar
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
 
 class AuthConnectorSpec extends WireMockSugar {
 

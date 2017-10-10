@@ -24,15 +24,16 @@ import uk.gov.hmrc.openidconnect.userinfo.config.{AuthParamsControllerConfigurat
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
 import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.HeaderCarrierConverter
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 trait MicroserviceAuthFilter extends Filter {
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    implicit val hc = HeaderCarrier.fromHeadersAndSession(rh.headers)
+    implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(rh.headers)
 
     def authConfig(rh: RequestHeader): Option[AuthConfig] = {
       rh.tags.get(Router.Tags.RouteController).flatMap { name =>

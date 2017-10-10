@@ -29,13 +29,13 @@
       "confidenceLevel": 200
     },
     {
-      "key":"openid:hmrc_enrolments",
+      "key":"openid:hmrc-enrolments",
       "name":"Access your enrolments",
       "description":"Access your enrolments",
       "confidenceLevel": 200
     },
     {
-      "key":"openid:government_gateway",
+      "key":"openid:government-gateway",
       "name":"Shows subset of your government gateway details",
       "description":"Shows subset of yours government gateway details",
       "confidenceLevel": 200
@@ -44,6 +44,12 @@
       "key":"email",
       "name":"Shows your email address",
       "description":"Shows your email address",
+      "confidenceLevel": 200
+    },
+    {
+      "key":"openid:mdtp",
+      "name":"Shows your sessionId and deviceId",
+      "description":"Shows your sessionId and deviceId",
       "confidenceLevel": 200
     }
   ],
