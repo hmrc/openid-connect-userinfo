@@ -36,9 +36,9 @@ trait UserInfoTransformer {
 
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap  {a => a.nino map {n => n}} else None
 
-    val userEnrolments = if (scopes.contains("openid:hmrc_enrolments")) enrolments else None
+    val userEnrolments = if (scopes.contains("openid:hmrc-enrolments")) enrolments else None
 
-    val ggInfo = if (scopes.contains("openid:government_gateway")) {
+    val ggInfo = if (scopes.contains("openid:government-gateway")) {
       formatGGInfo(authority, userDetails)
     } else None
 
