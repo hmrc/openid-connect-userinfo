@@ -24,11 +24,11 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterAll
 import play.api.libs.json.Json
-import uk.gov.hmrc.auth.core.authorise.{AffinityGroup, CredentialRole}
+import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole, _}
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
-import uk.gov.hmrc.openidconnect.userinfo.domain._
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, DesUserInfo, GovernmentGatewayDetails, Mdtp, UserInfo, Enrolment => UserInfoEnrolment, EnrolmentIdentifier => UserInfoEnrolmentIdentifier}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
 
 import scalaj.http.Http
@@ -49,7 +49,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
-  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val enrolments = Seq(UserInfoEnrolment("IR-SA", List(UserInfoEnrolmentIdentifier("UTR", "174371121"))))
   val deviceId = "device-id-12345"
   val sessionId = "session-id-12345"
   val mdtp = Mdtp(deviceId, sessionId)
@@ -115,11 +115,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("fetch user profile") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc_enrolments', 'openid:mdtp'," +
-        "'email' and 'openid:government_gateway' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+        "'email' and 'openid:government-gateway' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments",
-          "openid:government_gateway", "email", "agentInformation", "openid:mdtp"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments",
+          "openid:government-gateway", "email", "agentInformation", "openid:mdtp"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -130,7 +130,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       And("The auth will authorise DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
+        Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -158,9 +158,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("fetch user profile without family name") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -185,16 +185,16 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("fetch user data without enrolments when there are no enrolments") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government_gateway' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government-gateway' and 'openid:hmrc-enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments", "openid:government_gateway", "email", "openid:mdtp"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
 
       And("The auth will authorise and DES contains user information for the NINO")
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(CredentialRole.Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -208,9 +208,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("fetch user data without address and user details when there are no address and user details") {
 
-      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc_enrolments"))
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -233,11 +233,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
     }
 
-    scenario("fetch enrolments only when scope contains 'openid:hmrc_enrolments'") {
+    scenario("fetch enrolments only when scope contains 'openid:hmrc-enrolments'") {
 
-      Given("A Auth token with 'openid:hmrc_enrolments' scopes")
+      Given("A Auth token with 'openid:hmrc-enrolments' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:hmrc_enrolments"))
+        Set("openid:hmrc-enrolments"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -257,11 +257,11 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
     }
 
-    scenario("fetch government gateway details only when scope contains 'openid:government_gateway'") {
+    scenario("fetch government gateway details only when scope contains 'openid:government-gateway'") {
 
-      Given("A Auth token with 'openid:government_gateway' scopes")
+      Given("A Auth token with 'openid:government-gateway' scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway"))
+        Set("openid:government-gateway"))
 
       And("The Auth token has a NINO")
       authStub.willReturnAuthorityWith(Nino(nino))
@@ -273,7 +273,7 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willAuthorise(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code,
         government_gateway.agent_friendly_name)), Some(Credentials("", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(CredentialRole.Admin), None, gatewayInformation = Some(gatewayInformation), Some(10))
+        Some(Admin), None, gatewayInformation = Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -292,9 +292,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   feature("fetching user information propagates Unauthorized errors from upstream services") {
 
     scenario("return 401 when Auth returns Unauthorized") {
-      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+        Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("All upstream services excluding user-info have valid reponse")
       authStub.willAuthorise(Some(desUserInfo))
@@ -317,9 +317,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("return 502 when Auth returns error") {
       val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: ''"}"""
-      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+        Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("Auth returns unauthorized")
       authStub.willReturnAuthorityWith(503)
@@ -337,9 +337,9 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
 
     scenario("return 502 when Auth returns not found") {
       val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 404 (Not Found). Response body: ''"}"""
-      Given("A Auth token with openid:government_gateway, openid:hmrc_enrolments, address scopes")
+      Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
-        Set("openid:government_gateway", "openid:hmrc_enrolments", "address"))
+        Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("All upstream services excluding user-info have valid reponse")
       authStub.willAuthorise(Some(desUserInfo))

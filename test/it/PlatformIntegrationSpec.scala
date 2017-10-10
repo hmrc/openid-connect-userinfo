@@ -30,8 +30,8 @@ import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController
-import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.test.UnitSpec
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 /**
  * Testcase to verify the capability of integration with the API platform.
