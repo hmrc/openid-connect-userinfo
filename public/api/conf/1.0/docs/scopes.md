@@ -1,5 +1,3 @@
-# Scopes
-
 Access to user information is controlled through scopes. Each access token (OAuth 2.0 Bearer Token) is associated with a set of scopes at login. When a request is made for user information, only information belonging to the provided scopes is returned. The information is returned in the form of claims, which sometimes are simple fields and sometimes objects that contain further fields.
 
 Here is a list of supported scopes and the claims they contain. The details of each claim, including any contained fields, is documented further down.
