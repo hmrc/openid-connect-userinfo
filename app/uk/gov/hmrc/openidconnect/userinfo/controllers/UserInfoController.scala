@@ -38,19 +38,19 @@ import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, Sandbox
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.{ Upstream4xxResponse, Upstream5xxResponse }
+import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
 
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
 
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
-    service.fetchUserInfo() map {
-      case Some(userInfo) => Ok(Json.toJson(userInfo))
-      case None => Ok(Json.obj())
+    service.fetchUserInfo() map { userInfo =>
+      Ok(Json.toJson(userInfo))
     } recover {
       case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(msg4xx, _, _ , _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
       case Upstream5xxResponse(msg5xx, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
+      case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }
