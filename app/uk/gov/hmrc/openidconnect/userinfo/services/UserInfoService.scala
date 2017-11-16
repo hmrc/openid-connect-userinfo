@@ -92,7 +92,7 @@ trait SandboxUserInfoService extends UserInfoService {
   val userInfoGenerator: UserInfoGenerator
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    Future.successful(userInfoGenerator.userInfo.sample.get)
+    Future.successful(userInfoGenerator.userInfo.sample.getOrElse(UserInfo()))
   }
 }
 
