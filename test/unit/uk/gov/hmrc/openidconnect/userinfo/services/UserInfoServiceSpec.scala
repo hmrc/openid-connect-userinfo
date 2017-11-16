@@ -31,7 +31,7 @@ import uk.gov.hmrc.play.test.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, Token }
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Token}
 import uk.gov.hmrc.http.logging.Authorization
 
 class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
@@ -89,15 +89,13 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(liveInfoService.authConnector).fetchUserDetails()(any[HeaderCarrier])
     }
 
-    "return None when the NINO is not in the authority" in new Setup {
+    "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested" in new Setup {
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments")
       given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Option(authority.copy(nino = None))))
       given(liveInfoService.authConnector.fetchEnrolments(any())(any())).willReturn(Future(None))
 
-      val result = await(liveInfoService.fetchUserInfo())
-
-      result shouldBe None
+      a [BadRequestException] should be thrownBy await(liveInfoService.fetchUserInfo())
     }
 
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
@@ -151,7 +149,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       val result = await(sandboxInfoService.fetchUserInfo())
 
-      result shouldBe Some(userInfo)
+      result shouldBe userInfo
     }
   }
 
