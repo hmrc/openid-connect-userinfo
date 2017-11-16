@@ -16,17 +16,17 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, UnauthorizedException }
-import uk.gov.hmrc.http.logging.Authorization
 
 trait UserInfoService {
-  def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]]
+  def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo]
 }
 
 trait LiveUserInfoService extends UserInfoService {
@@ -34,7 +34,7 @@ trait LiveUserInfoService extends UserInfoService {
   val userInfoTransformer: UserInfoTransformer
   val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
+  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
 
     def scopes = hc.authorization match {
@@ -59,9 +59,12 @@ trait LiveUserInfoService extends UserInfoService {
       val scopesForDes = Set("profile", "address")
       val maybeDesUserInfo = maybeAuthority flatMap { authority =>
         val concreteAuthority = authority.getOrElse(Authority())
-        if (concreteAuthority.nino.isDefined)
-          getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority, authConnector.fetchDesUserInfo)
-        else Future.successful(None)
+        getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority,
+          concreteAuthority.nino match {
+            case Some(_) => authConnector.fetchDesUserInfo
+            case _ => (_) => Future.failed(new BadRequestException("NINO not found for this user"))
+          }
+        )
       }
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
@@ -80,9 +83,7 @@ trait LiveUserInfoService extends UserInfoService {
         desUserInfo <- maybeDesUserInfo
         userDetails <- maybeUserDetails
       } yield
-        if (authority.flatMap(_.nino).isDefined)
-          Some(userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails))
-        else None
+        userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails)
     }
   }
 }
@@ -90,8 +91,8 @@ trait LiveUserInfoService extends UserInfoService {
 trait SandboxUserInfoService extends UserInfoService {
   val userInfoGenerator: UserInfoGenerator
 
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[Option[UserInfo]] = {
-    Future.successful(userInfoGenerator.userInfo.sample)
+  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
+    Future.successful(userInfoGenerator.userInfo.sample.get)
   }
 }
 
