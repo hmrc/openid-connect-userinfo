@@ -24,12 +24,14 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.openidconnect.userinfo.controllers.{LiveUserInfoController, SandboxUserInfoController}
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{ErrorBadRequest, LiveUserInfoController, SandboxUserInfoController}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+
+import scala.concurrent.Future
 
 class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
 
@@ -60,7 +62,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
   "sandbox userInfo" should {
     "retrieve user information" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo()(Matchers.any[HeaderCarrier])).willReturn(Some(userInfo))
+      given(mockSandboxUserInfoService.fetchUserInfo()(Matchers.any[HeaderCarrier])).willReturn(userInfo)
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
@@ -70,7 +72,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo()(Matchers.any[HeaderCarrier])).willReturn(Some(userInfo))
+      given(mockSandboxUserInfoService.fetchUserInfo()(Matchers.any[HeaderCarrier])).willReturn(userInfo)
 
       val result = await(sandboxController.userInfo()(FakeRequest()))
 
@@ -82,22 +84,12 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
 
     "retrieve user information" in new Setup {
 
-      given(mockLiveUserInfoService.fetchUserInfo()(any[HeaderCarrier])).willReturn(Some(userInfo))
+      given(mockLiveUserInfoService.fetchUserInfo()(any[HeaderCarrier])).willReturn(userInfo)
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
       status(result) shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfo)
-    }
-
-    "retrieve an empty object when there is no user information returned by the service" in new Setup {
-
-      given(mockLiveUserInfoService.fetchUserInfo()(any[HeaderCarrier])).willReturn(None)
-
-      val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
-
-      status(result) shouldBe 200
-      jsonBodyOf(result) shouldBe Json.obj()
     }
 
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
@@ -107,5 +99,14 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
       status(result) shouldBe 406
     }
 
+    "fail with Bad Request if service throws BadRequestException" in new Setup {
+
+      given(mockLiveUserInfoService.fetchUserInfo()(any[HeaderCarrier])).willReturn(Future.failed(new BadRequestException("NINO is required")))
+
+      val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
+
+      status(result) shouldBe 400
+      jsonBodyOf(result) shouldBe Json.toJson(ErrorBadRequest("NINO is required"))
+    }
   }
 }
