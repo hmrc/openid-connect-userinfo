@@ -316,14 +316,15 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
   feature("fetching user information handles upstream errors") {
 
     scenario("return 502 when Auth returns error") {
-      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: ''"}"""
+      val errorMsg = "auth error msg"
+      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 503. Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("Auth returns unauthorized")
-      authStub.willReturnAuthorityWith(503)
-      authStub.willReturnEnrolmentsWith(503)
+      authStub.willReturnAuthorityWith(503, errorMsg)
+      authStub.willReturnEnrolmentsWith(503, errorMsg)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -336,7 +337,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
     }
 
     scenario("return 502 when Auth returns not found") {
-      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 404 (Not Found). Response body: ''"}"""
+      val errorMsg = "auth error msg"
+      val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"GET of 'http://localhost:22221/auth/authority' returned 404 (Not Found). Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       thirdPartyDelegatedAuthorityStub.willReturnScopesForAuthBearerToken(authBearerToken,
         Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
@@ -345,8 +347,8 @@ class UserInfoServiceSpec extends BaseFeatureSpec with BeforeAndAfterAll {
       authStub.willAuthorise(Some(desUserInfo))
 
       And("Auth returns not found")
-      authStub.willReturnAuthorityWith(404)
-      authStub.willReturnEnrolmentsWith(404)
+      authStub.willReturnAuthorityWith(404, errorMsg)
+      authStub.willReturnEnrolmentsWith(404, errorMsg)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
