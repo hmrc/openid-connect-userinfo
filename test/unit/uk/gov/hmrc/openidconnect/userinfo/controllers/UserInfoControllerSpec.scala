@@ -24,12 +24,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import uk.gov.hmrc.openidconnect.userinfo.controllers.{ErrorBadRequest, LiveUserInfoController, SandboxUserInfoController}
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, UserInfo}
-import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{ErrorBadRequest, LiveUserInfoController, SandboxUserInfoController}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDetails, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
 import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
 
@@ -43,7 +44,7 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some("John.Smith@a.b.c.com"),
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
-    Some(Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))),
+    Some(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))),
     Some(GovernmentGatewayDetails(Some("32131"),Some(Seq("User")), Some("John"), Some("affinityGroup"), Some("agent-code-12345"),
       Some("agent-id-12345"), Some("agent-friendly-name"), None, None)), None)
 

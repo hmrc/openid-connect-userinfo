@@ -18,9 +18,10 @@ package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import it.{MockHost, Stub}
+import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
+import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole, Enrolment}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.controllers.RestFormats.localDateFormats
 import uk.gov.hmrc.openidconnect.userinfo.domain.{DesUserInfo, _}
@@ -34,36 +35,37 @@ object AuthStub extends Stub {
       .getOrElse(jsObject)
   }
 
-  def willReturnAuthorityWith(nino: Nino): Unit = {
-    val body =
-      s"""
-         |{
-         |   "credentialStrength:": "strong",
-         |   "confidenceLevel": 0,
-         |   "userDetailsLink": "http://localhost:22224/uri/to/userDetails",
-         |   "nino": "${nino.nino}",
-         |   "enrolments": "/auth/oid/2/enrolments",
-         |   "affinityGroup": "Individual",
-         |   "credId": "1304372065861347",
-         |   "gatewayToken": "gateway-token-qwert"
-         |}
-        """.stripMargin
-    willReturnAuthorityWith(200, body)
-  }
-
-  def willReturnAuthorityWith(statusCode: Int, body: String = ""): Unit = {
-    stub.mock.register(get(urlPathEqualTo(s"/auth/authority"))
-      .willReturn(aResponse()
-        .withBody(body)
-        .withStatus(statusCode))
+  def willAuthoriseWith(statusCode: Int, body: String = Json.obj().toString()): Unit = {
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray()
+      ).toString(), JSONCompareMode.STRICT))
+      .willReturn(aResponse().withBody(body).withStatus(statusCode))
     )
   }
 
-  def willAuthorise(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
-                    credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
-                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
-                    mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None,
-                    unreadMessageCount: Option[Int] = None): Unit = {
+  def willReturnAuthorityWith(nino: Nino): Unit = {
+    val response = Json.obj(
+      "nino" -> nino,
+      "credentials" -> Json.obj("providerId" -> "1304372065861347", "providerType" -> "GG")
+    )
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray((Retrievals.credentials and Retrievals.nino).propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
+      .willReturn(aResponse()
+        .withBody(response.toString())
+        .withStatus(200))
+    )
+  }
+
+  def willFindUser(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
+                   credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
+                   affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
+                   mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None,
+                   unreadMessageCount: Option[Int] = None): Unit = {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
@@ -72,8 +74,7 @@ object AuthStub extends Stub {
     val jsonItmpName: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
     val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
-    val jsonName : Option[JsValue] = name.map(Json.toJson(_))
-    val jsonEmail : Option[JsValue] = email.map(Json.toJson(_))
+    val jsonName: Option[JsValue] = name.map(Json.toJson(_))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
     val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
     val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
@@ -94,6 +95,20 @@ object AuthStub extends Stub {
       .appendOptional("unreadMessageCount", unreadMessageCount.map(Json.toJson(_)))
 
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
+      .willReturn(aResponse()
+        .withBody(response.toString())
+        .withStatus(200))
+    )
+
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
       .willReturn(aResponse()
         .withBody(response.toString())
         .withStatus(200))
@@ -102,32 +117,30 @@ object AuthStub extends Stub {
 
   def willNotFindUser(): Unit = {
     stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
+      .willReturn(aResponse()
+        .withBody("{}")
+        .withStatus(404))
+    )
+
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
       .willReturn(aResponse()
         .withBody("{}")
         .withStatus(404))
     )
   }
 
-  def willAuthoriseWithEmptyResponse: Unit = {
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
-      .willReturn(aResponse()
-        .withBody("{}")
-        .withStatus(200))
-    )
-  }
-
-  def willNotAuthorise(statusCode: Int = 401): Unit = {
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
-      .willReturn(aResponse()
-        .withHeader("WWW-Authenticate", """MDTP detail="InsufficientConfidenceLevel"""")
-        .withStatus(statusCode))
-    )
-  }
-
   def willReturnEnrolmentsWith(): Unit = {
     val body =
       s"""
-         |[
+         |{"allEnrolments": [
          |  {
          |    "key": "IR-SA",
          |    "identifiers": [
@@ -138,13 +151,17 @@ object AuthStub extends Stub {
          |    ],
          |    "state": "Activated"
          |  }
-         |]
+         |]}
      """.stripMargin
     willReturnEnrolmentsWith(200, body)
   }
 
   def willReturnEnrolmentsWith(statusCode: Int, body: String = ""): Unit = {
-    stub.mock.register(get(urlPathEqualTo(s"/auth/oid/2/enrolments"))
+    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray(Retrievals.allEnrolments.propertyNames.map(JsString))
+      ).toString(), JSONCompareMode.STRICT))
       .willReturn(aResponse()
         .withBody(body)
         .withStatus(statusCode)))
