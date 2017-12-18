@@ -17,13 +17,14 @@
 package uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Authority, DesUserInfo, Enrolment, GovernmentGatewayDetails, Mdtp, UserDetails, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain._
 
 trait UserInfoTransformer {
 
-  def transform(scopes: Set[String], desUserInfo: Option[DesUserInfo], enrolments: Option[Seq[Enrolment]], authority: Option[Authority], userDetails: Option[UserDetails]): UserInfo = {
+  def transform(scopes: Set[String], authority: Option[Authority], desUserInfo: Option[DesUserInfo], enrolments: Option[Enrolments], userDetails: Option[UserDetails]): UserInfo = {
 
     def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.givenName, u.name.familyName, u.name.middleName, u.dateOfBirth)) else None
 
@@ -34,7 +35,7 @@ trait UserInfoTransformer {
 
     } else None
 
-    val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap  {a => a.nino map {n => n}} else None
+    val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap(_.nino) else None
 
     val userEnrolments = if (scopes.contains("openid:hmrc-enrolments")) enrolments else None
 
@@ -54,7 +55,7 @@ trait UserInfoTransformer {
       email,
       profile.flatMap(_.birthDate),
       identifier,
-      userEnrolments,
+      userEnrolments.map(_.enrolments),
       ggInfo,
       mdtp)
   }
@@ -70,7 +71,7 @@ trait UserInfoTransformer {
     val role = userDetails flatMap {_.credentialRole}
     val userName = userDetails flatMap {_.name}
     val credentialRoles = role.map(Seq(_))
-    val credId = authority flatMap {_.credId}
+    val credId = authority map {_.credId}
     val agentCode = userDetails flatMap { _.agentCode}
     val agentFriendlyName = userDetails flatMap { _.agentFriendlyName}
     val agentId = userDetails flatMap { _.agentId}

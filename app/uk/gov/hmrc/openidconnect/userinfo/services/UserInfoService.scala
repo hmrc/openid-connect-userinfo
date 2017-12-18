@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
@@ -48,34 +49,23 @@ trait LiveUserInfoService extends UserInfoService {
         else Future.successful(None)
       }
 
-      def getMaybeByParamForScopes[I, O](maybeScopes: Set[String], allScopes: Set[String], param: I, f: I => Future[Option[O]]): Future[Option[O]] = {
-        if ((maybeScopes intersect allScopes).nonEmpty) f(param)
-        else Future.successful(None)
-      }
-
       val scopesForAuthority = Set("openid:government-gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:mdtp")
-      val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority)
+      lazy val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority())
+
+      val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
+      lazy val maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, authConnector.fetchUserDetails)
 
       val scopesForDes = Set("profile", "address")
-      val maybeDesUserInfo = maybeAuthority flatMap { authority =>
-        val concreteAuthority = authority.getOrElse(Authority())
-        getMaybeByParamForScopes[Authority, DesUserInfo](scopesForDes, scopes, concreteAuthority,
-          concreteAuthority.nino match {
-            case Some(_) => authConnector.fetchDesUserInfo
-            case _ => (_) => Future.failed(new BadRequestException("NINO not found for this user"))
+      lazy val maybeDesUserInfo = {
+        getMaybeForScopes[DesUserInfo](scopesForDes, scopes,
+          maybeAuthority flatMap {
+            case Some(auth) if auth.nino.isDefined => authConnector.fetchDesUserInfo
+            case _ => Future.failed(new BadRequestException("NINO not found for this user"))
           }
         )
       }
 
-      val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      val maybeUserDetails = maybeAuthority flatMap { authority =>
-        getMaybeByParamForScopes[Authority, UserDetails](scopesForUserDetails, scopes, authority.getOrElse(Authority()), _ => authConnector.fetchUserDetails)
-      }
-
-      def maybeEnrolments = maybeAuthority flatMap { authority =>
-        getMaybeByParamForScopes[Authority, Seq[Enrolment]](Set("openid:hmrc-enrolments"), scopes,
-          authority.getOrElse(Authority()), authConnector.fetchEnrolments)
-      }
+      lazy val maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, authConnector.fetchEnrolments)
 
       for {
         authority <- maybeAuthority
@@ -83,7 +73,7 @@ trait LiveUserInfoService extends UserInfoService {
         desUserInfo <- maybeDesUserInfo
         userDetails <- maybeUserDetails
       } yield
-        userInfoTransformer.transform(scopes, desUserInfo, enrolments, authority, userDetails)
+        userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
     }
   }
 }
