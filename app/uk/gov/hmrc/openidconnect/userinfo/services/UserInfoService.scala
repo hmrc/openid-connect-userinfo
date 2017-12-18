@@ -50,13 +50,13 @@ trait LiveUserInfoService extends UserInfoService {
       }
 
       val scopesForAuthority = Set("openid:government-gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:mdtp")
-      lazy val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority())
+      val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority())
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      lazy val maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, authConnector.fetchUserDetails)
+      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, authConnector.fetchUserDetails)
 
       val scopesForDes = Set("profile", "address")
-      lazy val maybeDesUserInfo = {
+      def maybeDesUserInfo = {
         getMaybeForScopes[DesUserInfo](scopesForDes, scopes,
           maybeAuthority flatMap {
             case Some(auth) if auth.nino.isDefined => authConnector.fetchDesUserInfo
@@ -65,7 +65,7 @@ trait LiveUserInfoService extends UserInfoService {
         )
       }
 
-      lazy val maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, authConnector.fetchEnrolments)
+      def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, authConnector.fetchEnrolments)
 
       for {
         authority <- maybeAuthority
