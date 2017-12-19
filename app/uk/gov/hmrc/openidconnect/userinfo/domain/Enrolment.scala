@@ -16,14 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-case class EnrolmentIdentifier(key: String, value: String)
-
-case class Enrolment(key: String,
-                     identifiers: Seq[EnrolmentIdentifier] = Seq(),
-                     state: String = "Activated") {
-
-  def isActivated = state.toLowerCase == "activated"
-}
+import uk.gov.hmrc.auth.core.Enrolment
 
 case object ActiveEnrolment {
   def unapply(enrolment: Enrolment): Option[String] =
