@@ -16,6 +16,7 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.filters
 
+import org.mockito.Matchers
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,15 +26,17 @@ import play.api.mvc.RequestHeader
 import play.api.mvc.Results._
 import play.api.routing.Router
 import play.api.test.FakeRequest
+import uk.gov.hmrc.auth.core.authorise.EmptyPredicate
+import uk.gov.hmrc.auth.core.retrieve.EmptyRetrieval
+import uk.gov.hmrc.auth.core.{AuthConnector, MissingBearerToken}
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.openidconnect.userinfo.filters.MicroserviceAuthFilter
-import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
 import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with MockitoSugar with WithFakeApplication {
 
@@ -43,8 +46,8 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
   trait Setup extends MicroserviceFilterSupport {
 
     val authFilter = new MicroserviceAuthFilter with MicroserviceFilterSupport {
-      override val authService = mock[AuthService]
       override val authParamsConfig = mock[AuthParamsControllerConfig]
+      override val authConnector = mock[AuthConnector]
 
       override def controllerNeedsAuth(controllerName: String): Boolean = {
          controllerName match {
@@ -64,7 +67,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
 
     "call the next filter if authentication is required and the user is authorised" in new Setup {
 
-      when(authFilter.authService.isAuthorised()(any())).thenReturn(Future.successful(true))
+      when(authFilter.authConnector.authorise(Matchers.eq(EmptyPredicate), Matchers.eq(EmptyRetrieval))(any(), any())).thenReturn(Future.successful())
       when(authFilter.authParamsConfig.authConfig(live)).thenReturn(AuthConfig(confidenceLevel = ConfidenceLevel.L50))
 
       val request = FakeRequest("GET", "/").copy(tags = Map(Router.Tags.RouteController -> live))
@@ -76,7 +79,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
 
     "return 401 (Unauthorized) if authentication is required and the user is not authorised" in new Setup {
 
-      when(authFilter.authService.isAuthorised()(any())).thenReturn(Future.successful(false))
+      when(authFilter.authConnector.authorise(Matchers.eq(EmptyPredicate), Matchers.eq(EmptyRetrieval))(any(), any())).thenReturn(Future.failed(MissingBearerToken()))
       when(authFilter.authParamsConfig.authConfig(live)).thenReturn(AuthConfig(confidenceLevel = ConfidenceLevel.L50))
 
       val request = FakeRequest("GET", "/").copy(tags = Map(Router.Tags.RouteController -> live))
@@ -95,7 +98,7 @@ class MicroserviceAuthFilterSpec extends UnitSpec with ScalaFutures with Mockito
       response.header.status shouldBe 200
       bodyOf(response) shouldBe "Success"
 
-      verifyZeroInteractions(authFilter.authService, authFilter.authParamsConfig)
+      verifyZeroInteractions(authFilter.authConnector, authFilter.authParamsConfig)
     }
   }
 }

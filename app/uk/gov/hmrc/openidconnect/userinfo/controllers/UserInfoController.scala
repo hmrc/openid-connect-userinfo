@@ -34,11 +34,11 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import play.api.libs.json.Json
 import uk.gov.hmrc.api.controllers.HeaderValidator
+import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
 
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService

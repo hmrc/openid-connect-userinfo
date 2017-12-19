@@ -20,18 +20,18 @@ import controllers.Default.Unauthorized
 import play.api.libs.json.Json
 import play.api.mvc.{Filter, RequestHeader, Result}
 import play.api.routing.Router
+import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import uk.gov.hmrc.openidconnect.userinfo.config.{AuthParamsControllerConfiguration, ControllerConfiguration}
+import uk.gov.hmrc.openidconnect.userinfo.connectors.ConcreteAuthConnector
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
-import uk.gov.hmrc.openidconnect.userinfo.services.AuthService
+import uk.gov.hmrc.play.HeaderCarrierConverter
 import uk.gov.hmrc.play.auth.controllers.{AuthConfig, AuthParamsControllerConfig}
+import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.HeaderCarrier
-import uk.gov.hmrc.play.HeaderCarrierConverter
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
 
-trait MicroserviceAuthFilter extends Filter {
+trait MicroserviceAuthFilter extends Filter with AuthorisedFunctions {
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(rh.headers)
 
@@ -43,21 +43,22 @@ trait MicroserviceAuthFilter extends Filter {
     }
 
     authConfig(rh) match {
-      case Some(authConfig) => authService.isAuthorised().flatMap {
-        case true => next(rh)
-        case _ => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
-      }
+      case Some(authConfig) =>
+        authorised() {
+          next(rh)
+        } recoverWith {
+          case e: AuthorisationException => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
+        }
       case _ => next(rh)
     }
   }
 
-  val authService: AuthService
   val authParamsConfig: AuthParamsControllerConfig
 
   def controllerNeedsAuth(controllerName: String): Boolean = ControllerConfiguration.paramsForController(controllerName).needsAuth
 }
 
 object MicroserviceAuthFilter extends MicroserviceAuthFilter with MicroserviceFilterSupport {
-  override lazy val authService = AuthService
   override lazy val authParamsConfig = AuthParamsControllerConfiguration
+  lazy val authConnector = ConcreteAuthConnector
 }

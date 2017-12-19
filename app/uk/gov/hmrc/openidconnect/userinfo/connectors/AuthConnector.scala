@@ -16,35 +16,31 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import play.api.Logger
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
-import uk.gov.hmrc.auth.core.{AuthorisedFunctions, PlayAuthConnector}
+import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
+import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, Enrolment, UserDetails}
-import uk.gov.hmrc.play.auth.microservice.connectors.ConfidenceLevel._
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, UserDetails}
 import uk.gov.hmrc.play.config.ServicesConfig
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{CoreGet, HeaderCarrier, HttpReads, NotFoundException}
+import scala.concurrent.Future
 
 trait AuthConnector extends AuthorisedFunctions {
-  val authBaseUrl: String
+  def fetchEnrolments()(implicit headerCarrier: HeaderCarrier): Future[Option[Enrolments]] = {
+    authorised().retrieve(Retrievals.allEnrolments) {
+      enrolments => Future.successful(Some(enrolments))
+    }.recover {
+      case e: NotFoundException => None
+    }
+  }
 
-  val http: CoreGet
-
-  def fetchEnrolments(auth: Authority)(implicit headerCarrier: HeaderCarrier): Future[Option[Seq[Enrolment]]] = {
-    auth.enrolments map { enrolmentsUri =>
-      http.GET(s"$authBaseUrl$enrolmentsUri") map { response =>
-        response.json.asOpt[Seq[Enrolment]]
-      } recover {
-        case e: NotFoundException => {
-          None
-        }
-      }
-    } getOrElse {
-      Logger.debug("No enrolment uri.")
-      Future.successful(None)
+  def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
+    authorised().retrieve(Retrievals.credentials and Retrievals.nino) {
+      case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
+      case _ => Future.successful(None)
+    }.recover {
+      case e: NotFoundException => None
     }
   }
 
@@ -64,33 +60,23 @@ trait AuthConnector extends AuthorisedFunctions {
     }
   }
 
-  def fetchDesUserInfo(auth: Authority)(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+  def fetchDesUserInfo()(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
-    if (auth.nino.isDefined)
-      authorised().retrieve(Retrievals.allItmpUserDetails) {
-        case name ~ dateOfBirth ~ address =>
-          Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
-        case _ => nothing
-      }.recoverWith {
-        case ex: NotFoundException => nothing
-      }
-    else nothing
-  }
-
-  def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
-    http.GET(s"$authBaseUrl/auth/authority") map { response =>
-      response.json.asOpt[Authority]
+    authorised().retrieve(Retrievals.allItmpUserDetails) {
+      case name ~ dateOfBirth ~ address =>
+        Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
+      case _ => nothing
+    }.recoverWith {
+      case ex: NotFoundException => nothing
     }
   }
 }
 
 object AuthConnector extends AuthConnector with ServicesConfig {
-  override lazy val authBaseUrl = baseUrl("auth")
-  override lazy val http = WSHttp
+  override def authConnector: uk.gov.hmrc.auth.core.AuthConnector = ConcreteAuthConnector
+}
 
-  override def authConnector = new PlayAuthConnector {
-    override val serviceUrl = baseUrl("auth")
-
-    override def http = WSHttp
-  }
+object ConcreteAuthConnector extends PlayAuthConnector with ServicesConfig {
+  override val serviceUrl = baseUrl("auth")
+  override def http = WSHttp
 }

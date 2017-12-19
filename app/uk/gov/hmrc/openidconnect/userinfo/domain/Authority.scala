@@ -16,10 +16,5 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-case class Authority(credentialStrength: Option[String] = None,
-                     confidenceLevel: Option[Int] = None,
-                     nino: Option[String] = None,
-                     userDetailsLink: Option[String] = None,
-                     enrolments: Option[String] = None,
-                     affinityGroup: Option[String] = None,
-                     credId: Option[String] = None)
+case class Authority(credId: String,
+                     nino: Option[String] = None)

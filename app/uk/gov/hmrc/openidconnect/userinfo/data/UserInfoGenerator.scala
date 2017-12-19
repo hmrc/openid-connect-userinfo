@@ -18,9 +18,9 @@ package uk.gov.hmrc.openidconnect.userinfo.data
 
 import org.joda.time._
 import org.scalacheck.Gen
-import uk.gov.hmrc.auth.core.retrieve.MdtpInformation
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
-import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, Enrolment, EnrolmentIdentifier, GovernmentGatewayDetails, Mdtp, UserInfo}
+import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
 
 trait UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
@@ -53,7 +53,7 @@ trait UserInfoGenerator {
 
   def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
-  val enrolments = Seq(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121"))))
+  val enrolments = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"),Some("affinityGroup"),
     Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10))
   val mdtp = Mdtp(deviceId, sessionId)
