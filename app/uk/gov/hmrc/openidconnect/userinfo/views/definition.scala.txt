@@ -60,7 +60,8 @@
     "versions":[
       {
         "version":"1.0",
-        "status":"PUBLISHED",
+        "status":"STABLE",
+        "endpointsEnabled": true,
         "access" : @Json.toJson(access)
       }
     ]
