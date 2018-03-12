@@ -36,27 +36,28 @@ traits:
                 value: <<successExample>>
 
 /userinfo:
-  get:
-    displayName: Get user information
-    description: Retrieves OpenID Connect compliant information about the signed-in user
-    is:
-      - headers.acceptHeader
-    (annotations.scope): "openid"
-    securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
-    responses:
-      200:
-        body:
-          application/json:
-            type: !include schemas/userinfo.json
-            examples:
-              example-1:
-                value: !include examples/get-user-info-example-1.json
-      403:
-        body:
-          application/json:
-            type: types.errorResponse
-            examples:
-              BadRequest:
-                description: Forbidden operation
-                value:
-                  code: FORBIDDEN
+  /:
+    get:
+      displayName: Get user information
+      description: Retrieves OpenID Connect compliant information about the signed-in user
+      is:
+        - headers.acceptHeader
+      (annotations.scope): "openid"
+      securedBy: [ sec.oauth_2_0: { scopes: [ "openid" ] } ]
+      responses:
+        200:
+          body:
+            application/json:
+              type: !include schemas/userinfo.json
+              examples:
+                example-1:
+                  value: !include examples/get-user-info-example-1.json
+        403:
+          body:
+            application/json:
+              type: types.errorResponse
+              examples:
+                BadRequest:
+                  description: Forbidden operation
+                  value:
+                    code: FORBIDDEN
