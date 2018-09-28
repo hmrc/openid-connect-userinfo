@@ -45,12 +45,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
 
+  val responseLogger = Logger("userinfo-response-payload-logger")
+
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
     service.fetchUserInfo() map { userInfo =>
       val json = Json.toJson(userInfo)
 
       if(logUserInfoResponsePayload.isEnabled){
-        Logger.debug(s"Returning userinfo payload: $json")
+        responseLogger.debug(s"Returning userinfo payload: $json")
       }
 
       Ok(json)
