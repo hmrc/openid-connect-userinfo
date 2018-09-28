@@ -32,9 +32,11 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
  * limitations under the License.
  */
 
+import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.openidconnect.userinfo.config.LoggingSwitches.logUserInfoResponsePayload
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -45,7 +47,13 @@ trait UserInfoController extends BaseController with HeaderValidator {
 
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
     service.fetchUserInfo() map { userInfo =>
-      Ok(Json.toJson(userInfo))
+      val json = Json.toJson(userInfo)
+
+      if(logUserInfoResponsePayload.isEnabled){
+        Logger.info(s"Returning userinfo payload: $json")
+      }
+
+      Ok(json)
     } recover {
       case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(msg4xx, _, _ , _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
