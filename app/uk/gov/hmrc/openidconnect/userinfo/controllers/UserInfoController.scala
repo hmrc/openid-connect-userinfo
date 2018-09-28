@@ -50,7 +50,7 @@ trait UserInfoController extends BaseController with HeaderValidator {
       val json = Json.toJson(userInfo)
 
       if(logUserInfoResponsePayload.isEnabled){
-        Logger.info(s"Returning userinfo payload: $json")
+        Logger.debug(s"Returning userinfo payload: $json")
       }
 
       Ok(json)
