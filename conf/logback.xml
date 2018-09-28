@@ -49,6 +49,8 @@
 
     <logger name="application" level="DEBUG"/>
 
+    <logger name="userinfo-response-payload-logger" level="DEBUG"/>
+
     <logger name="connector" level="TRACE">
         <appender-ref ref="STDOUT"/>
     </logger>
