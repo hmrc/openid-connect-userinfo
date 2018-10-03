@@ -44,9 +44,3 @@ object UserInfoFeatureSwitches {
   def allSwitches: Seq[FeatureSwitch] = Seq(countryCode, addressLine5)
 
 }
-
-object LoggingSwitches {
-
-  lazy val logUserInfoResponsePayload: FeatureSwitch = FeatureSwitch.forName("log-userinfo-response-payload")
-
-}

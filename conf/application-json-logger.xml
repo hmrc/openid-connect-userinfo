@@ -7,6 +7,8 @@
 
     <logger name="uk.gov" level="DEBUG"/>
 
+    <logger name="userInfoResponsePayloadLogger" level="DEBUG"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>

@@ -36,7 +36,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
-import uk.gov.hmrc.openidconnect.userinfo.config.LoggingSwitches.logUserInfoResponsePayload
+import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -45,14 +45,14 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
 
-  val responseLogger = Logger("userinfo-response-payload-logger")
+  val responseLogger = Logger("userInfoResponsePayloadLogger")
 
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
     service.fetchUserInfo() map { userInfo =>
       val json = Json.toJson(userInfo)
 
-      if(logUserInfoResponsePayload.isEnabled){
-        responseLogger.debug(s"Returning userinfo payload: $json")
+      if(AppContext.logUserInfoResponsePayload){
+        responseLogger.debug(s"Returning user info payload: $json")
       }
 
       Ok(json)
