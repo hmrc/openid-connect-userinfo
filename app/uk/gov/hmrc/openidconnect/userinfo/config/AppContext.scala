@@ -27,4 +27,5 @@ object AppContext extends ServicesConfig {
   lazy val access = current.configuration.getConfig(s"$env.api.access")
   lazy val desEnvironment = current.configuration.getString(s"$env.microservice.services.des.environment").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.environment is not configured"))
   lazy val desBearerToken =  current.configuration.getString(s"$env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.bearer-token is not configured"))
+  lazy val logUserInfoResponsePayload = current.configuration.underlying.getBoolean("log-user-info-response-payload")
 }
