@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly
 
+import javax.inject.Singleton
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
-import uk.gov.hmrc.play.microservice.controller.BaseController
-
+import uk.gov.hmrc.play.bootstrap.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-
-trait FeatureSwitchController extends BaseController {
+@Singleton
+class FeatureSwitchController extends BaseController {
 
   implicit val featureSwitchReads = Json.reads[FeatureSwitch]
   implicit val featureSwitchWrites = Json.writes[FeatureSwitch]
@@ -54,8 +54,6 @@ trait FeatureSwitchController extends BaseController {
 
   def currentFeatureSwitchesAsJson = Json.toJson(for (fs <- UserInfoFeatureSwitches.allSwitches) yield FeatureSwitch(fs.name, fs.isEnabled))
 }
-
-object FeatureSwitchController extends FeatureSwitchController
 
 case class FeatureSwitchRequest(featureSwitches: Seq[FeatureSwitch]) {}
 

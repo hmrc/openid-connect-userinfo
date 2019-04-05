@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package it.stubs
+package uk.gov.hmrc.openidconnect.userinfo.config
 
-import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json.Json
+import javax.inject.{Inject, Singleton}
+import play.api.Logger
+import uk.gov.hmrc.api.connector.ServiceLocatorConnector
+import uk.gov.hmrc.http.HeaderCarrier
 
-trait ThirdPartyDelegatedAuthorityStub {
-  def willReturnScopesForAuthBearerToken(authBearerToken: String, scopes: Set[String]) = {
-    stubFor(get(urlPathEqualTo(s"/delegated-authority"))
-      .withQueryParam("auth_bearer_token", equalTo(authBearerToken))
-      .willReturn(aResponse().withBody(
-        s"""
-          |{"token":
-          | {
-          |   "scopes":${Json.toJson(scopes)}
-          | }
-          |}
-        """.stripMargin)))
+@Singleton
+class ServiceLocatorRegistration @Inject() (appContext: AppContext, slConnector: ServiceLocatorConnector) {
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+
+  appContext.registrationEnabled match {
+    case true => slConnector.register
+    case false => Logger.warn("Registration in Service Locator is disabled")
   }
 }
+

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,12 @@
 package it
 
 import java.nio.file.Paths
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.scalatest.FlatSpec
 
-class SchemaSpec extends FlatSpec {
+class SchemaISpec extends FlatSpec {
   val validator = JsonSchemaFactory.byDefault().getValidator
   val root = System.getProperty("user.dir")
   val public10 = Paths.get(root, "public", "api", "conf", "1.0").toString

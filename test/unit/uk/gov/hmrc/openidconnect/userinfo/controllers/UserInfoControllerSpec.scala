@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,25 +16,30 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
 
+import akka.actor.ActorSystem
+import akka.stream.ActorMaterializer
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers.any
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.controllers.{ErrorBadRequest, LiveUserInfoController, SandboxUserInfoController}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
+import uk.gov.hmrc.play.test.{UnitSpec}
 
 import scala.concurrent.Future
 
-class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures with WithFakeApplication {
+class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures {
+
+  implicit val actorSystem: ActorSystem = ActorSystem("test")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   val userInfo = UserInfo(
     Some("John"),
@@ -48,16 +53,13 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     Some(GovernmentGatewayDetails(Some("32131"),Some(Seq("User")), Some("John"), Some("affinityGroup"), Some("agent-code-12345"),
       Some("agent-id-12345"), Some("agent-friendly-name"), None, None)), None)
 
-  trait Setup extends MicroserviceFilterSupport {
+  trait Setup {
+    val mockAppContext = mock[AppContext]
     val mockLiveUserInfoService = mock[LiveUserInfoService]
     val mockSandboxUserInfoService = mock[SandboxUserInfoService]
 
-    val sandboxController = new SandboxUserInfoController {
-      override val service = mockSandboxUserInfoService
-    }
-    val liveController = new LiveUserInfoController {
-      override val service = mockLiveUserInfoService
-    }
+    val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext)
+    val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext)
   }
 
   "sandbox userInfo" should {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,22 +16,14 @@
 
 package it
 
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatest.{BeforeAndAfterEach, TestData}
-import org.scalatestplus.play.OneAppPerTest
-import play.api.Mode
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
+import uk.gov.hmrc.api.controllers.DocumentationController
 import uk.gov.hmrc.api.domain.Registration
-import uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController
-import uk.gov.hmrc.play.test.UnitSpec
-import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.ws.WSRequest
 
 /**
  * Testcase to verify the capability of integration with the API platform.
@@ -47,37 +39,29 @@ import uk.gov.hmrc.play.microservice.filters.MicroserviceFilterSupport
  *
  * See: Confluence/display/ApiPlatform/API+Platform+Architecture+with+Flows
  */
-class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutures with BeforeAndAfterEach with OneAppPerTest {
+class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpec")
+  with WSRequest
+  with ScalaFutures {
 
-  val stubHost = "localhost"
-  val stubPort = sys.env.getOrElse("WIREMOCK_SERVICE_LOCATOR_PORT", "11112").toInt
-  val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
+  override def applicableHeaders(url: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Nil
 
-  override def newAppForTest(testData: TestData) = GuiceApplicationBuilder()
-    .configure("run.mode" -> "Stub")
-    .configure(Map(
+  override lazy val additionalConfig: Seq[(String, Any)] =
+    Seq(
+      "run.mode" -> "Test",
       "appName" -> "application-name",
       "appUrl" -> "http://microservice-name.protected.mdtp",
-      "Test.microservice.services.service-locator.host" -> stubHost,
-      "Test.microservice.services.service-locator.port" -> stubPort,
-      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/"))
-    .in(Mode.Test).build()
+      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/",
+      "Test.microservice.services.service-locator.enabled" -> true
+    )
 
-  override def beforeEach() {
-    wireMockServer.start()
-    WireMock.configureFor(stubHost, stubPort)
-    stubFor(post(urlPathMatching("/registration")).willReturn(aResponse().withStatus(204)))
-  }
+  implicit val hc = new HeaderCarrier()
 
+  val documentationController = DocumentationController
+  val request = FakeRequest()
 
-  trait Setup extends MicroserviceFilterSupport {
-    val documentationController = DocumentationController
-    val request = FakeRequest()
-  }
+  feature("microservice") {
 
-  "microservice" should {
-
-    "register itelf to service-locator" in new Setup {
+    scenario("register itelf to service-locator") {
       def regPayloadStringFor(serviceName: String, serviceUrl: String): String =
         Json.toJson(Registration(serviceName, serviceUrl, Some(Map("third-party-api" -> "true")))).toString
 
@@ -86,14 +70,9 @@ class PlatformIntegrationSpec extends UnitSpec with MockitoSugar with ScalaFutur
       withRequestBody(equalTo(regPayloadStringFor("application-name", "http://microservice-name.protected.mdtp"))))
     }
 
-    "provide definition endpoint" in new Setup {
-      val result = documentationController.definition()(request)
-      status(result) shouldBe 200
+    scenario("provide definition endpoint") {
+      val response = buildRequest(server.resource("/api/definition")).get().futureValue
+      response.status shouldBe 200
     }
-  }
-
-  override protected def afterEach() = {
-    wireMockServer.stop()
-    wireMockServer.resetMappings()
   }
 }

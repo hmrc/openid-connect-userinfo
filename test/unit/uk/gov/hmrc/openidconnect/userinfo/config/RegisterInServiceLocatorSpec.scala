@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,33 +18,32 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.config
 
 import org.mockito.Matchers._
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.api.connector.ServiceLocatorConnector
-import uk.gov.hmrc.openidconnect.userinfo.config.ServiceLocatorRegistration
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-
+import uk.gov.hmrc.openidconnect.userinfo.config.{AppContext, ServiceLocatorRegistration}
+import uk.gov.hmrc.play.test.UnitSpec
 import scala.concurrent.Future
 import uk.gov.hmrc.http.HeaderCarrier
 
-class RegisterInServiceLocatorSpec extends UnitSpec with MockitoSugar with WithFakeApplication {
+class RegisterInServiceLocatorSpec extends UnitSpec with MockitoSugar {
 
-  trait Setup extends ServiceLocatorRegistration {
+  trait Setup  {
     val mockConnector = mock[ServiceLocatorConnector]
-    override val slConnector = mockConnector
-    override implicit val hc = HeaderCarrier()
+    val mockAppContext = mock[AppContext]
+    implicit val hc = HeaderCarrier()
   }
 
   "onStart" should {
     "register the microservice in service locator when registration is enabled" in new Setup {
-      override val registrationEnabled: Boolean = true
+      when(mockAppContext.registrationEnabled).thenReturn(true)
       when(mockConnector.register(any())).thenReturn(Future.successful(true))
-      onStart(fakeApplication)
+      val registration = new ServiceLocatorRegistration(mockAppContext, mockConnector)
       verify(mockConnector).register(any())
     }
 
     "not register the microservice in service locator when registration is disabled" in new Setup {
-      override val registrationEnabled: Boolean = false
-      onStart(fakeApplication)
+      when(mockAppContext.registrationEnabled).thenReturn(false)
+      val registration = new ServiceLocatorRegistration(mockAppContext, mockConnector)
       verify(mockConnector, never()).register(any())
     }
   }

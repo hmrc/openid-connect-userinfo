@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,18 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.controllers
 
+import javax.inject.{Inject, Singleton}
 import controllers.Assets
-import play.api.http.{HttpErrorHandler, LazyHttpErrorHandler}
+import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent}
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.domain.APIAccess
 import uk.gov.hmrc.openidconnect.userinfo.views._
-
 import scala.language.dynamics
 
-class DocumentationController(errorHandler:HttpErrorHandler) extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler) {
+@Singleton
+class DocumentationController @Inject() (errorHandler:HttpErrorHandler, appContext: AppContext)
+  extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     Ok(txt.definition(buildAccess())).withHeaders("Content-Type" -> "application/json")
@@ -36,9 +38,7 @@ class DocumentationController(errorHandler:HttpErrorHandler) extends uk.gov.hmrc
   }
 
   private def buildAccess() = {
-    val access = APIAccessConfig(AppContext.access)
+    val access = APIAccessConfig(appContext.access)
     APIAccess(access.accessType, access.whiteListedApplicationIds)
   }
 }
-
-object DocumentationController extends DocumentationController(LazyHttpErrorHandler)

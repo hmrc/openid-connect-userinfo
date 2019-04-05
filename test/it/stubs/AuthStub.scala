@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import it.{MockHost, Stub}
 import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve._
@@ -26,8 +25,7 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.controllers.RestFormats.localDateFormats
 import uk.gov.hmrc.openidconnect.userinfo.domain.{DesUserInfo, _}
 
-object AuthStub extends Stub {
-  override val stub: MockHost = new MockHost(22221)
+trait AuthStub {
   val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
 
   implicit class JsOptAppendable(jsObject: JsObject) {
@@ -36,7 +34,7 @@ object AuthStub extends Stub {
   }
 
   def willAuthoriseWith(statusCode: Int, body: String = Json.obj().toString()): Unit = {
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray()
@@ -50,7 +48,7 @@ object AuthStub extends Stub {
       "nino" -> nino,
       "credentials" -> Json.obj("providerId" -> "1304372065861347", "providerType" -> "GG")
     )
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray((Retrievals.credentials and Retrievals.nino).propertyNames.map(JsString))
@@ -94,7 +92,7 @@ object AuthStub extends Stub {
       .appendOptional("gatewayInformation", jsonGatewayInformation)
       .appendOptional("unreadMessageCount", unreadMessageCount.map(Json.toJson(_)))
 
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
@@ -104,7 +102,7 @@ object AuthStub extends Stub {
         .withStatus(200))
     )
 
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
@@ -116,7 +114,7 @@ object AuthStub extends Stub {
   }
 
   def willNotFindUser(): Unit = {
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
@@ -126,7 +124,7 @@ object AuthStub extends Stub {
         .withStatus(404))
     )
 
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
@@ -157,7 +155,7 @@ object AuthStub extends Stub {
   }
 
   def willReturnEnrolmentsWith(statusCode: Int, body: String = ""): Unit = {
-    stub.mock.register(post(urlPathEqualTo(s"/auth/authorise"))
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allEnrolments.propertyNames.map(JsString))

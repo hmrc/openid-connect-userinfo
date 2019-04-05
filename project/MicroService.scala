@@ -22,12 +22,30 @@ trait MicroService {
   lazy val plugins : Seq[Plugins] = Seq.empty
   lazy val playSettings : Seq[Setting[_]] = Seq.empty
 
+  private lazy val scoverageSettings = {
+
+    import scoverage._
+
+    Seq(
+      ScoverageKeys.coverageExcludedPackages :=
+        """<empty>;
+          |Reverse.*;
+          |.*BuildInfo.*;
+          |.*views.*;
+          |.*Routes.*;
+          |.*RoutesPrefix.*;""".stripMargin,
+      ScoverageKeys.coverageMinimum := 80,
+      ScoverageKeys.coverageFailOnMinimum := false,
+      ScoverageKeys.coverageHighlighting := true
+    )
+  }
+
   def intTestFilter(name: String): Boolean = name startsWith "it"
   def unitFilter(name: String): Boolean = name startsWith "unit"
 
   lazy val microservice = Project(appName, file("."))
     .enablePlugins(Seq(play.sbt.PlayScala, SbtArtifactory, SbtAutoBuildPlugin, SbtGitVersioning, SbtDistributablesPlugin) ++ plugins : _*)
-    .settings(playSettings : _*)
+    .settings(playSettings ++ scoverageSettings : _*)
     .settings(scalaSettings: _*)
     .settings(majorVersion := 0)
     .settings(publishingSettings: _*)

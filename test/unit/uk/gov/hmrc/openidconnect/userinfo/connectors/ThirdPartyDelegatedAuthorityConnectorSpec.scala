@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,12 +21,15 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock._
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.BeforeAndAfterEach
-import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
+import org.scalatest.mockito.MockitoSugar
+import org.mockito.Mockito._
+import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.connectors.ThirdPartyDelegatedAuthorityConnector
 import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet }
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.bootstrap.http.HttpClient
 
-class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with BeforeAndAfterEach with WithFakeApplication {
+class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with WithFakeApplication {
 
   val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
@@ -36,10 +39,12 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with BeforeAndA
   trait Setup {
     implicit val hc = HeaderCarrier()
 
-    val connector = new ThirdPartyDelegatedAuthorityConnector {
-      override val serviceUrl: String = wireMockUrl
-      override val http: HttpGet = WSHttp
-    }
+    val mockAppContext = mock[AppContext]
+
+    when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
+
+    val httpClient = fakeApplication.injector.instanceOf[HttpClient]
+    val connector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
   override def beforeEach() {

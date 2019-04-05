@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Matchers.any
 import org.mockito.Mockito.{never, verify}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
@@ -31,7 +31,6 @@ import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
 import uk.gov.hmrc.play.test.UnitSpec
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -58,15 +57,13 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   trait Setup {
     implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
 
-    val sandboxInfoService = new SandboxUserInfoService {
-      override val userInfoGenerator = mock[UserInfoGenerator]
-    }
+    val mockAuthConnector: AuthConnector =  mock[AuthConnector]
+    val mockUserInfoGenerator : UserInfoGenerator = mock[UserInfoGenerator]
+    val mockUserInfoTransformer = mock[UserInfoTransformer]
+    val mockThirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
 
-    val liveInfoService = new LiveUserInfoService {
-      override val authConnector: AuthConnector =  mock[AuthConnector]
-      override val userInfoTransformer = mock[UserInfoTransformer]
-      override val thirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
-    }
+    val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)
+    val liveInfoService = new LiveUserInfoService(mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
   }
 
   "LiveUserInfoService" should {
@@ -74,26 +71,26 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "requests all available data" in new Setup {
 
       val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "email", "openid:government-gateway")
-      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
-      given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
-      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.authConnector.fetchUserDetails()(headers)).willReturn(Some(userDetails))
-      given(liveInfoService.authConnector.fetchDesUserInfo()(headers)).willReturn(Some(desUserInfo))
-      given(liveInfoService.userInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
+      given(mockAuthConnector.fetchUserDetails()(headers)).willReturn(Some(userDetails))
+      given(mockAuthConnector.fetchDesUserInfo()(headers)).willReturn(Some(desUserInfo))
+      given(mockUserInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.authConnector).fetchDesUserInfo()
-      verify(liveInfoService.authConnector).fetchEnrolments()
-      verify(liveInfoService.authConnector).fetchAuthority()
-      verify(liveInfoService.authConnector).fetchUserDetails()(any[HeaderCarrier])
+      verify(mockAuthConnector).fetchDesUserInfo()
+      verify(mockAuthConnector).fetchEnrolments()
+      verify(mockAuthConnector).fetchAuthority()
+      verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier])
     }
 
     "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested" in new Setup {
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
-      given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Future(Some(authority.copy(nino = None))))
-      given(liveInfoService.authConnector.fetchEnrolments()(any())).willReturn(Future(None))
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Future(Some(authority.copy(nino = None))))
+      given(mockAuthConnector.fetchEnrolments()(any())).willReturn(Future(None))
 
       a [BadRequestException] should be thrownBy await(liveInfoService.fetchUserInfo())
     }
@@ -101,51 +98,51 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
 
       val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
-      given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
-      given(liveInfoService.authConnector.fetchEnrolments()(any())).willReturn(Future(None))
-      given(liveInfoService.userInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(any())).willReturn(Future(None))
+      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.authConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
-      verify(liveInfoService.authConnector).fetchEnrolments()
+      verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
+      verify(mockAuthConnector).fetchEnrolments()
     }
 
     "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
 
       val scopes = Set("openid:hmrc-enrolments")
-      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
-      given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
-      given(liveInfoService.authConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
-      given(liveInfoService.userInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
+      given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
+      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.authConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
-      verify(liveInfoService.authConnector).fetchEnrolments()
+      verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
+      verify(mockAuthConnector).fetchEnrolments()
     }
 
     "does not request AUTH::fetchEnrolments when the scopes does not contain 'openid:hmrc-enrolments'" in new Setup {
 
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
-      given(liveInfoService.thirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
 
-      given(liveInfoService.authConnector.fetchAuthority()(headers)).willReturn(Some(authority))
-      given(liveInfoService.authConnector.fetchDesUserInfo()(headers)).willReturn(None)
-      given(liveInfoService.userInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
+      given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Some(authority))
+      given(mockAuthConnector.fetchDesUserInfo()(headers)).willReturn(None)
+      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo())
 
-      verify(liveInfoService.authConnector, never).fetchEnrolments()(any[HeaderCarrier])
-      verify(liveInfoService.authConnector).fetchDesUserInfo()(any[HeaderCarrier])
+      verify(mockAuthConnector, never).fetchEnrolments()(any[HeaderCarrier])
+      verify(mockAuthConnector).fetchDesUserInfo()(any[HeaderCarrier])
     }
   }
 
   "SandboxUserInfoService" should {
     "return generated UserInfo" in new Setup {
-      given(sandboxInfoService.userInfoGenerator.userInfo).willReturn(userInfo)
+      given(mockUserInfoGenerator.userInfo).willReturn(userInfo)
 
       val result = await(sandboxInfoService.fetchUserInfo())
 

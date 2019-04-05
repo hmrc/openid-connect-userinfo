@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,15 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
-import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import uk.gov.hmrc.http.{ HeaderCarrier, HttpGet, NotFoundException }
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, NotFoundException}
+import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 
-trait ThirdPartyDelegatedAuthorityConnector {
-  val http: HttpGet
-  val serviceUrl: String
+@Singleton
+class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, http: HttpGet) {
+  val serviceUrl: String = appContext.thirdPartyDelegatedAuthorityUrl
 
   def fetchScopes(authBearerToken: String)(implicit hc: HeaderCarrier): Future[Set[String]] = {
     http.GET(s"$serviceUrl/delegated-authority", Seq("auth_bearer_token" -> authBearerToken)) map { response =>
@@ -34,9 +33,4 @@ trait ThirdPartyDelegatedAuthorityConnector {
       case e: NotFoundException => Set.empty
     }
   }
-}
-
-object ThirdPartyDelegatedAuthorityConnector extends ThirdPartyDelegatedAuthorityConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("third-party-delegated-authority")
-  override val http = WSHttp
 }

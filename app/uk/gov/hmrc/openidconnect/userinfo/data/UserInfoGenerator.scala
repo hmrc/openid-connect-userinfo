@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.data
 
+import javax.inject.Singleton
 import org.joda.time._
 import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
 
-trait UserInfoGenerator {
+@Singleton
+class UserInfoGenerator {
   val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
   val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
   val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
@@ -96,7 +98,7 @@ trait UserInfoGenerator {
   }
 
 
-  val userInfo = for {
+  val userInfo: Gen[UserInfo] = for {
     name <- nameGen
     lastName <- lastNameGen
     middleName <- middleNameGen
@@ -105,5 +107,3 @@ trait UserInfoGenerator {
   } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
     Some(government_gateway), Some(mdtp))
 }
-
-object UserInfoGenerator extends UserInfoGenerator
