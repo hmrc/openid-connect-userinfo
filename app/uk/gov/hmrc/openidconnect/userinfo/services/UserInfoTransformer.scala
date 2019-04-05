@@ -16,13 +16,15 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import javax.inject.Singleton
 import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import uk.gov.hmrc.openidconnect.userinfo.config.UserInfoFeatureSwitches
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 
-trait UserInfoTransformer {
+@Singleton
+class UserInfoTransformer {
 
   def transform(scopes: Set[String], authority: Option[Authority], desUserInfo: Option[DesUserInfo], enrolments: Option[Enrolments], userDetails: Option[UserDetails]): UserInfo = {
 
@@ -85,7 +87,4 @@ trait UserInfoTransformer {
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])
-
 }
-
-object UserInfoTransformer extends UserInfoTransformer

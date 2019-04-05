@@ -16,17 +16,21 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
-import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
-import uk.gov.hmrc.openidconnect.userinfo.config.WSHttp
+import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, UserDetails}
-import uk.gov.hmrc.play.config.ServicesConfig
-
+import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait AuthConnector extends AuthorisedFunctions {
+@Singleton
+class AuthConnector @Inject() (appContext: AppContext, val http: CorePost) extends PlayAuthConnector with AuthorisedFunctions {
+  val serviceUrl : String = appContext.authUrl
+
+  override def authConnector: AuthConnector = this
+
   def fetchEnrolments()(implicit headerCarrier: HeaderCarrier): Future[Option[Enrolments]] = {
     authorised().retrieve(Retrievals.allEnrolments) {
       enrolments => Future.successful(Some(enrolments))
@@ -70,13 +74,4 @@ trait AuthConnector extends AuthorisedFunctions {
       case ex: NotFoundException => nothing
     }
   }
-}
-
-object AuthConnector extends AuthConnector with ServicesConfig {
-  override def authConnector: uk.gov.hmrc.auth.core.AuthConnector = ConcreteAuthConnector
-}
-
-object ConcreteAuthConnector extends PlayAuthConnector with ServicesConfig {
-  override val serviceUrl = baseUrl("auth")
-  override def http = WSHttp
 }

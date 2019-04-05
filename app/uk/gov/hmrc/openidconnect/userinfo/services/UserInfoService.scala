@@ -16,13 +16,13 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
+import javax.inject.{Inject, Singleton}
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
-
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -30,10 +30,13 @@ trait UserInfoService {
   def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo]
 }
 
-trait LiveUserInfoService extends UserInfoService {
-  val authConnector: AuthConnector
-  val userInfoTransformer: UserInfoTransformer
-  val thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
+@Singleton
+class LiveUserInfoService @Inject()
+  (
+    authConnector: AuthConnector,
+    userInfoTransformer: UserInfoTransformer,
+    thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
+  ) extends UserInfoService {
 
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
@@ -78,20 +81,9 @@ trait LiveUserInfoService extends UserInfoService {
   }
 }
 
-trait SandboxUserInfoService extends UserInfoService {
-  val userInfoGenerator: UserInfoGenerator
-
+@Singleton
+class SandboxUserInfoService @Inject() (userInfoGenerator : UserInfoGenerator) extends UserInfoService {
   override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
     Future.successful(userInfoGenerator.userInfo.sample.getOrElse(UserInfo()))
   }
-}
-
-object LiveUserInfoService extends LiveUserInfoService {
-  override val authConnector = AuthConnector
-  override val userInfoTransformer = UserInfoTransformer
-  override val thirdPartyDelegatedAuthorityConnector = ThirdPartyDelegatedAuthorityConnector
-}
-
-object SandboxUserInfoService extends SandboxUserInfoService {
-  override val userInfoGenerator = UserInfoGenerator
 }

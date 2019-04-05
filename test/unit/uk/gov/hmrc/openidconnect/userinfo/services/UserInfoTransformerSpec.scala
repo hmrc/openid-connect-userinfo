@@ -18,7 +18,7 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mock.MockitoSugar
+import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
@@ -27,7 +27,6 @@ import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeature
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.UserInfoTransformer
 import uk.gov.hmrc.play.test.UnitSpec
-
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
