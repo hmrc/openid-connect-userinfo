@@ -36,5 +36,7 @@ case class UserDetails(
                         agentId: Option[String] = None,
                         gatewayInformation: Option[GatewayInformation],
                         mdtpInformation: Option[MdtpInformation],
-                        unreadMessageCount: Option[Int]
+                        unreadMessageCount: Option[Int],
+                        profile: Option[String],
+                        groupProfile: Option[String]
                       )

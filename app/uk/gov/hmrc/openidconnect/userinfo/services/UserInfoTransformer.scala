@@ -79,11 +79,13 @@ class UserInfoTransformer {
     val agentId = userDetails flatMap { _.agentId}
     val gatewayInformation = userDetails flatMap { _.gatewayInformation }
     val mdtp = userDetails flatMap { _.mdtpInformation }
+    val profileUrl = userDetails flatMap { _.profile }
+    val groupProfileUrl = userDetails flatMap { _.groupProfile }
 
     Some(GovernmentGatewayDetails(user_id = credId, user_name = userName, roles = credentialRoles, affinity_group = affinityGroup,
       agent_code = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
-      gateway_token = gatewayInformation.flatMap(_.gatewayToken),
-      unread_message_count = userDetails.flatMap(_.unreadMessageCount)))
+      gateway_token = gatewayInformation.flatMap(_.gatewayToken), unread_message_count = userDetails.flatMap(_.unreadMessageCount),
+      profile_uri = profileUrl, group_profile_uri = groupProfileUrl))
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])

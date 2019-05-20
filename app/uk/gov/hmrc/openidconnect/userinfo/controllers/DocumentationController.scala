@@ -17,12 +17,13 @@
 package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import javax.inject.{Inject, Singleton}
+
 import controllers.Assets
 import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent}
-import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, AppContext}
-import uk.gov.hmrc.openidconnect.userinfo.domain.APIAccess
+import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessVersions, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.views._
+
 import scala.language.dynamics
 
 @Singleton
@@ -30,15 +31,11 @@ class DocumentationController @Inject() (errorHandler:HttpErrorHandler, appConte
   extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
-    Ok(txt.definition(buildAccess())).withHeaders("Content-Type" -> "application/json")
+    val versions = APIAccessVersions(appContext.access)
+    Ok(txt.definition(versions.versions.getOrElse(List()))).withHeaders("Content-Type" -> "application/json")
   }
 
   def ramlDocs(version: String, filename: String): Action[AnyContent] = {
     Assets.at(s"/public/api/conf/$version", filename)
-  }
-
-  private def buildAccess() = {
-    val access = APIAccessConfig(appContext.access)
-    APIAccess(access.accessType, access.whiteListedApplicationIds)
   }
 }

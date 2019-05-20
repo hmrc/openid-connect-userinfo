@@ -17,16 +17,21 @@
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import javax.inject.{Inject, Singleton}
+
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, UserDetails}
 import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
-@Singleton
-class AuthConnector @Inject() (appContext: AppContext, val http: CorePost) extends PlayAuthConnector with AuthorisedFunctions {
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ExecutionContext, Future}
+
+abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
+  self: UserDetailsFetcher =>
+
+  val appContext: AppContext
+  val http: CorePost
   val serviceUrl : String = appContext.authUrl
 
   override def authConnector: AuthConnector = this
@@ -48,21 +53,7 @@ class AuthConnector @Inject() (appContext: AppContext, val http: CorePost) exten
     }
   }
 
-  def fetchUserDetails()(implicit hc: HeaderCarrier): Future[Option[UserDetails]] = {
-    authorised().retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
-      case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
-        credentialRole ~ description ~ groupId ~ unreadMessageCount ~ mdtp ~ gatewayInformation =>
-        Future.successful(Some(UserDetails(authProviderId = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
-          name = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
-          affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
-          agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
-          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
-          gatewayInformation = gatewayInformation, mdtpInformation = mdtp, unreadMessageCount = unreadMessageCount)))
-      case _ => Future.successful(None)
-    }.recover {
-      case e: NotFoundException => None
-    }
-  }
+  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()
 
   def fetchDesUserInfo()(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
@@ -75,3 +66,9 @@ class AuthConnector @Inject() (appContext: AppContext, val http: CorePost) exten
     }
   }
 }
+
+@Singleton
+class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost) extends AuthConnector with AuthV1UserDetailsFetcher
+
+@Singleton
+class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost) extends AuthConnector with AuthV2UserDetailsFetcher

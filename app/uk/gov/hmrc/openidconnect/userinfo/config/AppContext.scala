@@ -17,6 +17,8 @@
 package uk.gov.hmrc.openidconnect.userinfo.config
 
 import javax.inject.{Inject, Singleton}
+
+import com.typesafe.config.ConfigObject
 import play.api.Mode.Mode
 import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.config.ServicesConfig
@@ -29,7 +31,7 @@ class AppContext @Inject()(override val runModeConfiguration: Configuration, env
   lazy val appUrl : String = runModeConfiguration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
   lazy val authUrl : String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl : String = baseUrl("third-party-delegated-authority")
-  lazy val access: Option[Configuration] = runModeConfiguration.getConfig(s"$env.api.access")
+  lazy val access: Option[ConfigObject] = runModeConfiguration.getObject("api.access.version")
   lazy val desEnvironment: String = runModeConfiguration.getString(s"$env.microservice.services.des.environment").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.environment is not configured"))
   lazy val desBearerToken: String =  runModeConfiguration.getString(s"$env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.bearer-token is not configured"))
   lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")

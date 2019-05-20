@@ -28,14 +28,30 @@ import uk.gov.hmrc.play.bootstrap.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
+sealed trait Version
+case object Version_1_0 extends Version
+case object Version_1_1 extends Version
+
+object Version {
+  def fromAcceptHeader(header: Option[String]) : Version = {
+    header match {
+      case Some("application/vnd.hmrc.1.0+json") => Version_1_0
+      case Some("application/vnd.hmrc.1.1+json") => Version_1_1
+      case _ => throw new IllegalArgumentException("Valid version not supplied")
+    }
+  }
+}
+
 trait UserInfoController extends BaseController with HeaderValidator {
   val service: UserInfoService
   val appContext: AppContext
 
+  override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
+
   val responseLogger = Logger("userInfoResponsePayloadLogger")
 
   final def userInfo() = validateAccept(acceptHeaderValidationRules).async { implicit request =>
-    service.fetchUserInfo() map { userInfo =>
+    service.fetchUserInfo(Version.fromAcceptHeader(request.headers.get(ACCEPT))) map { userInfo =>
       val json = Json.toJson(userInfo)
 
       if(appContext.logUserInfoResponsePayload){

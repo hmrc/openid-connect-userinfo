@@ -16,15 +16,17 @@
 
 package it
 
+import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.controllers.DocumentationController
+import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSRequest
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-
 /**
  * Testcase to verify the capability of integration with the API platform.
  *
@@ -50,7 +52,18 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
       "run.mode" -> "Test",
       "appName" -> "application-name",
       "appUrl" -> "http://microservice-name.protected.mdtp",
-      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/"
+      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/",
+      "api.access.version.1_0.type" -> "PRIVATE",
+      "api.access.version.1_0.status" -> "STABLE",
+      "api.access.version.1_0.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
+      "api.access.version.1_0.white-list.applicationIds.1" -> "df8c10db-01fb-4543-b77e-859267462231",
+      "api.access.version.1_0.white-list.applicationIds.2" -> "9a32c713-7741-4aae-b39d-957021fb97a9",
+      "api.access.version.1_0.endpointsEnabled" -> true,
+      "api.access.version.1_1.type" -> "PRIVATE",
+      "api.access.version.1_1.status" -> "ALPHA",
+      "api.access.version.1_1.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
+      "api.access.version.1_1.endpointsEnabled" -> false,
+      "Test.microservice.services.service-locator.enabled" -> true
     )
 
   implicit val hc = new HeaderCarrier()
@@ -61,8 +74,54 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
   feature("microservice") {
 
     scenario("provide definition endpoint") {
-      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), Duration("500 millis"))
+      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), 1 minute)
       response.status shouldBe 200
     }
+
+    scenario("provide definition for versions 1.0 and 1.1") {
+      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), 1 minute)
+      response.status shouldBe 200
+      val jsonBody = Json.parse(response.body)
+
+      val versions : JsArray = (jsonBody \ "api" \ "versions") match {
+        case JsDefined(arr : JsArray) => arr
+        case _ => fail("The definition is not correctly formatted")
+      }
+
+      versions.value.length shouldBe 2
+
+      versions.value.foreach { version =>
+        (version \ "version").get.as[String] match {
+          case "1.0" =>
+            val (status, endpointsEnabled, accessType, whitelistIds) = extractVersionToVerify(version)
+            status shouldBe "STABLE"
+            endpointsEnabled shouldBe true
+            accessType shouldBe "PRIVATE"
+            whitelistIds.size shouldBe 3
+            whitelistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
+            whitelistIds should contain ("df8c10db-01fb-4543-b77e-859267462231")
+            whitelistIds should contain ("9a32c713-7741-4aae-b39d-957021fb97a9")
+          case "1.1" =>
+            val (status, endpointsEnabled, accessType, whitelistIds) = extractVersionToVerify(version)
+            status shouldBe "ALPHA"
+            endpointsEnabled shouldBe false
+            accessType shouldBe "PRIVATE"
+            whitelistIds.size shouldBe 1
+            whitelistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
+          case versionId => fail(s"An unknown version is found $versionId")
+        }
+      }
+    }
+  }
+
+  def extractVersionToVerify(version : JsValue) = {
+    val status = (version \ "status").get.as[String]
+    val endpointsEnabled = (version \ "endpointsEnabled").get.as[Boolean]
+    val accessType = (version \ "access" \ "type").get.as[String]
+    val whitelistIds = (version \ "access" \ "whitelistedApplicationIds") match {
+      case JsDefined(arr: JsArray) => arr.value.map(_.as[String]).toList
+      case _ => fail("Invalid whitelisted Application Ids definition")
+    }
+    (status, endpointsEnabled, accessType, whitelistIds)
   }
 }
