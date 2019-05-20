@@ -1,7 +1,7 @@
-@import uk.gov.hmrc.openidconnect.userinfo.domain.APIAccess
+@import uk.gov.hmrc.openidconnect.userinfo.config.APIAccessConfig
 @import play.api.libs.json.Json
 
-@(access: APIAccess)
+@(versions: List[APIAccessConfig])
 {
   "scopes":[
     {
@@ -57,13 +57,19 @@
     "name":"User Information",
     "description":"The User Information API allows you to retrieve information about the signed-in user, in an OpenID Connect compliant format",
     "context":"userinfo",
-    "versions":[
-      {
-        "version":"1.0",
-        "status":"STABLE",
-        "endpointsEnabled": true,
-        "access" : @Json.toJson(access)
-      }
+    "versions":[ @for((version, index) <- versions.zipWithIndex) { @display(version) @if((index + 1) < versions.size) { , } else { } }
     ]
   }
+}
+
+@display(version: APIAccessConfig) = {
+    {
+        "version":"@version.version",
+        "status":"@version.status",
+        "endpointsEnabled": @version.endpointsEnabled,
+        "access" : {
+            "type" : "@version.accessType",
+            "whitelistedApplicationIds" : @Json.toJson(version.whiteListedApplicationIds)
+        }
+    }
 }

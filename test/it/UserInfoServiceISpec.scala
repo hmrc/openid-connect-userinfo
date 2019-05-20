@@ -17,6 +17,7 @@
 package it
 
 import java.nio.file.Paths
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
@@ -29,8 +30,10 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.{AffinityGroup, _}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
+import uk.gov.hmrc.openidconnect.userinfo.controllers.Version_1_1
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, DesUserInfo, GovernmentGatewayDetails, Mdtp, UserInfo}
-import scalaj.http.Http
+
+import scalaj.http.{Http, HttpOptions}
 
 class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with BeforeAndAfterAll with AuthStub with ThirdPartyDelegatedAuthorityStub {
 
@@ -68,11 +71,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
   val mdtp = Mdtp(deviceId, sessionId)
   val authMdtp = MdtpInformation(deviceId, sessionId)
   val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"))
-  val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")), Some("Bob")
-    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10))
+  val government_gateway_v1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")), Some("Bob")
+    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), None, None)
+  val government_gateway_v2: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")), Some("Bob")
+    ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), Some("some_url"),
+    Some("some_other_url"))
   val email = "my-email@abc.uk"
 
-  val userInfo = UserInfo(
+  val userInfo_v1 = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
@@ -81,8 +87,21 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway),
+    Some(government_gateway_v1),
     Some(mdtp))
+
+  val userInfo_v2 = UserInfo(
+    Some("John"),
+    Some("Smith"),
+    Some("A"),
+    Some(Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nGREAT BRITAIN", Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))),
+    Some(email),
+    Some(LocalDate.parse("1980-01-01")),
+    Some("AB123456A"),
+    Some(enrolments),
+    Some(government_gateway_v2),
+    Some(mdtp))
+
   val desUserInfoWithoutFirstName = DesUserInfo(ItmpName(None, Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"),  Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
   val userInfoWithoutFirstName = UserInfo(
@@ -94,7 +113,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway),
+    Some(government_gateway_v1),
     Some(mdtp)
   )
   val desUserInfoWithoutFamilyName = DesUserInfo(ItmpName(Some("John"), Some("A"), None), Some(LocalDate.parse("1980-01-01")),
@@ -108,7 +127,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     Some(enrolments),
-    Some(government_gateway),
+    Some(government_gateway_v1),
     Some(mdtp))
   val desUserInfoWithPartialAddress = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
@@ -121,12 +140,12 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
     Some(LocalDate.parse("1980-01-01")),
     Some("AB123456A"),
     None,
-    Some(government_gateway),
+    Some(government_gateway_v1),
     Some(mdtp))
 
   feature("fetch user information") {
 
-    scenario("fetch user profile") {
+    scenario("fetch user profile v1") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government-gateway' scopes")
@@ -142,7 +161,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnEnrolmentsWith()
 
       And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
         Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
@@ -169,7 +188,53 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       import scala.collection.JavaConversions._
       assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
-      json shouldBe Json.toJson(userInfo)
+      json shouldBe Json.toJson(userInfo_v1)
+    }
+
+    scenario("fetch user profile v2") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+        "'email' and 'openid:government-gateway' scopes")
+      willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments",
+          "openid:government-gateway", "email", "agentInformation", "openid:mdtp"))
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will authorise DES contains user information for the NINO")
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
+        Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10), Some("some_url"), Some("some_other_url"), Version_1_1)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl").options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
+        .asString
+
+      val validator = JsonSchemaFactory.byDefault().getValidator
+      val root = System.getProperty("user.dir")
+      val public10 = Paths.get(root, "public", "api", "conf", "1.1").toString
+      val mapper = new ObjectMapper
+
+      val schema = mapper.readTree(Paths.get(public10, "schemas", "userinfo.json").toFile)
+      println(result.body)
+      val json = Json.parse(result.body)
+
+      val report = validator.validate(schema, mapper.readTree(json.toString()))
+
+      println(wireMockServer.findAll(RequestPatternBuilder.allRequests()))
+      Then("The user information is returned")
+      result.code shouldBe 200
+
+      import scala.collection.JavaConversions._
+      assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+
+      json shouldBe Json.toJson(userInfo_v2)
     }
 
     scenario("fetch user profile without family name") {
@@ -211,7 +276,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnAuthorityWith(Nino(nino))
 
       And("The auth will authorise and DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code, government_gateway.agent_friendly_name)), Some(Credentials("", "")),
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
@@ -221,7 +286,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
 
       Then("The user information is returned")
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.toJson(userInfo.copy(hmrc_enrolments = None))
+      Json.parse(result.body) shouldBe Json.toJson(userInfo_v1.copy(hmrc_enrolments = None))
     }
 
     scenario("fetch user data without address and user details when there are no address and user details") {
@@ -247,7 +312,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithNinoAndEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+      val userWithNinoAndEnrolmentsOnly = userInfo_v1.copy(given_name = None, family_name = None, middle_name = None,
         address = None, birthdate = None, government_gateway = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
     }
@@ -272,7 +337,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithEnrolmentsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+      val userWithEnrolmentsOnly = userInfo_v1.copy(given_name = None, family_name = None, middle_name = None,
         address = None, birthdate = None, uk_gov_nino = None, government_gateway = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
     }
@@ -291,8 +356,8 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnEnrolmentsWith()
 
       And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway.agent_id, government_gateway.agent_code,
-        government_gateway.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code,
+        government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
         Some(Admin), None, gatewayInformation = Some(gatewayInformation), Some(10))
 
@@ -303,7 +368,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
 
       Then("The user information is returned")
       result.code shouldBe 200
-      val userWithGovernmentDetailsOnly = userInfo.copy(given_name = None, family_name = None, middle_name = None,
+      val userWithGovernmentDetailsOnly = userInfo_v1.copy(given_name = None, family_name = None, middle_name = None,
         address = None, birthdate = None, uk_gov_nino = None, hmrc_enrolments = None, email = None, mdtp = None)
       Json.parse(result.body) shouldBe Json.toJson(userWithGovernmentDetailsOnly)
     }

@@ -40,25 +40,38 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
   }
 
   "userInfo" should {
-    "generate an OpenID Connect compliant UserInfo response" in forAll(TestUserInfoGenerator.userInfo) { userInfo: UserInfo =>
+    "generate an OpenID Connect compliant UserInfo response v1.0" in forAll(TestUserInfoGenerator.userInfoV1_0) { userInfo: UserInfo =>
       TestUserInfoGenerator.firstNames should contain(userInfo.given_name)
       TestUserInfoGenerator.middleNames should contain(userInfo.middle_name)
       TestUserInfoGenerator.lastNames should contain(userInfo.family_name)
       userInfo.address shouldBe TestUserInfoGenerator.fullAddress
       assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
+      userInfo.government_gateway.get.profile_uri should not be defined
+      userInfo.government_gateway.get.group_profile_uri should not be defined
+    }
+
+    "generate an OpenID Connect compliant UserInfo response v1.1" in forAll(TestUserInfoGenerator.userInfoV1_1) { userInfo: UserInfo =>
+      TestUserInfoGenerator.firstNames should contain(userInfo.given_name)
+      TestUserInfoGenerator.middleNames should contain(userInfo.middle_name)
+      TestUserInfoGenerator.lastNames should contain(userInfo.family_name)
+      userInfo.address shouldBe TestUserInfoGenerator.fullAddress
+      assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
+      assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
+      userInfo.government_gateway.get.profile_uri shouldBe defined
+      userInfo.government_gateway.get.group_profile_uri shouldBe defined
     }
 
     "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in forAll({
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-      TestUserInfoGenerator.userInfo
+      TestUserInfoGenerator.userInfoV1_0
     }) { userInfo: UserInfo =>
       userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(true, false)
     }
 
     "generate an OpenID Connect UserInfo response without addressLine5 when feature flag is disabled" in forAll({
       FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-      TestUserInfoGenerator.userInfo
+      TestUserInfoGenerator.userInfoV1_0
     }) { userInfo: UserInfo =>
       userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(false, true)
     }

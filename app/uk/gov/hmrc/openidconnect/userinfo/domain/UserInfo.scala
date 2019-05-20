@@ -36,7 +36,9 @@ case class UserInfo(given_name: Option[String] = None,
                     uk_gov_nino: Option[String] = None,
                     hmrc_enrolments: Option[Set[Enrolment]] = None,
                     government_gateway: Option[GovernmentGatewayDetails] = None,
-                    mdtp: Option[Mdtp] = None)
+                    mdtp: Option[Mdtp] = None,
+                    profile_url: Option[String] = None,
+                    group_profile_url: Option[String] = None)
 
 case class UserInformation(profile: Option[UserProfile],
                            address: Option[Address],
