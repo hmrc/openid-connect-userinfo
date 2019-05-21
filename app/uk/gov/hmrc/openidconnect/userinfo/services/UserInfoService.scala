@@ -16,34 +16,43 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.services
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.{Inject, Named, Singleton}
+
+import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{Version, Version_1_0, Version_1_1}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait UserInfoService {
-  def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo]
+  def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo]
 }
 
-@Singleton
 class LiveUserInfoService @Inject()
   (
-    authConnector: AuthConnector,
+    @Named("v1Connector") v1AuthConnector: AuthConnector,
+    @Named("v2Connector") v2AuthConnector: AuthConnector,
     userInfoTransformer: UserInfoTransformer,
     thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
   ) extends UserInfoService {
 
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
+  override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
 
     def scopes = hc.authorization match {
       case Some(authorization) => thirdPartyDelegatedAuthorityConnector.fetchScopes(bearerToken(authorization))
       case None => Future.failed(new UnauthorizedException("Bearer token is required"))
+    }
+
+    val userDetailsFetcher = version match {
+      case Version_1_0 => v1AuthConnector.fetchUserDetails
+      case Version_1_1 => v2AuthConnector.fetchUserDetails
     }
 
     scopes flatMap { scopes =>
@@ -53,22 +62,22 @@ class LiveUserInfoService @Inject()
       }
 
       val scopesForAuthority = Set("openid:government-gateway", "email", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:mdtp")
-      val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, authConnector.fetchAuthority())
+      val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, v1AuthConnector.fetchAuthority())
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, authConnector.fetchUserDetails)
+      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, userDetailsFetcher)
 
       val scopesForDes = Set("profile", "address")
       def maybeDesUserInfo = {
         getMaybeForScopes[DesUserInfo](scopesForDes, scopes,
           maybeAuthority flatMap {
-            case Some(auth) if auth.nino.isDefined => authConnector.fetchDesUserInfo
+            case Some(auth) if auth.nino.isDefined => v1AuthConnector.fetchDesUserInfo
             case _ => Future.failed(new BadRequestException("NINO not found for this user"))
           }
         )
       }
 
-      def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, authConnector.fetchEnrolments)
+      def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, v1AuthConnector.fetchEnrolments)
 
       for {
         authority <- maybeAuthority
@@ -83,7 +92,12 @@ class LiveUserInfoService @Inject()
 
 @Singleton
 class SandboxUserInfoService @Inject() (userInfoGenerator : UserInfoGenerator) extends UserInfoService {
-  override def fetchUserInfo()(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    Future.successful(userInfoGenerator.userInfo.sample.getOrElse(UserInfo()))
+  override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
+    val generator : Gen[UserInfo] = version match {
+      case Version_1_0 => userInfoGenerator.userInfoV1_0
+      case Version_1_1 => userInfoGenerator.userInfoV1_1
+    }
+
+    Future.successful(generator.sample.getOrElse(UserInfo()))
   }
 }

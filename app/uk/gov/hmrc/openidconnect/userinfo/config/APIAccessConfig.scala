@@ -16,25 +16,32 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.config
 
-import play.api.Configuration
+import com.typesafe.config.{Config, ConfigObject}
 
-case class APIAccessConfig(value: Option[Configuration]) {
+import collection.JavaConverters._
 
-  val PRIVATE = "PRIVATE"
+case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds : List[String])
 
-  def accessType = {
-    value match {
-      case Some(config) => {
-        config.getString("type").getOrElse(PRIVATE)
-      }
-      case None => PRIVATE
+case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
+  def findAPIs(versions : List[String], config: Config) = {
+    versions.map { version =>
+      val value = config.getConfig(version)
+
+      val accessType = if (value.hasPath("type")) value.getString("type") else "PRIVATE"
+      val status = if (value.hasPath("status")) value.getString("status") else throw new IllegalArgumentException("Status missing")
+      val whiteListedApplicationIds = if (value.hasPath("white-list.applicationIds")) Some(value.getStringList("white-list.applicationIds").asScala.toList) else None
+      val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
+      val versionNumber = version.replace('_', '.')
+
+      new APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, whiteListedApplicationIds.getOrElse(List()))
     }
   }
 
-  def whiteListedApplicationIds = {
-    value match {
-      case Some(config) => config.getStringSeq("white-list.applicationIds")
-      case None => Some(Seq())
-    }
+  def versions = {
+    for {
+      config <- versionConfigs
+      keys = config.unwrapped().keySet().asScala.toList
+      api = findAPIs(keys, config.toConfig)
+    } yield api
   }
 }

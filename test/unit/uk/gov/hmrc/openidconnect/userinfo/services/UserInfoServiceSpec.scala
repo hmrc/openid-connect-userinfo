@@ -16,9 +16,9 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.services
 
-import org.mockito.BDDMockito.given
-import org.mockito.Matchers.any
-import org.mockito.Mockito.{never, verify}
+import org.mockito.BDDMockito._
+import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
@@ -26,13 +26,15 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.logging.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, Token}
-import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, ThirdPartyDelegatedAuthorityConnector}
+import uk.gov.hmrc.openidconnect.userinfo.connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityConnector}
+import uk.gov.hmrc.openidconnect.userinfo.controllers.{Version_1_0, Version_1_1}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
 import uk.gov.hmrc.play.test.UnitSpec
+
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
@@ -43,10 +45,10 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val authority: Authority = Authority("32131", Some("AB123456A"))
 
   val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
-    Some("User"), None, None, None, None, None)
+    Some("User"), None, None, None, None, None, None, None)
 
   val governmentGateway: GovernmentGatewayDetails =  GovernmentGatewayDetails(Some("32131"),Some(Seq("User")), Some("John"),
-    Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11))
+    Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11), None, None)
   val mdtp = Mdtp("device-id-12", "session-id-133")
 
   val ggToken = Token("ggToken")
@@ -57,13 +59,13 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   trait Setup {
     implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
 
-    val mockAuthConnector: AuthConnector =  mock[AuthConnector]
+    val mockAuthConnector: AuthConnector = mock[AuthConnectorV1]
     val mockUserInfoGenerator : UserInfoGenerator = mock[UserInfoGenerator]
     val mockUserInfoTransformer = mock[UserInfoTransformer]
     val mockThirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
 
     val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)
-    val liveInfoService = new LiveUserInfoService(mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
+    val liveInfoService = new LiveUserInfoService(mockAuthConnector, mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
   }
 
   "LiveUserInfoService" should {
@@ -74,16 +76,16 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers)).willReturn(scopes)
       given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Some(authority))
       given(mockAuthConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
-      given(mockAuthConnector.fetchUserDetails()(headers)).willReturn(Some(userDetails))
       given(mockAuthConnector.fetchDesUserInfo()(headers)).willReturn(Some(desUserInfo))
+      when(mockAuthConnector.fetchUserDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
       given(mockUserInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
-      await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector).fetchDesUserInfo()
       verify(mockAuthConnector).fetchEnrolments()
       verify(mockAuthConnector).fetchAuthority()
-      verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier])
+      verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested" in new Setup {
@@ -92,7 +94,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchAuthority()(headers)).willReturn(Future(Some(authority.copy(nino = None))))
       given(mockAuthConnector.fetchEnrolments()(any())).willReturn(Future(None))
 
-      a [BadRequestException] should be thrownBy await(liveInfoService.fetchUserInfo())
+      a [BadRequestException] should be thrownBy await(liveInfoService.fetchUserInfo(Version_1_0))
     }
 
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
@@ -103,7 +105,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchEnrolments()(any())).willReturn(Future(None))
       given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
 
-      await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
       verify(mockAuthConnector).fetchEnrolments()
@@ -118,7 +120,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchEnrolments()(headers)).willReturn(Some(enrolments))
       given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
-      await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier])
       verify(mockAuthConnector).fetchEnrolments()
@@ -133,7 +135,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchDesUserInfo()(headers)).willReturn(None)
       given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
 
-      await(liveInfoService.fetchUserInfo())
+      await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchEnrolments()(any[HeaderCarrier])
       verify(mockAuthConnector).fetchDesUserInfo()(any[HeaderCarrier])
@@ -141,13 +143,20 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   }
 
   "SandboxUserInfoService" should {
-    "return generated UserInfo" in new Setup {
-      given(mockUserInfoGenerator.userInfo).willReturn(userInfo)
+    "return generated UserInfo v1.0" in new Setup {
+      given(mockUserInfoGenerator.userInfoV1_0).willReturn(userInfo)
 
-      val result = await(sandboxInfoService.fetchUserInfo())
+      val result = await(sandboxInfoService.fetchUserInfo(Version_1_0))
+
+      result shouldBe userInfo
+    }
+
+    "return generated UserInfo v1.1" in new Setup {
+      given(mockUserInfoGenerator.userInfoV1_1).willReturn(userInfo)
+
+      val result = await(sandboxInfoService.fetchUserInfo(Version_1_1))
 
       result shouldBe userInfo
     }
   }
-
 }
