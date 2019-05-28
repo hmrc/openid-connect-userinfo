@@ -37,6 +37,5 @@ class GuiceModule(val environment: Environment, val configuration: Configuration
         override def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
       }
     }
-    bind(classOf[ServiceLocatorRegistration]).asEagerSingleton()
   }
 }
