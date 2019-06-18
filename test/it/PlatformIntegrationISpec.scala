@@ -16,14 +16,14 @@
 
 package it
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
-import play.api.libs.json.Json
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.controllers.DocumentationController
-import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSRequest
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 /**
  * Testcase to verify the capability of integration with the API platform.
@@ -61,10 +61,8 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
   feature("microservice") {
 
     scenario("provide definition endpoint") {
-      val response = buildRequest(server.resource("/api/definition")).get()
-      Thread.sleep(100)
-       val res2 = response.futureValue
-      res2.status shouldBe 200
+      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), Duration("500 millis"))
+      response.status shouldBe 200
     }
   }
 }
