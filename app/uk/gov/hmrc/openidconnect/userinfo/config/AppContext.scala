@@ -29,8 +29,6 @@ class AppContext @Inject()(override val runModeConfiguration: Configuration, env
   lazy val appUrl : String = runModeConfiguration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
   lazy val authUrl : String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl : String = baseUrl("third-party-delegated-authority")
-  lazy val serviceLocatorUrl: String = baseUrl("service-locator")
-  lazy val registrationEnabled: Boolean = runModeConfiguration.getBoolean(s"$env.microservice.services.service-locator.enabled").getOrElse(true)
   lazy val access: Option[Configuration] = runModeConfiguration.getConfig(s"$env.api.access")
   lazy val desEnvironment: String = runModeConfiguration.getString(s"$env.microservice.services.des.environment").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.environment is not configured"))
   lazy val desBearerToken: String =  runModeConfiguration.getString(s"$env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$env.microservice.services.des.bearer-token is not configured"))

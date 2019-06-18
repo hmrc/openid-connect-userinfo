@@ -50,8 +50,7 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
       "run.mode" -> "Test",
       "appName" -> "application-name",
       "appUrl" -> "http://microservice-name.protected.mdtp",
-      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/",
-      "Test.microservice.services.service-locator.enabled" -> true
+      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/"
     )
 
   implicit val hc = new HeaderCarrier()
@@ -62,8 +61,10 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
   feature("microservice") {
 
     scenario("provide definition endpoint") {
-      val response = buildRequest(server.resource("/api/definition")).get().futureValue
-      response.status shouldBe 200
+      val response = buildRequest(server.resource("/api/definition")).get()
+      Thread.sleep(100)
+       val res2 = response.futureValue
+      res2.status shouldBe 200
     }
   }
 }
