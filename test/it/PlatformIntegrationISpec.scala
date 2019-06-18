@@ -61,15 +61,6 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
 
   feature("microservice") {
 
-    scenario("register itelf to service-locator") {
-      def regPayloadStringFor(serviceName: String, serviceUrl: String): String =
-        Json.toJson(Registration(serviceName, serviceUrl, Some(Map("third-party-api" -> "true")))).toString
-
-      verify(1, postRequestedFor(urlMatching("/registration")).
-      withHeader("content-type", equalTo("application/json")).
-      withRequestBody(equalTo(regPayloadStringFor("application-name", "http://microservice-name.protected.mdtp"))))
-    }
-
     scenario("provide definition endpoint") {
       val response = buildRequest(server.resource("/api/definition")).get().futureValue
       response.status shouldBe 200
