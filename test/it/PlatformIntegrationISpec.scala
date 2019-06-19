@@ -16,12 +16,10 @@
 
 package it
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.controllers.DocumentationController
-import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSRequest
 
