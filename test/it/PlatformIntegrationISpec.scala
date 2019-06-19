@@ -16,12 +16,10 @@
 
 package it
 
-import com.github.tomakehurst.wiremock.client.WireMock._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.controllers.DocumentationController
-import uk.gov.hmrc.api.domain.Registration
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.ws.WSRequest
 
@@ -72,15 +70,6 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
   val request = FakeRequest()
 
   feature("microservice") {
-
-    scenario("register itelf to service-locator") {
-      def regPayloadStringFor(serviceName: String, serviceUrl: String): String =
-        Json.toJson(Registration(serviceName, serviceUrl, Some(Map("third-party-api" -> "true")))).toString
-
-      verify(1, postRequestedFor(urlMatching("/registration")).
-      withHeader("content-type", equalTo("application/json")).
-      withRequestBody(equalTo(regPayloadStringFor("application-name", "http://microservice-name.protected.mdtp"))))
-    }
 
     scenario("provide definition endpoint") {
       val response = Await.result(buildRequest(server.resource("/api/definition")).get(), 1 minute)
