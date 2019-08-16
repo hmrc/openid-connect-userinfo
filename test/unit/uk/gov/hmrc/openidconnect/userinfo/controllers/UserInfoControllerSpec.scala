@@ -32,7 +32,7 @@ import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.controllers.{ErrorBadRequest, LiveUserInfoController, SandboxUserInfoController, Version_1_0, Version_1_1}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDetails, UserInfo}
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 import scala.concurrent.Future
 

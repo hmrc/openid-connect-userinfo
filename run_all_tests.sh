@@ -1,5 +1,5 @@
+#!/usr/bin/env bash
 
 set -e
 
-sbt test
-sbt it:test
+sbt clean coverage test it:test coverageOff coverageReport

@@ -31,7 +31,7 @@ import uk.gov.hmrc.openidconnect.userinfo.controllers.{Version_1_0, Version_1_1}
 import uk.gov.hmrc.openidconnect.userinfo.data.UserInfoGenerator
 import uk.gov.hmrc.openidconnect.userinfo.domain._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoTransformer}
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}

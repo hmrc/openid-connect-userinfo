@@ -23,28 +23,29 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.mockito.MockitoSugar
 import org.mockito.Mockito._
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.connectors.ThirdPartyDelegatedAuthorityConnector
-import uk.gov.hmrc.play.test.{UnitSpec, WithFakeApplication}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
-class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with WithFakeApplication {
+class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
-  val stubPort = sys.env.getOrElse("WIREMOCK", "11111").toInt
+  val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
   val wireMockUrl = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   trait Setup {
-    implicit val hc = HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val mockAppContext = mock[AppContext]
+    val mockAppContext: AppContext = mock[AppContext]
 
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
 
-    val httpClient = fakeApplication.injector.instanceOf[HttpClient]
-    val connector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
+    val httpClient: HttpClient = app.injector.instanceOf[HttpClient]
+    val connector: ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
   override def beforeEach() {
@@ -75,7 +76,7 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
                |}
             """.stripMargin)))
 
-      val scopes = await(connector.fetchScopes(authBearerToken))
+      val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 
       scopes shouldBe Set("scope1", "scope2")
     }
@@ -86,7 +87,7 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
       stubFor(get(urlPathMatching(s"/delegated-authority")).withQueryParam("auth_bearer_token", equalTo(authBearerToken)).
         willReturn(aResponse().withStatus(404)))
 
-      val scopes = await(connector.fetchScopes(authBearerToken))
+      val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 
       scopes shouldBe Set()
     }

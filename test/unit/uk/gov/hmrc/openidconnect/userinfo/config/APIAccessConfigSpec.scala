@@ -18,10 +18,10 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.config
 
 import play.api.Configuration
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, APIAccessVersions}
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 class APIAccessConfigSpec extends UnitSpec {
-  val configuration = Configuration.from(Map(
+  val configuration: Configuration = Configuration.from(Map(
     "api.access.version.1_0.type" -> "PRIVATE",
     "api.access.version.1_0.status" -> "STABLE",
     "api.access.version.1_0.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
@@ -36,7 +36,7 @@ class APIAccessConfigSpec extends UnitSpec {
 
   "API Access Versions" should {
     "determine whether or not a version is enabled in the current environment" in {
-      val apiVersions = new APIAccessVersions(configuration.getObject("api.access.version"))
+      val apiVersions = APIAccessVersions(configuration.getObject("api.access.version"))
       apiVersions.versions.getOrElse(List()).size shouldBe 2
 
       apiVersions.versions.get.map {version =>
@@ -46,7 +46,7 @@ class APIAccessConfigSpec extends UnitSpec {
             version.accessType shouldBe "PRIVATE"
             version.status shouldBe "STABLE"
             version.endpointsEnabled shouldBe true
-            version.whiteListedApplicationIds shouldBe a [List[String]]
+            version.whiteListedApplicationIds shouldBe a [List[_]]
             version.whiteListedApplicationIds.size shouldBe 3
             version.whiteListedApplicationIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
             version.whiteListedApplicationIds should contain ("df8c10db-01fb-4543-b77e-859267462231")
@@ -55,7 +55,7 @@ class APIAccessConfigSpec extends UnitSpec {
             version.accessType shouldBe "PRIVATE"
             version.status shouldBe "ALPHA"
             version.endpointsEnabled shouldBe false
-            version.whiteListedApplicationIds shouldBe a [List[String]]
+            version.whiteListedApplicationIds shouldBe a [List[_]]
             version.whiteListedApplicationIds.size shouldBe 1
             version.whiteListedApplicationIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
           case unknown => fail(s"Unknown version found : $unknown")
