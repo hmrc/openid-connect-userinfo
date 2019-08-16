@@ -24,7 +24,7 @@ import play.api.mvc.{Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly.FeatureSwitchController
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 class FeatureSwitchControllerSpec extends UnitSpec with ScalaFutures {
 

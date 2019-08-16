@@ -19,7 +19,7 @@ package unit.uk.gov.hmrc.openidconnect.userinfo.controllers
 import org.scalatest.Matchers
 import play.api.libs.json.Json
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorAcceptHeaderInvalid
-import uk.gov.hmrc.play.test.UnitSpec
+import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 class ErrorResponseSpec extends UnitSpec with Matchers{
   "errorResponse" should {

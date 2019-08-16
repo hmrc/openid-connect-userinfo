@@ -39,45 +39,24 @@ import scala.concurrent.duration._
  *
  * See: Confluence/display/ApiPlatform/API+Platform+Architecture+with+Flows
  */
-class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpec")
-  with WSRequest
-  with ScalaFutures {
+class PlatformIntegrationISpec extends BaseFeatureISpec with WSRequest with ScalaFutures {
 
   override def applicableHeaders(url: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Nil
 
-  override lazy val additionalConfig: Seq[(String, Any)] =
-    Seq(
-      "run.mode" -> "Test",
-      "appName" -> "application-name",
-      "appUrl" -> "http://microservice-name.protected.mdtp",
-      "des.individual.endpoint" -> "/pay-as-you-earn/02.00.00/individuals/",
-      "api.access.version.1_0.type" -> "PRIVATE",
-      "api.access.version.1_0.status" -> "STABLE",
-      "api.access.version.1_0.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
-      "api.access.version.1_0.white-list.applicationIds.1" -> "df8c10db-01fb-4543-b77e-859267462231",
-      "api.access.version.1_0.white-list.applicationIds.2" -> "9a32c713-7741-4aae-b39d-957021fb97a9",
-      "api.access.version.1_0.endpointsEnabled" -> true,
-      "api.access.version.1_1.type" -> "PRIVATE",
-      "api.access.version.1_1.status" -> "ALPHA",
-      "api.access.version.1_1.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
-      "api.access.version.1_1.endpointsEnabled" -> false,
-      "Test.microservice.services.service-locator.enabled" -> true
-    )
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  implicit val hc = new HeaderCarrier()
-
-  val documentationController = DocumentationController
+  val documentationController: DocumentationController.type = DocumentationController
   val request = FakeRequest()
 
   feature("microservice") {
 
     scenario("provide definition endpoint") {
-      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), 1 minute)
+      val response = Await.result(buildRequest(resource("/api/definition")).get(), 1.minute)
       response.status shouldBe 200
     }
 
     scenario("provide definition for versions 1.0 and 1.1") {
-      val response = Await.result(buildRequest(server.resource("/api/definition")).get(), 1 minute)
+      val response = Await.result(buildRequest(resource("/api/definition")).get(), 1.minute)
       response.status shouldBe 200
       val jsonBody = Json.parse(response.body)
 
@@ -112,7 +91,7 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
     }
   }
 
-  def extractVersionToVerify(version : JsValue) = {
+  def extractVersionToVerify(version : JsValue): (String, Boolean, String, List[String]) = {
     val status = (version \ "status").get.as[String]
     val endpointsEnabled = (version \ "endpointsEnabled").get.as[Boolean]
     val accessType = (version \ "access" \ "type").get.as[String]
@@ -122,4 +101,5 @@ class PlatformIntegrationISpec extends BaseFeatureISpec("PlatformIntegrationISpe
     }
     (status, endpointsEnabled, accessType, whitelistIds)
   }
+
 }

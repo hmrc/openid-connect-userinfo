@@ -24,56 +24,49 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory
 import com.github.tomakehurst.wiremock.client.RequestPatternBuilder
 import it.stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
 import org.joda.time.LocalDate
-import org.scalatest.{BeforeAndAfterAll, FeatureSpec}
 import play.api.libs.json.Json
+import scalaj.http.{Http, HttpOptions}
+import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.{AffinityGroup, _}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.controllers.Version_1_1
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, DesUserInfo, GovernmentGatewayDetails, Mdtp, UserInfo}
 
-import scalaj.http.{Http, HttpOptions}
-
-class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with BeforeAndAfterAll with AuthStub with ThirdPartyDelegatedAuthorityStub {
-
-  override lazy val additionalConfig: Seq[(String, Any)] =
-    Seq(
-      "run.mode" -> "Test"
-    )
+class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
 
   override protected def beforeEach(): Unit = {
     super.beforeEach()
     wireMockServer.resetMappings()
   }
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     super.beforeAll()
     FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
     FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
   }
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     super.afterAll()
     FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
     FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
   }
 
-  val serviceUrl = server.resource("")
+  val serviceUrl: String = resource("")
 
   val authBearerToken = "AUTH_BEARER_TOKEN"
   val nino = "AB123456A"
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), Some("A"), Some("Smith")), Some(LocalDate.parse("1980-01-01")),
     ItmpAddress(Some("1 Station Road"), Some("Town Centre"), Some("London"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB")))
-  val enrolments = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
+  val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
   val deviceId = "device-id-12345"
   val sessionId = "session-id-12345"
   val mdtp = Mdtp(deviceId, sessionId)
   val authMdtp = MdtpInformation(deviceId, sessionId)
   val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"))
-  val government_gateway_v1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")), Some("Bob")
+  val government_gateway_v1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("User")), Some("Bob")
     ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), None, None)
-  val government_gateway_v2: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("Admin")), Some("Bob")
+  val government_gateway_v2: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"),Some(Seq("User")), Some("Bob")
     ,Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), Some("some_url"),
     Some("some_other_url"))
   val email = "my-email@abc.uk"
@@ -161,9 +154,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnEnrolmentsWith()
 
       And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")), Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
+        Some(User), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -207,9 +200,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnEnrolmentsWith()
 
       And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10), Some("some_url"), Some("some_other_url"), Version_1_1)
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")), Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
+        Some(User), Some(authMdtp), Some(gatewayInformation), Some(10), Some("some_url"), Some("some_other_url"), Version_1_1)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl").options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
@@ -276,8 +269,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willReturnAuthorityWith(Nino(nino))
 
       And("The auth will authorise and DES contains user information for the NINO")
-      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)), Some(Credentials("", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual), Some(Admin), Some(authMdtp), Some(gatewayInformation), Some(10))
+      willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("", "")), Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)),
+        Some(AffinityGroup.Individual), Some(User), Some(authMdtp), Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
@@ -359,7 +353,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec("UserInfoServiceISpec") with
       willFindUser(Some(desUserInfo), Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code,
         government_gateway_v1.agent_friendly_name)), Some(Credentials("1304372065861347", "")),
         Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)), Some(Email(email)), Some(AffinityGroup.Individual),
-        Some(Admin), None, gatewayInformation = Some(gatewayInformation), Some(10))
+        Some(User), None, gatewayInformation = Some(gatewayInformation), Some(10))
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
