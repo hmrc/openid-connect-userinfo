@@ -80,7 +80,7 @@ class PlatformIntegrationISpec extends BaseFeatureISpec with WSRequest with Scal
             whitelistIds should contain ("9a32c713-7741-4aae-b39d-957021fb97a9")
           case "1.1" =>
             val (status, endpointsEnabled, accessType, whitelistIds) = extractVersionToVerify(version)
-            status shouldBe "ALPHA"
+            status shouldBe "BETA"
             endpointsEnabled shouldBe false
             accessType shouldBe "PRIVATE"
             whitelistIds.size shouldBe 1
