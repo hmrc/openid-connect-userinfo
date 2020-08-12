@@ -1,6 +1,4 @@
-import play.routes.compiler.StaticRoutesGenerator
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import play.sbt.routes.RoutesKeys.routesGenerator
 import sbt.Keys._
 import sbt.Tests.{Group, SubProcess}
 import sbt._

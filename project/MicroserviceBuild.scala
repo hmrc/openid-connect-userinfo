@@ -31,8 +31,7 @@ private object AppDependencies {
     "org.jsoup"               % "jsoup"                    % "1.10.2"            % testScope,
     "org.mockito"             % "mockito-all"              % "1.10.19"           % testScope,
     "org.scalaj"             %% "scalaj-http"              % "2.3.0"             % testScope,
-    "com.github.fge"          % "json-schema-validator"    % "2.2.6"             % testScope,
-    "org.skyscreamer"         % "jsonassert"               % "1.5.0"             % testScope
+    "com.github.fge"          % "json-schema-validator"    % "2.2.6"             % testScope
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
