@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package it
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
+import play.api.libs.ws.WSClient
 import play.api.test.FakeRequest
 import uk.gov.hmrc.api.controllers.DocumentationController
 import uk.gov.hmrc.http.HeaderCarrier
@@ -39,13 +40,13 @@ import scala.concurrent.duration._
  *
  * See: Confluence/display/ApiPlatform/API+Platform+Architecture+with+Flows
  */
-class PlatformIntegrationISpec extends BaseFeatureISpec with WSRequest with ScalaFutures {
+class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFeatureISpec with WSRequest with ScalaFutures {
 
   override def applicableHeaders(url: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Nil
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val documentationController: DocumentationController.type = DocumentationController
+  val documentationController = app.injector.instanceOf[DocumentationController]
   val request = FakeRequest()
 
   feature("microservice") {

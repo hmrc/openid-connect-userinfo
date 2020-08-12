@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import uk.gov.hmrc.http.{CorePost, HttpGet}
 import uk.gov.hmrc.openidconnect.userinfo.connectors._
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
-import uk.gov.hmrc.play.config.ControllerConfig
+import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 
 class GuiceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {
   override def configure() = {
@@ -38,7 +38,7 @@ class GuiceModule(val environment: Environment, val configuration: Configuration
     bind(classOf[HttpGet]).to(classOf[DefaultHttpClient])
     bind(classOf[ControllerConfig]).toInstance {
       new ControllerConfig {
-        override def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
+         def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
       }
     }
   }

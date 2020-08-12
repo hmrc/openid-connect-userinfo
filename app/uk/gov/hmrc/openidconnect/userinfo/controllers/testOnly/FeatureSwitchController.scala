@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,17 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly
 
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendController
+
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController extends BaseController {
+class FeatureSwitchController @Inject()()(implicit cc: ControllerComponents) extends BackendController(cc) {
 
   implicit val featureSwitchReads = Json.reads[FeatureSwitch]
   implicit val featureSwitchWrites = Json.writes[FeatureSwitch]

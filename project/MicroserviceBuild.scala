@@ -14,17 +14,17 @@ private object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "org.scalacheck" %% "scalacheck"        % "1.13.5",
-    "uk.gov.hmrc"    %% "bootstrap-play-25" % "5.0.0",
-    "uk.gov.hmrc"    %% "play-hmrc-api"     % "3.6.0-play-25",
-    "uk.gov.hmrc"    %% "domain"            % "5.6.0-play-25",
-    "uk.gov.hmrc"    %% "auth-client"       % "2.28.0-play-25"
+    "org.scalacheck"    %% "scalacheck"        % "1.13.5",
+    "uk.gov.hmrc"       %% "bootstrap-play-26" % "1.13.0",
+    "uk.gov.hmrc"       %% "play-hmrc-api"     % "4.1.0-play-26",
+    "uk.gov.hmrc"       %% "domain"            % "5.9.0-play-26",
+    "com.typesafe.play" %% "play-json-joda"    % "2.6.10"
   )
 
   val test: Seq[ModuleID] = Seq(
     "com.typesafe.play"      %% "play-test"                % PlayVersion.current % testScope,
-    "uk.gov.hmrc"            %% "service-integration-test" % "0.9.0-play-25"     % testScope,
-    "org.scalatestplus.play" %% "scalatestplus-play"       % "2.0.1"             % testScope,
+    "uk.gov.hmrc"            %% "service-integration-test" % "0.12.0-play-26"     % testScope,
+    "org.scalatestplus.play" %% "scalatestplus-play"       % "3.1.2"             % testScope,
     "org.scoverage"          %% "scalac-scoverage-plugin"  % "1.3.1"             % testScope,
     "org.pegdown"             % "pegdown"                  % "1.6.0"             % testScope,
     "org.jsoup"               % "jsoup"                    % "1.10.2"            % testScope,

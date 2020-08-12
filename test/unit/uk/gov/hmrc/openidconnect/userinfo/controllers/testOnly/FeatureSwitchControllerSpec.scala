@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,15 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
-import play.api.mvc.{Request, Result}
+import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import uk.gov.hmrc.openidconnect.userinfo.config.{FeatureSwitch, UserInfoFeatureSwitches}
 import uk.gov.hmrc.openidconnect.userinfo.controllers.testOnly.FeatureSwitchController
 import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
-class FeatureSwitchControllerSpec extends UnitSpec with ScalaFutures {
+import scala.concurrent.ExecutionContext
+
+class FeatureSwitchControllerSpec (implicit val cc:ControllerComponents, val ex: ExecutionContext) extends UnitSpec with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
   implicit val materializer: ActorMaterializer = ActorMaterializer()

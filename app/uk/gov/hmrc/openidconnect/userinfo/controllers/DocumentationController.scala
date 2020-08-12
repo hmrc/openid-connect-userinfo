@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,18 +17,17 @@
 package uk.gov.hmrc.openidconnect.userinfo.controllers
 
 import javax.inject.{Inject, Singleton}
-
 import controllers.Assets
 import play.api.http.HttpErrorHandler
-import play.api.mvc.{Action, AnyContent}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessVersions, AppContext}
 import uk.gov.hmrc.openidconnect.userinfo.views._
 
 import scala.language.dynamics
 
 @Singleton
-class DocumentationController @Inject() (errorHandler:HttpErrorHandler, appContext: AppContext)
-  extends uk.gov.hmrc.api.controllers.DocumentationController(errorHandler) {
+class DocumentationController @Inject() (errorHandler:HttpErrorHandler, appContext: AppContext, assets: Assets, cc:ControllerComponents)
+  extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets,errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     val versions = APIAccessVersions(appContext.access)

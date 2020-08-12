@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,13 +20,14 @@ import javax.inject.{Inject, Singleton}
 import com.google.inject.name.Named
 import play.api.Logger
 import play.api.libs.json.Json
+import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
-import uk.gov.hmrc.play.bootstrap.controller.BaseController
+import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
 
-import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.ExecutionContext
 
 sealed trait Version
 case object Version_1_0 extends Version
@@ -42,10 +43,10 @@ object Version {
   }
 }
 
-trait UserInfoController extends BaseController with HeaderValidator {
+trait UserInfoController extends BackendBaseController with HeaderValidator {
   val service: UserInfoService
   val appContext: AppContext
-
+  implicit val executionContext:ExecutionContext
   override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
 
   val responseLogger = Logger("userInfoResponsePayloadLogger")
@@ -62,14 +63,22 @@ trait UserInfoController extends BaseController with HeaderValidator {
     } recover {
       case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(msg4xx, _, _ , _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
-      case Upstream5xxResponse(msg5xx, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
+      case Upstream5xxResponse(msg5xx, _, _,_) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
       case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }
 
 @Singleton
-class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext) extends UserInfoController
+class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
+  override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+
+  override protected def controllerComponents: ControllerComponents = cc
+}
 
 @Singleton
-class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext) extends UserInfoController
+class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc:ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController{
+  override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
+
+  override protected def controllerComponents: ControllerComponents = cc
+}

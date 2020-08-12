@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import org.mockito.Matchers.{any, eq => eqTo}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
 import play.api.libs.json.Json
+import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
@@ -34,9 +35,9 @@ import uk.gov.hmrc.openidconnect.userinfo.domain.{Address, GovernmentGatewayDeta
 import uk.gov.hmrc.openidconnect.userinfo.services.{LiveUserInfoService, SandboxUserInfoService}
 import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFutures {
+class UserInfoControllerSpec (implicit val cc:ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -64,8 +65,8 @@ class UserInfoControllerSpec extends UnitSpec with MockitoSugar with ScalaFuture
     val mockLiveUserInfoService = mock[LiveUserInfoService]
     val mockSandboxUserInfoService = mock[SandboxUserInfoService]
 
-    val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext)
-    val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext)
+    val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext,cc)
+    val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext,cc)
   }
 
   "sandbox userInfo" should {
