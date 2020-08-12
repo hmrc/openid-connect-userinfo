@@ -17,14 +17,13 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.client.{MappingBuilder, UrlMatchingStrategy, WireMock}
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 
 trait WiremockDSL {
 
   def given() = new Givens()
 
   class Givens() {
-    def get(strategy: UrlMatchingStrategy) = new Result(WireMock.get(strategy))
 
     class Result(mappingBuilder: MappingBuilder) {
       def returns(responseBody: String) = {

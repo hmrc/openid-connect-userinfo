@@ -23,15 +23,16 @@ private object AppDependencies {
 
   val test: Seq[ModuleID] = Seq(
     "com.typesafe.play"      %% "play-test"                % PlayVersion.current % testScope,
-    "uk.gov.hmrc"            %% "service-integration-test" % "0.12.0-play-26"     % testScope,
+    "com.github.tomakehurst"  % "wiremock-jre8"            % "2.24.0"            % testScope,
+    "uk.gov.hmrc"            %% "service-integration-test" % "0.12.0-play-26"    % testScope,
     "org.scalatestplus.play" %% "scalatestplus-play"       % "3.1.2"             % testScope,
     "org.scoverage"          %% "scalac-scoverage-plugin"  % "1.3.1"             % testScope,
     "org.pegdown"             % "pegdown"                  % "1.6.0"             % testScope,
     "org.jsoup"               % "jsoup"                    % "1.10.2"            % testScope,
-    "com.github.tomakehurst"  % "wiremock"                 % "1.58"              % testScope,
     "org.mockito"             % "mockito-all"              % "1.10.19"           % testScope,
     "org.scalaj"             %% "scalaj-http"              % "2.3.0"             % testScope,
-    "com.github.fge"          % "json-schema-validator"    % "2.2.6"             % testScope
+    "com.github.fge"          % "json-schema-validator"    % "2.2.6"             % testScope,
+    "org.skyscreamer"         % "jsonassert"               % "1.5.0"             % testScope
   )
 
   def apply(): Seq[ModuleID] = compile ++ test
