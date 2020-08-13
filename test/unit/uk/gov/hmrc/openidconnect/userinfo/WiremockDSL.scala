@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package unit.uk.gov.hmrc.openidconnect.userinfo
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.client.{MappingBuilder, UrlMatchingStrategy, WireMock}
+import com.github.tomakehurst.wiremock.client.MappingBuilder
 
 trait WiremockDSL {
 
   def given() = new Givens()
 
   class Givens() {
-    def get(strategy: UrlMatchingStrategy) = new Result(WireMock.get(strategy))
 
     class Result(mappingBuilder: MappingBuilder) {
       def returns(responseBody: String) = {

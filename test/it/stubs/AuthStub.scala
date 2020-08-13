@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,6 @@
 package it.stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
-import org.skyscreamer.jsonassert.JSONCompareMode
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.{Retrievals => V2Retrievals}
@@ -40,7 +39,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray()
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse().withBody(body).withStatus(statusCode))
     )
   }
@@ -54,7 +53,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray((Retrievals.credentials and Retrievals.nino).propertyNames.map(JsString))
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse()
         .withBody(response.toString())
         .withStatus(200))
@@ -109,7 +108,7 @@ trait AuthStub {
           .withRequestBody(equalToJson(Json.obj(
             "authorise" -> JsArray(),
             "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
-          ).toString(), JSONCompareMode.STRICT))
+          ).toString()))
           .willReturn(aResponse()
             .withBody(v10response.toString())
             .withStatus(200))
@@ -123,7 +122,7 @@ trait AuthStub {
               and V2Retrievals.gatewayInformation
               and V2Retrievals.profile
               and V2Retrievals.groupProfile).propertyNames.map(JsString))
-          ).toString(), JSONCompareMode.STRICT))
+          ).toString()))
           .willReturn(aResponse()
             .withBody(v11response.toString())
             .withStatus(200))
@@ -134,7 +133,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse()
         .withBody(v10response.toString())
         .withStatus(200))
@@ -146,7 +145,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse()
         .withBody("{}")
         .withStatus(404))
@@ -156,7 +155,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray((Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString))
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse()
         .withBody("{}")
         .withStatus(404))
@@ -187,7 +186,7 @@ trait AuthStub {
       .withRequestBody(equalToJson(Json.obj(
         "authorise" -> JsArray(),
         "retrieve" -> JsArray(Retrievals.allEnrolments.propertyNames.map(JsString))
-      ).toString(), JSONCompareMode.STRICT))
+      ).toString()))
       .willReturn(aResponse()
         .withBody(body)
         .withStatus(statusCode)))

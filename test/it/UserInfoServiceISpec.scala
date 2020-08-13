@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import java.nio.file.Paths
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import com.github.tomakehurst.wiremock.client.RequestPatternBuilder
 import it.stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
@@ -174,7 +173,6 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
-      println(wireMockServer.findAll(RequestPatternBuilder.allRequests()))
       Then("The user information is returned")
       result.code shouldBe 200
 
@@ -220,7 +218,6 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
-      println(wireMockServer.findAll(RequestPatternBuilder.allRequests()))
       Then("The user information is returned")
       result.code shouldBe 200
 

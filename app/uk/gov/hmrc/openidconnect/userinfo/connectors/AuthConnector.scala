@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
     }
   }
 
-  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()
+  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()(hc,ec)
 
   def fetchDesUserInfo()(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
@@ -68,7 +68,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
 }
 
 @Singleton
-class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost) extends AuthConnector with AuthV1UserDetailsFetcher
+class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)  extends AuthConnector with AuthV1UserDetailsFetcher
 
 @Singleton
-class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost) extends AuthConnector with AuthV2UserDetailsFetcher
+class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)  extends AuthConnector with AuthV2UserDetailsFetcher

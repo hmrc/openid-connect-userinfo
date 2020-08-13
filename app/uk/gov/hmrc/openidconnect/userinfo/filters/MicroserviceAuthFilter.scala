@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import play.api.mvc.{Filter, RequestHeader, Result}
 import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.play.config.ControllerConfig
+import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
 import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,7 +36,7 @@ class MicroserviceAuthFilter @Inject() (controllerConfig: ControllerConfig, val 
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(rh.headers)
 
     rh.tags.get(Router.Tags.RouteController) match {
-      case Some(name) if controllerNeedsAuth(name) =>
+      case Some(name) =>
         authorised() {
           next(rh)
         } recoverWith {
@@ -45,6 +45,4 @@ class MicroserviceAuthFilter @Inject() (controllerConfig: ControllerConfig, val 
       case _ => next(rh)
     }
   }
-
-  def controllerNeedsAuth(controllerName: String): Boolean = controllerConfig.paramsForController(controllerName).needsAuth
 }
