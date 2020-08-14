@@ -16,27 +16,28 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.filters
 
-import javax.inject.{Inject, Singleton}
 import akka.stream.Materializer
 import controllers.Default.Unauthorized
+import javax.inject.{Inject, Singleton}
+import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.mvc.{Filter, RequestHeader, Result}
 import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
-import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorUnauthorized
 import uk.gov.hmrc.play.HeaderCarrierConverter
+
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MicroserviceAuthFilter @Inject() (controllerConfig: ControllerConfig, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions {
+class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions {
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(rh.headers)
 
     rh.tags.get(Router.Tags.RouteController) match {
-      case Some(name) =>
+      case Some(name) if controllerNeedsAuth(name).getOrElse(false) =>
         authorised() {
           next(rh)
         } recoverWith {
@@ -45,4 +46,12 @@ class MicroserviceAuthFilter @Inject() (controllerConfig: ControllerConfig, val 
       case _ => next(rh)
     }
   }
+
+  lazy val controllerConfigs: Option[Configuration] = configuration.getConfig("controllers")
+
+  def controllerNeedsAuth(controllerName: String): Option[Boolean] =
+    controllerConfigs
+      .flatMap(_.getConfig(controllerName))
+      .flatMap(_.getBoolean("needsAuth"))
+
 }
