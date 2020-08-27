@@ -29,11 +29,11 @@ case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
 
       val accessType = if (value.hasPath("type")) value.getString("type") else "PRIVATE"
       val status = if (value.hasPath("status")) value.getString("status") else throw new IllegalArgumentException("Status missing")
-      val whiteListedApplicationIds = if (value.hasPath("white-list.applicationIds")) Some(value.getStringList("white-list.applicationIds").asScala.toList) else None
+      val allowListedApplicationIds = if (value.hasPath("white-list.applicationIds")) Some(value.getStringList("white-list.applicationIds").asScala.toList) else None
       val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
       val versionNumber = version.replace('_', '.')
 
-      new APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, whiteListedApplicationIds.getOrElse(List()))
+      new APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, allowListedApplicationIds.getOrElse(List()))
     }
   }
 
