@@ -71,21 +71,21 @@ class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFea
       versions.value.foreach { version =>
         (version \ "version").get.as[String] match {
           case "1.0" =>
-            val (status, endpointsEnabled, accessType, whitelistIds) = extractVersionToVerify(version)
+            val (status, endpointsEnabled, accessType, allowlistIds) = extractVersionToVerify(version)
             status shouldBe "STABLE"
             endpointsEnabled shouldBe true
             accessType shouldBe "PRIVATE"
-            whitelistIds.size shouldBe 3
-            whitelistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
-            whitelistIds should contain ("df8c10db-01fb-4543-b77e-859267462231")
-            whitelistIds should contain ("9a32c713-7741-4aae-b39d-957021fb97a9")
+            allowlistIds.size shouldBe 3
+            allowlistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
+            allowlistIds should contain ("df8c10db-01fb-4543-b77e-859267462231")
+            allowlistIds should contain ("9a32c713-7741-4aae-b39d-957021fb97a9")
           case "1.1" =>
-            val (status, endpointsEnabled, accessType, whitelistIds) = extractVersionToVerify(version)
+            val (status, endpointsEnabled, accessType, allowlistIds) = extractVersionToVerify(version)
             status shouldBe "BETA"
             endpointsEnabled shouldBe false
             accessType shouldBe "PRIVATE"
-            whitelistIds.size shouldBe 1
-            whitelistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
+            allowlistIds.size shouldBe 1
+            allowlistIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
           case versionId => fail(s"An unknown version is found $versionId")
         }
       }
@@ -96,11 +96,11 @@ class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFea
     val status = (version \ "status").get.as[String]
     val endpointsEnabled = (version \ "endpointsEnabled").get.as[Boolean]
     val accessType = (version \ "access" \ "type").get.as[String]
-    val whitelistIds = (version \ "access" \ "whitelistedApplicationIds") match {
+    val allowlistIds = (version \ "access" \ "allowlistedApplicationIds") match {
       case JsDefined(arr: JsArray) => arr.value.map(_.as[String]).toList
-      case _ => fail("Invalid whitelisted Application Ids definition")
+      case _ => fail("Invalid allowlisted Application Ids definition")
     }
-    (status, endpointsEnabled, accessType, whitelistIds)
+    (status, endpointsEnabled, accessType, allowlistIds)
   }
 
 }

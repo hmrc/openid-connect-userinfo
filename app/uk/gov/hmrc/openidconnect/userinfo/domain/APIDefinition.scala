@@ -16,4 +16,4 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
-case class APIAccess(`type`: String, whitelistedApplicationIds: Option[Seq[String]])
+case class APIAccess(`type`: String, allowlistedApplicationIds: Option[Seq[String]])
