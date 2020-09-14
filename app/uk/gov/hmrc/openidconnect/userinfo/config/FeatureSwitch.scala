@@ -18,7 +18,6 @@ package uk.gov.hmrc.openidconnect.userinfo.config
 
 case class FeatureSwitch(name: String, isEnabled: Boolean)
 
-
 object FeatureSwitch {
 
   def forName(name: String) = FeatureSwitch(name, java.lang.Boolean.getBoolean(systemPropertyName(name)))

@@ -34,11 +34,11 @@ case object Version_1_0 extends Version
 case object Version_1_1 extends Version
 
 object Version {
-  def fromAcceptHeader(header: Option[String]) : Version = {
+  def fromAcceptHeader(header: Option[String]): Version = {
     header match {
       case Some("application/vnd.hmrc.1.0+json") => Version_1_0
       case Some("application/vnd.hmrc.1.1+json") => Version_1_1
-      case _ => throw new IllegalArgumentException("Valid version not supplied")
+      case _                                     => throw new IllegalArgumentException("Valid version not supplied")
     }
   }
 }
@@ -46,7 +46,7 @@ object Version {
 trait UserInfoController extends BackendBaseController with HeaderValidator {
   val service: UserInfoService
   val appContext: AppContext
-  implicit val executionContext:ExecutionContext
+  implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
 
   val responseLogger = Logger("userInfoResponsePayloadLogger")
@@ -55,16 +55,16 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
     service.fetchUserInfo(Version.fromAcceptHeader(request.headers.get(ACCEPT))) map { userInfo =>
       val json = Json.toJson(userInfo)
 
-      if(appContext.logUserInfoResponsePayload){
+      if (appContext.logUserInfoResponsePayload) {
         responseLogger.debug(s"Returning user info payload: $json")
       }
 
       Ok(json)
     } recover {
-      case Upstream4xxResponse(msg, 401, _, _) => Unauthorized(Json.toJson(ErrorUnauthorized()))
-      case Upstream4xxResponse(msg4xx, _, _ , _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
-      case Upstream5xxResponse(msg5xx, _, _,_) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case Upstream4xxResponse(msg, 401, _, _)  => Unauthorized(Json.toJson(ErrorUnauthorized()))
+      case Upstream4xxResponse(msg4xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
+      case Upstream5xxResponse(msg5xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
+      case bex: BadRequestException             => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }
@@ -77,7 +77,7 @@ class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserIn
 }
 
 @Singleton
-class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc:ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController{
+class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
   override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
   override protected def controllerComponents: ControllerComponents = cc

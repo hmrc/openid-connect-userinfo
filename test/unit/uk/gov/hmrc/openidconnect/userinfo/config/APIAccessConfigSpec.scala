@@ -39,14 +39,14 @@ class APIAccessConfigSpec extends UnitSpec {
       val apiVersions = APIAccessVersions(configuration.getObject("api.access.version"))
       apiVersions.versions.getOrElse(List()).size shouldBe 2
 
-      apiVersions.versions.get.map {version =>
-        version shouldBe a [APIAccessConfig]
+      apiVersions.versions.get.map { version =>
+        version shouldBe a[APIAccessConfig]
         version.version match {
           case "1.0" =>
             version.accessType shouldBe "PRIVATE"
             version.status shouldBe "STABLE"
             version.endpointsEnabled shouldBe true
-            version.whiteListedApplicationIds shouldBe a [List[_]]
+            version.whiteListedApplicationIds shouldBe a[List[_]]
             version.whiteListedApplicationIds.size shouldBe 3
             version.whiteListedApplicationIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
             version.whiteListedApplicationIds should contain ("df8c10db-01fb-4543-b77e-859267462231")
@@ -55,7 +55,7 @@ class APIAccessConfigSpec extends UnitSpec {
             version.accessType shouldBe "PRIVATE"
             version.status shouldBe "ALPHA"
             version.endpointsEnabled shouldBe false
-            version.whiteListedApplicationIds shouldBe a [List[_]]
+            version.whiteListedApplicationIds shouldBe a[List[_]]
             version.whiteListedApplicationIds.size shouldBe 1
             version.whiteListedApplicationIds should contain ("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
           case unknown => fail(s"Unknown version found : $unknown")

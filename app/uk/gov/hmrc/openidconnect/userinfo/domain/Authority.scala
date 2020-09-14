@@ -17,4 +17,4 @@
 package uk.gov.hmrc.openidconnect.userinfo.domain
 
 case class Authority(credId: String,
-                     nino: Option[String] = None)
+                     nino:   Option[String] = None)

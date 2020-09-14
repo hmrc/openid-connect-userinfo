@@ -33,14 +33,14 @@ import scala.concurrent.duration._
  * - application name
  * - application url
  *
-  *
+ *
  * 2a, To expose API's to Third Party Developers, the service needs to define the APIs in a definition.json and make it available under api/definition GET endpoint
  * 2b, For all of the endpoints defined in the definition.json a documentation.xml needs to be provided and be available under api/documentation/[version]/[endpoint name] GET endpoint
  *     Example: api/documentation/1.0/Fetch-Some-Data
  *
  * See: Confluence/display/ApiPlatform/API+Platform+Architecture+with+Flows
  */
-class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFeatureISpec with WSRequest with ScalaFutures {
+class PlatformIntegrationISpec(implicit val wsClient: WSClient) extends BaseFeatureISpec with WSRequest with ScalaFutures {
 
   override def applicableHeaders(url: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Nil
 
@@ -61,9 +61,9 @@ class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFea
       response.status shouldBe 200
       val jsonBody = Json.parse(response.body)
 
-      val versions : JsArray = (jsonBody \ "api" \ "versions") match {
-        case JsDefined(arr : JsArray) => arr
-        case _ => fail("The definition is not correctly formatted")
+      val versions: JsArray = (jsonBody \ "api" \ "versions") match {
+        case JsDefined(arr: JsArray) => arr
+        case _                       => fail("The definition is not correctly formatted")
       }
 
       versions.value.length shouldBe 2
@@ -92,13 +92,13 @@ class PlatformIntegrationISpec (implicit val wsClient: WSClient) extends BaseFea
     }
   }
 
-  def extractVersionToVerify(version : JsValue): (String, Boolean, String, List[String]) = {
+  def extractVersionToVerify(version: JsValue): (String, Boolean, String, List[String]) = {
     val status = (version \ "status").get.as[String]
     val endpointsEnabled = (version \ "endpointsEnabled").get.as[Boolean]
     val accessType = (version \ "access" \ "type").get.as[String]
     val allowlistIds = (version \ "access" \ "allowlistedApplicationIds") match {
       case JsDefined(arr: JsArray) => arr.value.map(_.as[String]).toList
-      case _ => fail("Invalid allowlisted Application Ids definition")
+      case _                       => fail("Invalid allowlisted Application Ids definition")
     }
     (status, endpointsEnabled, accessType, allowlistIds)
   }

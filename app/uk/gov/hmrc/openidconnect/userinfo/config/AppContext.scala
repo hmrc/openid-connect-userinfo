@@ -23,15 +23,15 @@ import play.api.{Configuration, Environment}
 import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
 
 @Singleton
-class AppContext @Inject()(val runModeConfiguration: Configuration, environment: Environment, runMode: RunMode) extends ServicesConfig(runModeConfiguration,runMode) {
+class AppContext @Inject() (val runModeConfiguration: Configuration, environment: Environment, runMode: RunMode) extends ServicesConfig(runModeConfiguration, runMode) {
   protected def mode: Mode = environment.mode
 
-  lazy val appName : String = runModeConfiguration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
-  lazy val appUrl : String = runModeConfiguration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
-  lazy val authUrl : String = baseUrl("auth")
-  lazy val thirdPartyDelegatedAuthorityUrl : String = baseUrl("third-party-delegated-authority")
+  lazy val appName: String = runModeConfiguration.getString("appName").getOrElse(throw new RuntimeException("appName is not configured"))
+  lazy val appUrl: String = runModeConfiguration.getString("appUrl").getOrElse(throw new RuntimeException("appUrl is not configured"))
+  lazy val authUrl: String = baseUrl("auth")
+  lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
   lazy val access: Option[ConfigObject] = runModeConfiguration.getObject("api.access.version")
   lazy val desEnvironment: String = runModeConfiguration.getString(s"$runMode.env.microservice.services.des.environment").getOrElse(throw new RuntimeException(s"$runMode.env.microservice.services.des.environment is not configured"))
-  lazy val desBearerToken: String =  runModeConfiguration.getString(s"$runMode.env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$runMode.env.microservice.services.des.bearer-token is not configured"))
+  lazy val desBearerToken: String = runModeConfiguration.getString(s"$runMode.env.microservice.services.des.bearer-token").getOrElse(throw new RuntimeException(s"$runMode.env.microservice.services.des.bearer-token is not configured"))
   lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
 }

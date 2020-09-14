@@ -28,13 +28,13 @@ import scala.concurrent.{Await, Future}
 
 trait BaseFeatureISpec
   extends FeatureSpec
-    with GivenWhenThen
-    with Matchers
-    with ServiceSpec
-    with BeforeAndAfterEach
-    with BeforeAndAfterAll {
+  with GivenWhenThen
+  with Matchers
+  with ServiceSpec
+  with BeforeAndAfterEach
+  with BeforeAndAfterAll {
 
-  implicit val timeout : Duration = 1.minutes
+  implicit val timeout: Duration = 1.minutes
 
   def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 

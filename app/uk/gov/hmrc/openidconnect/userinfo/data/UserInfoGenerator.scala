@@ -56,10 +56,10 @@ class UserInfoGenerator {
   def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
-  val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"),Some("affinityGroup"),
-    Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
-  val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"),Some("affinityGroup"),
-    Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
+  val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+                                                                                   Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
+  val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+                                                                                   Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
   val mdtp = Mdtp(deviceId, sessionId)
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
@@ -76,11 +76,11 @@ class UserInfoGenerator {
   private val suffixGen = Gen.oneOf(ninoSuffixes)
   private val numbersGen = Gen.choose(100000, 999999)
   private def email(name: Option[String], lastName: Option[String]): Option[String] = (name, lastName) match {
-      case (Some(n),None) ⇒ Some(s"$n@abc.com")
-      case (None, Some(l)) ⇒ Some(s"$l@abc.com")
-      case (Some(n), Some(l)) ⇒ Some(s"$n.$l@abc.com")
-      case (None, None) ⇒ None
-    }
+    case (Some(n), None)    ⇒ Some(s"$n@abc.com")
+    case (None, Some(l))    ⇒ Some(s"$l@abc.com")
+    case (Some(n), Some(l)) ⇒ Some(s"$n.$l@abc.com")
+    case (None, None)       ⇒ None
+  }
 
   private def dateOfBirth = {
     for {
@@ -106,7 +106,7 @@ class UserInfoGenerator {
     dob <- dateOfBirth
     nino <- formattedNino
   } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-    Some(government_gateway_v1_0), Some(mdtp))
+                   Some(government_gateway_v1_0), Some(mdtp))
 
   val userInfoV1_1: Gen[UserInfo] = for {
     name <- nameGen
@@ -115,5 +115,5 @@ class UserInfoGenerator {
     dob <- dateOfBirth
     nino <- formattedNino
   } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-    Some(government_gateway_v1_1), Some(mdtp))
+                   Some(government_gateway_v1_1), Some(mdtp))
 }

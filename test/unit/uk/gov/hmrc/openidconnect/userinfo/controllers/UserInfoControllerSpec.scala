@@ -37,16 +37,16 @@ import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class UserInfoControllerSpec (implicit val cc:ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
+class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   val ACCEPT_HEADER_V1_0 = "application/vnd.hmrc.1.0+json"
   val ACCEPT_HEADER_V1_1 = "application/vnd.hmrc.1.1+json"
 
-  val ggDetailsV1 = GovernmentGatewayDetails(Some("32131"),Some(Seq("User")), Some("John"), Some("affinityGroup"), Some("agent-code-12345"),
-    Some("agent-id-12345"), Some("agent-friendly-name"), None, None, None, None)
-  val ggDetailsV11 = ggDetailsV1.copy(profile_uri = Some("some_url"), group_profile_uri = Some("some_other_url"))
+  val ggDetailsV1 = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("John"), Some("affinityGroup"), Some("agent-code-12345"),
+                                             Some("agent-id-12345"), Some("agent-friendly-name"), None, None, None, None)
+  val ggDetailsV11 = ggDetailsV1.copy(profile_uri       = Some("some_url"), group_profile_uri = Some("some_other_url"))
 
   val userInfoV1 = UserInfo(
     Some("John"),
@@ -65,8 +65,8 @@ class UserInfoControllerSpec (implicit val cc:ControllerComponents, ex: Executio
     val mockLiveUserInfoService = mock[LiveUserInfoService]
     val mockSandboxUserInfoService = mock[SandboxUserInfoService]
 
-    val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext,cc)
-    val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext,cc)
+    val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext, cc)
+    val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext, cc)
   }
 
   "sandbox userInfo" should {

@@ -32,7 +32,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
 
   val appContext: AppContext
   val http: CorePost
-  val serviceUrl : String = appContext.authUrl
+  val serviceUrl: String = appContext.authUrl
 
   override def authConnector: AuthConnector = this
 
@@ -47,13 +47,13 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
   def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
     authorised().retrieve(Retrievals.credentials and Retrievals.nino) {
       case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
-      case _ => Future.successful(None)
+      case _                  => Future.successful(None)
     }.recover {
       case e: NotFoundException => None
     }
   }
 
-  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()(hc,ec)
+  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()(hc, ec)
 
   def fetchDesUserInfo()(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
@@ -68,7 +68,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
 }
 
 @Singleton
-class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)  extends AuthConnector with AuthV1UserDetailsFetcher
+class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext) extends AuthConnector with AuthV1UserDetailsFetcher
 
 @Singleton
-class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)  extends AuthConnector with AuthV2UserDetailsFetcher
+class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext) extends AuthConnector with AuthV2UserDetailsFetcher
