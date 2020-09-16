@@ -174,8 +174,8 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Then("The user information is returned")
       result.code shouldBe 200
 
-      import scala.collection.JavaConversions._
-      assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+      import scala.collection.JavaConverters._
+      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
       json shouldBe Json.toJson(userInfo_v1)
     }
@@ -219,8 +219,8 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Then("The user information is returned")
       result.code shouldBe 200
 
-      import scala.collection.JavaConversions._
-      assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+      import scala.collection.JavaConverters._
+      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
       json shouldBe Json.toJson(userInfo_v2)
     }

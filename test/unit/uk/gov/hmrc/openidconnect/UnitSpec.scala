@@ -27,6 +27,9 @@ import play.api.mvc.Result
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 
+import scala.language.postfixOps
+import scala.language.implicitConversions
+
 trait UnitSpec extends WordSpec with Matchers {
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)

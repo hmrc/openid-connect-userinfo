@@ -16,6 +16,7 @@
 
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
+import com.github.ghik.silencer.silent
 import uk.gov.hmrc.auth.core.AuthorisedFunctions
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
@@ -23,7 +24,7 @@ import uk.gov.hmrc.openidconnect.userinfo.domain.UserDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 
-trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
+@silent trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
   self: AuthorisedFunctions =>
 
   def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {

@@ -17,11 +17,10 @@
 package uk.gov.hmrc.openidconnect.userinfo.filters
 
 import akka.stream.Materializer
-import controllers.Default.Unauthorized
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.libs.json.Json
-import play.api.mvc.{Filter, RequestHeader, Result}
+import play.api.mvc.{Filter, RequestHeader, Result, Results}
 import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import uk.gov.hmrc.openidconnect.userinfo.connectors.AuthConnector
@@ -31,13 +30,13 @@ import uk.gov.hmrc.play.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions {
+class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions with Results {
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     implicit val hc = HeaderCarrierConverter.fromHeadersAndSession(rh.headers)
 
-    rh.tags.get(Router.Tags.RouteController) match {
-      case Some(name) if controllerNeedsAuth(name).getOrElse(false) =>
+    rh.attrs.get(Router.Attrs.HandlerDef) match {
+      case Some(name) if controllerNeedsAuth(name.controller).getOrElse(false) =>
         authorised() {
           next(rh)
         } recoverWith {
@@ -47,11 +46,11 @@ class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authCo
     }
   }
 
-  lazy val controllerConfigs: Option[Configuration] = configuration.getConfig("controllers")
+  lazy val controllerConfigs: Option[Configuration] = configuration.getOptional[Configuration]("controllers")
 
   def controllerNeedsAuth(controllerName: String): Option[Boolean] =
     controllerConfigs
-      .flatMap(_.getConfig(controllerName))
-      .flatMap(_.getBoolean("needsAuth"))
+      .flatMap(_.getOptional[Configuration](controllerName))
+      .flatMap(_.getOptional[Boolean]("needsAuth"))
 
 }

@@ -25,9 +25,9 @@ import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.controllers.RestFormats.localDateFormats
 import uk.gov.hmrc.openidconnect.userinfo.controllers.{Version, Version_1_0, Version_1_1}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{DesUserInfo, _}
+import com.github.ghik.silencer.silent
 
-trait AuthStub {
-  val optionalElement = PartialFunction[Option[String], String](_.map(s => s""""$s"""").getOrElse("null"))
+@silent trait AuthStub {
 
   implicit class JsOptAppendable(jsObject: JsObject) {
     def appendOptional(key: String, value: Option[JsValue]): JsObject = value.map(js => jsObject + (key -> js))

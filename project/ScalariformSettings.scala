@@ -30,4 +30,5 @@ object ScalariformSettings {
     .setPreference(SpaceInsideParentheses, false)
     .setPreference(SpacesAroundMultiImports, false)
     .setPreference(SpacesWithinPatternBinders, true)
+
 }

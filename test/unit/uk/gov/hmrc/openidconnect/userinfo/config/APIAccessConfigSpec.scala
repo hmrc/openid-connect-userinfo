@@ -16,6 +16,7 @@
 
 package unit.uk.gov.hmrc.openidconnect.userinfo.config
 
+import com.typesafe.config.ConfigObject
 import play.api.Configuration
 import uk.gov.hmrc.openidconnect.userinfo.config.{APIAccessConfig, APIAccessVersions}
 import unit.uk.gov.hmrc.openidconnect.UnitSpec
@@ -36,7 +37,7 @@ class APIAccessConfigSpec extends UnitSpec {
 
   "API Access Versions" should {
     "determine whether or not a version is enabled in the current environment" in {
-      val apiVersions = APIAccessVersions(configuration.getObject("api.access.version"))
+      val apiVersions = APIAccessVersions(configuration.getOptional[ConfigObject]("api.access.version"))
       apiVersions.versions.getOrElse(List()).size shouldBe 2
 
       apiVersions.versions.get.map { version =>

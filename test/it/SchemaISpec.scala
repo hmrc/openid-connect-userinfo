@@ -36,7 +36,7 @@ class SchemaISpec extends FlatSpec {
     assert(syntaxValidator.schemaIsValid(schema), "Schema is NOT valid.")
 
     val report = validator.validate(schema, exampleJSON)
-    import scala.collection.JavaConversions._
-    assert(report.isSuccess, report.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+    import scala.collection.JavaConverters._
+    assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
   }
 }

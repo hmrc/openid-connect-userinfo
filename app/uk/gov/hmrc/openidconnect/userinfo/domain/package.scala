@@ -42,8 +42,8 @@ package object domain {
   implicit val mdtp = Json.format[Mdtp]
   implicit val governmentGatewayDetails = Json.format[GovernmentGatewayDetails]
 
-  implicit val dateReads = Reads.jodaDateReads("yyyy-MM-dd")
-  implicit val dateWrites = Writes.jodaDateWrites("yyyy-MM-dd")
+  implicit val dateReads = JodaReads.jodaDateReads("yyyy-MM-dd")
+  implicit val dateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd")
   implicit val addressFmt = Json.format[Address]
   implicit val userInfoFmt = Json.format[UserInfo]
   implicit val apiAccessFmt = Json.format[APIAccess]
