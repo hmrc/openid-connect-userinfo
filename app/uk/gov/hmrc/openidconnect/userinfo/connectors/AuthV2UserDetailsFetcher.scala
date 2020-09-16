@@ -25,19 +25,19 @@ import uk.gov.hmrc.openidconnect.userinfo.domain.UserDetails
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthV2UserDetailsFetcher extends UserDetailsFetcher {
-  self : AuthorisedFunctions =>
+  self: AuthorisedFunctions =>
 
   def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
     authorised().retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation and Retrievals.profile and Retrievals.groupProfile) {
       case credentials ~ maybeName ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
         credentialRole ~ description ~ groupId ~ unreadMessageCount ~ mdtp ~ gatewayInformation ~ profile ~ groupProfile =>
-        Future.successful(Some(UserDetails(authProviderId = credentials.map(_.providerId), authProviderType = credentials.map(_.providerType),
-          name = maybeName.flatMap(_.name), lastName = maybeName.flatMap(_.lastName), dateOfBirth = birthDate, postCode = postCode, email = email,
-          affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
-          agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
-          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
-          gatewayInformation = gatewayInformation, mdtpInformation = mdtp, unreadMessageCount = unreadMessageCount, profile = profile,
-          groupProfile = groupProfile)))
+        Future.successful(Some(UserDetails(authProviderId     = credentials.map(_.providerId), authProviderType = credentials.map(_.providerType),
+                                           name               = maybeName.flatMap(_.name), lastName = maybeName.flatMap(_.lastName), dateOfBirth = birthDate, postCode = postCode, email = email,
+                                           affinityGroup      = affinityGroup.map(_.toString()), agentCode = agentCode,
+                                           agentFriendlyName  = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
+                                           description        = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
+                                           gatewayInformation = gatewayInformation, mdtpInformation = mdtp, unreadMessageCount = unreadMessageCount, profile = profile,
+                                           groupProfile       = groupProfile)))
       case _ => Future.successful(None)
     }.recover {
       case e: NotFoundException => None

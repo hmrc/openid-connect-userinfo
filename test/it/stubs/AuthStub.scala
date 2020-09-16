@@ -64,8 +64,8 @@ trait AuthStub {
                    credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
                    mdtp: Option[MdtpInformation] = None, gatewayInformation: Option[GatewayInformation] = None,
-                   unreadMessageCount: Option[Int] = None, profileUrl : Option[String] = None,
-                   groupProfileUrl : Option[String] = None, version : Version = Version_1_0): Unit = {
+                   unreadMessageCount: Option[Int] = None, profileUrl: Option[String] = None,
+                   groupProfileUrl: Option[String] = None, version: Version = Version_1_0): Unit = {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
@@ -78,8 +78,8 @@ trait AuthStub {
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
     val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
     val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
-    val jsonProfile : Option[JsValue] = profileUrl.map(Json.toJson(_))
-    val jsonGroupProfile : Option[JsValue] = groupProfileUrl.map(Json.toJson(_))
+    val jsonProfile: Option[JsValue] = profileUrl.map(Json.toJson(_))
+    val jsonGroupProfile: Option[JsValue] = groupProfileUrl.map(Json.toJson(_))
 
     val response = Json.obj()
       .appendOptional("itmpName", jsonItmpName)
@@ -195,6 +195,6 @@ trait AuthStub {
   private def displayAddress(address: ItmpAddress): Boolean = {
     val ia = address
     Seq(ia.countryCode, ia.countryName, ia.postCode, ia.line1, ia.line2, ia.line3, ia.line4,
-      ia.line5, ia.postCode).nonEmpty
+        ia.line5, ia.postCode).nonEmpty
   }
 }

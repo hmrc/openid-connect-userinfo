@@ -84,7 +84,7 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
   private def assertValidDob(dob: LocalDate): Unit = {
 
     dob.isAfter(from) && dob.isBefore(until) match {
-      case true =>
+      case true  =>
       case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")
     }
   }
@@ -92,7 +92,7 @@ class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndA
   private def assertValidNino(nino: String) = {
     ninoPattern.findFirstIn(nino) match {
       case Some(s) =>
-      case None => fail(s"Generated invalid user's NINO: $nino")
+      case None    => fail(s"Generated invalid user's NINO: $nino")
     }
   }
 }

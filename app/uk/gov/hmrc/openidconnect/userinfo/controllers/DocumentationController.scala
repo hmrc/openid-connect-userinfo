@@ -26,8 +26,8 @@ import uk.gov.hmrc.openidconnect.userinfo.views._
 import scala.language.dynamics
 
 @Singleton
-class DocumentationController @Inject() (errorHandler:HttpErrorHandler, appContext: AppContext, assets: Assets, cc:ControllerComponents)
-  extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets,errorHandler) {
+class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appContext: AppContext, assets: Assets, cc: ControllerComponents)
+  extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets, errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     val versions = APIAccessVersions(appContext.access)

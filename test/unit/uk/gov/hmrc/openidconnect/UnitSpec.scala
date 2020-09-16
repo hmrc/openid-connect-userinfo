@@ -29,11 +29,11 @@ import scala.concurrent.{Await, Future}
 
 trait UnitSpec extends WordSpec with Matchers {
 
-  implicit def toFuture[A](a:A) : Future[A] = Future.successful(a)
+  implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 
-  implicit def unFuture[A](a:Future[A]) : A = Await.result(a,10 seconds)
+  implicit def unFuture[A](a: Future[A]): A = Await.result(a, 10 seconds)
 
-  implicit val timeout : Duration = 1 minutes
+  implicit val timeout: Duration = 1 minutes
 
   def await[A](future: Future[A])(implicit timeout: Duration): A = Await.result(future, timeout)
 

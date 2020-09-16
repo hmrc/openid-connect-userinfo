@@ -28,7 +28,7 @@ import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
 import scala.concurrent.ExecutionContext
 
-class FeatureSwitchControllerSpec (implicit val cc:ControllerComponents, val ex: ExecutionContext) extends UnitSpec with ScalaFutures {
+class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex: ExecutionContext) extends UnitSpec with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -56,9 +56,9 @@ class FeatureSwitchControllerSpec (implicit val cc:ControllerComponents, val ex:
       val expectedBody = featuresList(countryCodeEnabled = true)
 
       val changeRequest = Json.obj("featureSwitches" -> Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> true)))
-      val updateRequest : Request[JsValue] = FakeRequest().withBody(changeRequest)
+      val updateRequest: Request[JsValue] = FakeRequest().withBody(changeRequest)
 
-      val result : Result = await(controller.setFlags()(updateRequest))
+      val result: Result = await(controller.setFlags()(updateRequest))
 
       status(result) shouldBe 202
       jsonBodyOf(result) shouldBe expectedBody
@@ -68,9 +68,9 @@ class FeatureSwitchControllerSpec (implicit val cc:ControllerComponents, val ex:
       val expectedBody = featuresList()
 
       val changeRequest = Json.obj("featureSwitches" -> Json.arr(Json.obj("name" -> "addressLine5", "isEnabled" -> false)))
-      val updateRequest : Request[JsValue] = FakeRequest().withBody(changeRequest)
+      val updateRequest: Request[JsValue] = FakeRequest().withBody(changeRequest)
 
-      val result : Result = await(controller.setFlags()(updateRequest))
+      val result: Result = await(controller.setFlags()(updateRequest))
 
       status(result) shouldBe 202
       jsonBodyOf(result) shouldBe expectedBody

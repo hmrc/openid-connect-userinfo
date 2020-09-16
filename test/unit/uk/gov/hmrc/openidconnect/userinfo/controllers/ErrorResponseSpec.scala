@@ -21,7 +21,7 @@ import play.api.libs.json.Json
 import uk.gov.hmrc.openidconnect.userinfo.controllers.ErrorAcceptHeaderInvalid
 import unit.uk.gov.hmrc.openidconnect.UnitSpec
 
-class ErrorResponseSpec extends UnitSpec with Matchers{
+class ErrorResponseSpec extends UnitSpec with Matchers {
   "errorResponse" should {
     "be translated to error Json with only the required fields" in {
       Json.toJson(ErrorAcceptHeaderInvalid()).toString() shouldBe

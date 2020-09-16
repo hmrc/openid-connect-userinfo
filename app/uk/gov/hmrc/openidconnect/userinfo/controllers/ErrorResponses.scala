@@ -19,8 +19,8 @@ package uk.gov.hmrc.openidconnect.userinfo.controllers
 import play.mvc.Http.Status._
 
 sealed abstract class ErrorResponse(val httpStatusCode: Int,
-                                    val errorCode: String,
-                                    val message: String)
+                                    val errorCode:      String,
+                                    val message:        String)
 
 case class ErrorUnauthorized(msg: String = "Bearer token is missing or not authorized") extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
 

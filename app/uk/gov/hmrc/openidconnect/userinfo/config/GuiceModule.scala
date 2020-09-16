@@ -38,7 +38,7 @@ class GuiceModule(val environment: Environment, val configuration: Configuration
     bind(classOf[HttpGet]).to(classOf[DefaultHttpClient])
     bind(classOf[ControllerConfig]).toInstance {
       new ControllerConfig {
-         def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
+        def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
       }
     }
   }

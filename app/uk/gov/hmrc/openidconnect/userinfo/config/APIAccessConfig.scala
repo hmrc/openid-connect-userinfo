@@ -20,10 +20,10 @@ import com.typesafe.config.{Config, ConfigObject}
 
 import collection.JavaConverters._
 
-case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds : List[String])
+case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
 
 case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
-  def findAPIs(versions : List[String], config: Config) = {
+  def findAPIs(versions: List[String], config: Config) = {
     versions.map { version =>
       val value = config.getConfig(version)
 

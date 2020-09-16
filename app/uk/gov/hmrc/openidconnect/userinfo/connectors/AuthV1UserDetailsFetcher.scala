@@ -24,18 +24,18 @@ import uk.gov.hmrc.openidconnect.userinfo.domain.UserDetails
 import scala.concurrent.{ExecutionContext, Future}
 
 trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
-  self : AuthorisedFunctions =>
+  self: AuthorisedFunctions =>
 
   def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
     authorised().retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
       case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
         credentialRole ~ description ~ groupId ~ unreadMessageCount ~ mdtp ~ gatewayInformation =>
-        Future.successful(Some(UserDetails(authProviderId = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
-          name = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
-          affinityGroup = affinityGroup.map(_.toString()), agentCode = agentCode,
-          agentFriendlyName = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
-          description = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
-          gatewayInformation = gatewayInformation, mdtpInformation = mdtp, unreadMessageCount = unreadMessageCount, None, None)))
+        Future.successful(Some(UserDetails(authProviderId     = Some(credentials.providerId), authProviderType = Some(credentials.providerType),
+                                           name               = name.name, lastName = name.lastName, dateOfBirth = birthDate, postCode = postCode, email = email,
+                                           affinityGroup      = affinityGroup.map(_.toString()), agentCode = agentCode,
+                                           agentFriendlyName  = agentInformation.agentFriendlyName, credentialRole = credentialRole.map(_.toString),
+                                           description        = description, groupIdentifier = groupId, agentId = agentInformation.agentId,
+                                           gatewayInformation = gatewayInformation, mdtpInformation = mdtp, unreadMessageCount = unreadMessageCount, None, None)))
       case _ => Future.successful(None)
     }.recover {
       case e: NotFoundException => None

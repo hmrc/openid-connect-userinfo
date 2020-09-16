@@ -26,7 +26,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 @Singleton
-class FeatureSwitchController @Inject()()(implicit cc: ControllerComponents) extends BackendController(cc) {
+class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents) extends BackendController(cc) {
 
   implicit val featureSwitchReads = Json.reads[FeatureSwitch]
   implicit val featureSwitchWrites = Json.writes[FeatureSwitch]
@@ -45,7 +45,7 @@ class FeatureSwitchController @Inject()()(implicit cc: ControllerComponents) ext
         featureSwitches.foreach(fs =>
           fs.isEnabled match {
             case true => FeatureSwitch.enable(FeatureSwitch.forName(fs.name))
-            case _ => FeatureSwitch.disable(FeatureSwitch.forName(fs.name))
+            case _    => FeatureSwitch.disable(FeatureSwitch.forName(fs.name))
           }
         )
         Future(Accepted(currentFeatureSwitchesAsJson))

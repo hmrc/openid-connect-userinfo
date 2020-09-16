@@ -66,9 +66,9 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
       stubFor(get(urlPathMatching(s"/delegated-authority")).withQueryParam("auth_bearer_token", equalTo(authBearerToken)).
         willReturn(
           aResponse()
-          .withStatus(200)
-          .withBody(
-            s"""
+            .withStatus(200)
+            .withBody(
+              s"""
                |{
                |  "token": {
                |    "scopes": ["scope1", "scope2"]
