@@ -35,6 +35,6 @@ class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appCont
   }
 
   def ramlDocs(version: String, filename: String): Action[AnyContent] = {
-    Assets.at(s"/public/api/conf/$version", filename)
+    assets.at(s"/public/api/conf/$version", filename)
   }
 }

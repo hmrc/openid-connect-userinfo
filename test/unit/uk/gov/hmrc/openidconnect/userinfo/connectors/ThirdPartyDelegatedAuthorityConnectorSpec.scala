@@ -29,6 +29,7 @@ import uk.gov.hmrc.openidconnect.userinfo.connectors.ThirdPartyDelegatedAuthorit
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.bootstrap.http.HttpClient
 import unit.uk.gov.hmrc.openidconnect.UnitSpec
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 

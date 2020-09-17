@@ -17,20 +17,26 @@
 package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, NotFoundException}
+import play.api.http.Status
+
+import scala.concurrent.{ExecutionContext, Future}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, NotFoundException}
 import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
+import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+
+import scala.util.control.NonFatal
 
 @Singleton
 class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, http: HttpGet) {
   val serviceUrl: String = appContext.thirdPartyDelegatedAuthorityUrl
 
-  def fetchScopes(authBearerToken: String)(implicit hc: HeaderCarrier): Future[Set[String]] = {
-    http.GET(s"$serviceUrl/delegated-authority", Seq("auth_bearer_token" -> authBearerToken)) map { response =>
-      (response.json \ "token" \ "scopes").as[Set[String]]
-    } recover {
-      case e: NotFoundException => Set.empty
+  def fetchScopes(authBearerToken: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Set[String]] = {
+    http.GET(s"$serviceUrl/delegated-authority", Seq("auth_bearer_token" -> authBearerToken))(readRaw, hc, ec) map { response =>
+      if (response.status == Status.NOT_FOUND) {
+        Set.empty
+      } else {
+        (response.json \ "token" \ "scopes").as[Set[String]]
+      }
     }
   }
 }

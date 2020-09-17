@@ -18,16 +18,16 @@ package uk.gov.hmrc.openidconnect.userinfo.connectors
 
 import javax.inject.{Inject, Singleton}
 
+import com.github.ghik.silencer.silent
 import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import uk.gov.hmrc.openidconnect.userinfo.domain.{Authority, DesUserInfo, UserDetails}
 import uk.gov.hmrc.openidconnect.userinfo.config.AppContext
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
+@silent abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
   self: UserDetailsFetcher =>
 
   val appContext: AppContext
@@ -36,7 +36,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
 
   override def authConnector: AuthConnector = this
 
-  def fetchEnrolments()(implicit headerCarrier: HeaderCarrier): Future[Option[Enrolments]] = {
+  def fetchEnrolments()(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[Enrolments]] = {
     authorised().retrieve(Retrievals.allEnrolments) {
       enrolments => Future.successful(Some(enrolments))
     }.recover {
@@ -44,7 +44,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
     }
   }
 
-  def fetchAuthority()(implicit headerCarrier: HeaderCarrier): Future[Option[Authority]] = {
+  def fetchAuthority()(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[Authority]] = {
     authorised().retrieve(Retrievals.credentials and Retrievals.nino) {
       case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
       case _                  => Future.successful(None)
@@ -55,7 +55,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
 
   def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = self.fetchDetails()(hc, ec)
 
-  def fetchDesUserInfo()(implicit hc: HeaderCarrier): Future[Option[DesUserInfo]] = {
+  def fetchDesUserInfo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
     authorised().retrieve(Retrievals.allItmpUserDetails) {
       case name ~ dateOfBirth ~ address =>
