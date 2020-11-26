@@ -9,8 +9,11 @@ object ScoverageSettings {
       "" +
         "<empty>",
       "Reverse.*",
-      ".*models.*",
+      ".*domain.*",
+      ".*views.*",
       ".*repositories.*",
+      ".*config.*",
+      ".*data.*",
       ".*BuildInfo.*",
       ".*javascript.*",
       ".*Routes.*",

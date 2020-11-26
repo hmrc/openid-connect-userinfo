@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it
+package unit.uk.gov.hmrc.openidconnect
 
 import java.nio.file.Paths
 
@@ -423,5 +423,66 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       result.code shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
+
+    scenario("fetching user info returns 5xx then we return 502") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+        "'email' and 'openid:government-gateway' scopes")
+      willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments",
+          "openid:government-gateway", "email", "agentInformation", "openid:mdtp"))
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will user details call will fail with 500")
+      willFindUserFailed(500)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl").options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
+        .asString
+
+
+      Then("The user information is returned")
+      result.code shouldBe 502
+
+    }
+
+    scenario("fetching user info returns 4xx then we return 502") {
+
+      Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+        "'email' and 'openid:government-gateway' scopes")
+      willReturnScopesForAuthBearerToken(authBearerToken,
+        Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments",
+          "openid:government-gateway", "email", "agentInformation", "openid:mdtp"))
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will user details call will fail with 400")
+      willFindUserFailed(409)
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl").options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
+        .asString
+
+
+      Then("The user information is returned")
+      result.code shouldBe 502
+
+    }
+
   }
+
+
 }

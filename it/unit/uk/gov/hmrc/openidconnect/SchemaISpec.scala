@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package it
+package unit.uk.gov.hmrc.openidconnect
 
 import java.nio.file.Paths
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory

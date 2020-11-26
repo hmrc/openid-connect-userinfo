@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it
+package unit.uk.gov.hmrc.openidconnect
 
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
