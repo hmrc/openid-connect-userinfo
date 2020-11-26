@@ -60,6 +60,18 @@ import com.github.ghik.silencer.silent
     )
   }
 
+  def willFindUserFailed(status: Int): Unit = {
+    stubFor(post(urlPathEqualTo(s"/auth/authorise"))
+      .withRequestBody(equalToJson(Json.obj(
+        "authorise" -> JsArray(),
+        "retrieve" -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+      ).toString()))
+      .willReturn(aResponse()
+          .withBody("{}")
+        .withStatus(status))
+    )
+  }
+
   def willFindUser(desUserInfo: Option[DesUserInfo] = None, agentInformation: Option[AgentInformation] = None,
                    credentials: Option[Credentials] = None, name: Option[Name] = None, email: Option[Email] = None,
                    affinityGroup: Option[AffinityGroup] = None, role: Option[CredentialRole] = None,
