@@ -1,2 +1,2 @@
-GET  /api/definition                             @uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController.definition()
-GET  /api/conf/:version/*filename                @uk.gov.hmrc.openidconnect.userinfo.controllers.DocumentationController.ramlDocs(version, filename)
+GET  /api/definition                             @controllers.DocumentationController.definition()
+GET  /api/conf/:version/*filename                @controllers.DocumentationController.ramlDocs(version, filename)
