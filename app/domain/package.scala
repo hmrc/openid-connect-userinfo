@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ import org.joda.time._
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
-import uk.gov.hmrc.http.Token
 
 package object domain {
   implicit val dFormat: Format[LocalDate] = new Format[LocalDate] {
@@ -33,7 +32,6 @@ package object domain {
   implicit val enrolmentIdentifier = Json.format[EnrolmentIdentifier]
   implicit val enrloment = Json.format[Enrolment]
 
-  implicit val token = Json.format[Token]
   implicit val gatewayInformationFmt: Format[GatewayInformation] = Json.format[GatewayInformation]
   implicit val mdtpInformationFmt: Format[MdtpInformation] = Json.format[MdtpInformation]
   implicit val userDetails = Json.format[UserDetails]
