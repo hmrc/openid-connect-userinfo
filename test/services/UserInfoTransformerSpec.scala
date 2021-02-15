@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,18 +16,18 @@
 
 package services
 
+import config.{FeatureSwitch, UserInfoFeatureSwitches}
+import domain._
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
+import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.{HeaderCarrier, Token}
-import config.{FeatureSwitch, UserInfoFeatureSwitches}
-import domain._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import testSupport.UnitSpec
 
 class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
 
@@ -50,8 +50,6 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
                                              agentFriendlyName  = Some("agent-friendly-name"), gatewayInformation = Some(gatewayInformation), mdtpInformation = Some(authMdtp),
                                              unreadMessageCount = Some(10), profile = None, groupProfile = None
   )
-
-  val ggToken = Token("ggToken")
 
   val government_gateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("John"),
                                                                               Some("affinityGroup"), userDetails.agentCode, agent_id = userDetails.agentId, agent_friendly_name = userDetails.agentFriendlyName,

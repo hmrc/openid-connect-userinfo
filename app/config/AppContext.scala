@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package config
 
-import javax.inject.{Inject, Singleton}
 import com.typesafe.config.ConfigObject
-import play.api.Mode
-import play.api.{Configuration, Environment}
-import uk.gov.hmrc.play.bootstrap.config.{RunMode, ServicesConfig}
+import javax.inject.{Inject, Singleton}
+import play.api.{Configuration, Environment, Mode}
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppContext @Inject() (val runModeConfiguration: Configuration, environment: Environment, runMode: RunMode) extends ServicesConfig(runModeConfiguration, runMode) {
+class AppContext @Inject() (val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig(runModeConfiguration) {
   protected def mode: Mode = environment.mode
 
   lazy val appName: String = runModeConfiguration.get[String]("appName")
@@ -31,7 +30,7 @@ class AppContext @Inject() (val runModeConfiguration: Configuration, environment
   lazy val authUrl: String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
   lazy val access: Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
-  lazy val desEnvironment: String = runModeConfiguration.get[String](s"$runMode.env.microservice.services.des.environment")
-  lazy val desBearerToken: String = runModeConfiguration.get[String](s"$runMode.env.microservice.services.des.bearer-token")
+  lazy val desEnvironment: String = runModeConfiguration.get[String](s"microservice.services.des.environment")
+  lazy val desBearerToken: String = runModeConfiguration.get[String](s"microservice.services.des.bearer-token")
   lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
 }

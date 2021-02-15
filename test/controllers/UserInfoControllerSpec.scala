@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,23 +18,23 @@ package controllers
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
+import config.AppContext
+import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.mockito.Matchers
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mockito.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest
+import services.{LiveUserInfoService, SandboxUserInfoService}
+import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
-import config.AppContext
-import domain.{Address, GovernmentGatewayDetails, UserInfo}
-import services.{LiveUserInfoService, SandboxUserInfoService}
 
 import scala.concurrent.{ExecutionContext, Future}
-import testSupport.UnitSpec
 
 class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
 

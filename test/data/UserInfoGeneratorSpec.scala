@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,12 +18,12 @@ package data
 
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import org.scalatest.prop.PropertyChecks
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain.UserInfo
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import testSupport.UnitSpec
 
-class UserInfoGeneratorSpec extends UnitSpec with PropertyChecks with BeforeAndAfterEach {
+class UserInfoGeneratorSpec extends UnitSpec with ScalaCheckPropertyChecks with BeforeAndAfterEach {
   val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
   val from = new LocalDate(1939, 12, 27)
   val until = new LocalDate(1998, 12, 29)

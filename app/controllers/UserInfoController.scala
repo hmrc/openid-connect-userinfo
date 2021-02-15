@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 HM Revenue & Customs
+ * Copyright 2021 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,16 @@
 
 package controllers
 
-import javax.inject.{Inject, Singleton}
 import com.google.inject.name.Named
+import config.AppContext
+import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
+import services.UserInfoService
 import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
-import config.AppContext
-import services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
-import uk.gov.hmrc.play.bootstrap.controller.BackendBaseController
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext
 

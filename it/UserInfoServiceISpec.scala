@@ -170,6 +170,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
       Then("The user information is returned")
+      println(result.body)
       result.code shouldBe 200
 
       import scala.collection.JavaConverters._

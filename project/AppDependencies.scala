@@ -8,10 +8,10 @@ object AppDependencies {
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-play-26" % "1.16.0",
-    "uk.gov.hmrc"       %% "play-hmrc-api"     % "4.1.0-play-26",
-    "uk.gov.hmrc"       %% "domain"            % "5.10.0-play-26",
-    "com.typesafe.play" %% "play-json-joda"    % "2.6.14"
+    "uk.gov.hmrc"             %% "bootstrap-backend-play-27"  % "3.2.0",
+    "uk.gov.hmrc"       %% "domain"            % "5.10.0-play-27",
+    "uk.gov.hmrc"       %% "play-hmrc-api"     % "5.3.0-play-27",
+    "com.typesafe.play" %% "play-json-joda"    % "2.7.4"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -19,7 +19,7 @@ object AppDependencies {
     "org.scalacheck"         %% "scalacheck"               % "1.13.5",
     "com.github.tomakehurst"  % "wiremock-jre8"            % "2.24.1"            % testScope,
     "uk.gov.hmrc"            %% "service-integration-test" % "0.12.0-play-26"    % testScope,
-    "org.scalatestplus.play" %% "scalatestplus-play"       % "3.1.2"             % testScope,
+    "org.scalatestplus.play" %% "scalatestplus-play"       % "3.1.3"             % testScope,
     "org.scoverage"          %% "scalac-scoverage-plugin"  % "1.3.1"             % testScope,
     "org.pegdown"             % "pegdown"                  % "1.6.0"             % testScope,
     "org.jsoup"               % "jsoup"                    % "1.10.3"            % testScope,
