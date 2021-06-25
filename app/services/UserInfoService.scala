@@ -20,7 +20,7 @@ import javax.inject.{Inject, Named, Singleton}
 
 import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.Enrolments
-import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import connectors._
 import controllers.{Version, Version_1_0, Version_1_1}
