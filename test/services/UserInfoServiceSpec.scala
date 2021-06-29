@@ -24,13 +24,12 @@ import org.mockito.BDDMockito._
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.mockito.Mockito._
 import org.scalatestplus.mockito.MockitoSugar
 import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.logging.Authorization
+import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
 import scala.concurrent.ExecutionContext.Implicits.global

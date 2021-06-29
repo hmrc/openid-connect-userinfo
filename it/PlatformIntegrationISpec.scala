@@ -40,8 +40,6 @@ import scala.concurrent.duration._
  */
 class PlatformIntegrationISpec(implicit val wsClient: WSClient) extends BaseFeatureISpec with WSRequest with ScalaFutures {
 
-  override def applicableHeaders(url: String)(implicit hc: HeaderCarrier): Seq[(String, String)] = Nil
-
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val documentationController = app.injector.instanceOf[DocumentationController]
@@ -50,12 +48,12 @@ class PlatformIntegrationISpec(implicit val wsClient: WSClient) extends BaseFeat
   feature("microservice") {
 
     scenario("provide definition endpoint") {
-      val response = Await.result(buildRequest(resource("/api/definition")).get(), 1.minute)
+      val response = Await.result(buildRequest(resource("/api/definition"), Seq.empty).get(), 1.minute)
       response.status shouldBe 200
     }
 
     scenario("provide definition for versions 1.0 and 1.1") {
-      val response = Await.result(buildRequest(resource("/api/definition")).get(), 1.minute)
+      val response = Await.result(buildRequest(resource("/api/definition"), Seq.empty).get(), 1.minute)
       response.status shouldBe 200
       val jsonBody = Json.parse(response.body)
 
