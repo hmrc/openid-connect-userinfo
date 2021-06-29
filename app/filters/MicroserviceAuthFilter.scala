@@ -33,7 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions with Results {
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    implicit val hc = HeaderCarrierConverter.fromRequestAndSession(rh, rh.session)
+    implicit val hc = HeaderCarrierConverter.fromRequest(rh)
 
     rh.attrs.get(Router.Attrs.HandlerDef) match {
       case Some(name) if controllerNeedsAuth(name.controller).getOrElse(false) =>
