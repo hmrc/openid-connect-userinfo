@@ -21,8 +21,8 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
 
   val serviceUrl = "/feature-switches"
 
-  feature("getting feature switches") {
-    scenario("calling GET /feature-switches") {
+  Feature("getting feature switches") {
+    Scenario("calling GET /feature-switches") {
       Given("we call GET /feature-switches")
 
       val result = Http(resource(s"$serviceUrl")).asString
@@ -34,8 +34,8 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
     }
   }
 
-  feature("updating feature switches") {
-    scenario("calling POST /feature-switches") {
+  Feature("updating feature switches") {
+    Scenario("calling POST /feature-switches") {
       Given("we call GET /feature-switches")
 
       val result = Http(resource(s"$serviceUrl")).asString

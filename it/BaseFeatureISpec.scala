@@ -20,19 +20,19 @@ import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, post, stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.typesafe.config.{Config, ConfigFactory}
 import org.scalatest._
+import org.scalatest.featurespec.AnyFeatureSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.integration.ServiceSpec
 
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 import scala.collection.JavaConverters._
-
 import scala.util.Try
 
 trait BaseFeatureISpec
-  extends FeatureSpec
+  extends AnyFeatureSpec
     with GivenWhenThen
     with Matchers
     with GuiceOneServerPerSuite

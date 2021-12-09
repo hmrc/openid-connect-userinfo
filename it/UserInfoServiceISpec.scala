@@ -131,9 +131,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Some(government_gateway_v1),
     Some(mdtp))
 
-  feature("fetch user information") {
+  Feature("fetch user information") {
 
-    scenario("fetch user profile v1") {
+    Scenario("fetch user profile v1") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government-gateway' scopes")
@@ -179,7 +179,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       json shouldBe Json.toJson(userInfo_v1)
     }
 
-    scenario("fetch user profile v2") {
+    Scenario("fetch user profile v2") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government-gateway' scopes")
@@ -224,7 +224,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       json shouldBe Json.toJson(userInfo_v2)
     }
 
-    scenario("fetch user profile without family name") {
+    Scenario("fetch user profile without family name") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
@@ -251,7 +251,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
                                                                                   mdtp               = None))
     }
 
-    scenario("fetch user data without enrolments when there are no enrolments") {
+    Scenario("fetch user data without enrolments when there are no enrolments") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government-gateway' and 'openid:hmrc-enrolments' scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
@@ -276,7 +276,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Json.parse(result.body) shouldBe Json.toJson(userInfo_v1.copy(hmrc_enrolments = None))
     }
 
-    scenario("fetch user data without address and user details when there are no address and user details") {
+    Scenario("fetch user data without address and user details when there are no address and user details") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
@@ -304,7 +304,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Json.parse(result.body) shouldBe Json.toJson(userWithNinoAndEnrolmentsOnly)
     }
 
-    scenario("fetch enrolments only when scope contains 'openid:hmrc-enrolments'") {
+    Scenario("fetch enrolments only when scope contains 'openid:hmrc-enrolments'") {
 
       Given("A Auth token with 'openid:hmrc-enrolments' scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
@@ -329,7 +329,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Json.parse(result.body) shouldBe Json.toJson(userWithEnrolmentsOnly)
     }
 
-    scenario("fetch government gateway details only when scope contains 'openid:government-gateway'") {
+    Scenario("fetch government gateway details only when scope contains 'openid:government-gateway'") {
 
       Given("A Auth token with 'openid:government-gateway' scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
@@ -361,9 +361,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     }
   }
 
-  feature("fetching user information propagates Unauthorized errors from upstream services") {
+  Feature("fetching user information propagates Unauthorized errors from upstream services") {
 
-    scenario("return 401 when Auth returns Unauthorized") {
+    Scenario("return 401 when Auth returns Unauthorized") {
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       willReturnScopesForAuthBearerToken(authBearerToken,
                                          Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
@@ -381,9 +381,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     }
   }
 
-  feature("fetching user information handles upstream errors") {
+  Feature("fetching user information handles upstream errors") {
 
-    scenario("return 502 when Auth returns error") {
+    Scenario("return 502 when Auth returns error") {
       val errorMsg = "auth error msg"
       val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 503. Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
@@ -403,7 +403,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
-    scenario("return 502 when Auth returns not found") {
+    Scenario("return 502 when Auth returns not found") {
       val errorMsg = "auth error msg"
       val expectedErrorMessage = s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 404 (Not Found). Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
@@ -423,7 +423,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
-    scenario("fetching user info returns 5xx then we return 502") {
+    Scenario("fetching user info returns 5xx then we return 502") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government-gateway' scopes")
@@ -452,7 +452,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
     }
 
-    scenario("fetching user info returns 4xx then we return 502") {
+    Scenario("fetching user info returns 4xx then we return 502") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
         "'email' and 'openid:government-gateway' scopes")

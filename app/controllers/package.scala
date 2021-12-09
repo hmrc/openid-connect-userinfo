@@ -18,7 +18,14 @@ import play.api.libs.json.{JsValue, Json, Writes}
 
 package object controllers {
 
-  implicit val errorResponseWrites = new Writes[ErrorResponse] {
-    def writes(e: ErrorResponse): JsValue = Json.obj("code" -> e.errorCode, "message" -> e.message)
+  def errorWrites[T <: ErrorResponse] = new Writes[T] {
+    override def writes(o: T): JsValue = Json.obj("code" -> o.errorCode, "message" -> o.message)
   }
+
+  implicit val errorResponseWrites = errorWrites[ErrorResponse]
+  implicit val errorUnauthorizedWrites = errorWrites[ErrorUnauthorized]
+  implicit val errorNotFoundWrites = errorWrites[ErrorNotFound]
+  implicit val errorAcceptHeaderInvalidWrites = errorWrites[ErrorAcceptHeaderInvalid]
+  implicit val errorBadGatewayWrites = errorWrites[ErrorBadGateway]
+  implicit val errorBadRequestWrites = errorWrites[ErrorBadRequest]
 }
