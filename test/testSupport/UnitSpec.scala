@@ -17,18 +17,19 @@
 package testSupport
 
 import java.nio.charset.Charset
-
 import akka.stream.Materializer
 import akka.util.ByteString
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
+
 import scala.language.postfixOps
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
 import scala.language.implicitConversions
 
-trait UnitSpec extends WordSpec with Matchers {
+trait UnitSpec extends AnyWordSpec with Matchers {
 
   implicit def toFuture[A](a: A): Future[A] = Future.successful(a)
 

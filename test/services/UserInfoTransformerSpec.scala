@@ -20,7 +20,7 @@ import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain._
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.scalatest.MockitoSugar
 import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}

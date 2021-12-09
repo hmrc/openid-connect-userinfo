@@ -45,14 +45,14 @@ class PlatformIntegrationISpec(implicit val wsClient: WSClient) extends BaseFeat
   val documentationController = app.injector.instanceOf[DocumentationController]
   val request = FakeRequest()
 
-  feature("microservice") {
+  Feature("microservice") {
 
-    scenario("provide definition endpoint") {
+    Scenario("provide definition endpoint") {
       val response = Await.result(buildRequest(resource("/api/definition"), Seq.empty).get(), 1.minute)
       response.status shouldBe 200
     }
 
-    scenario("provide definition for versions 1.0 and 1.1") {
+    Scenario("provide definition for versions 1.0 and 1.1") {
       val response = Await.result(buildRequest(resource("/api/definition"), Seq.empty).get(), 1.minute)
       response.status shouldBe 200
       val jsonBody = Json.parse(response.body)

@@ -15,13 +15,12 @@
  */
 
 import java.nio.file.Paths
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import org.scalatest.FlatSpec
+import org.scalatest.flatspec.AnyFlatSpec
 
-class SchemaISpec extends FlatSpec {
+class SchemaISpec extends AnyFlatSpec {
   val validator = JsonSchemaFactory.byDefault().getValidator
   val root = System.getProperty("user.dir")
   val public10 = Paths.get(root, "public", "api", "conf", "1.0").toString

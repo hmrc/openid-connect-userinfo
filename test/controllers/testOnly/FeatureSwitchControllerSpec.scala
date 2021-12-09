@@ -17,7 +17,6 @@
 package controllers.testOnly
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, Result}
@@ -30,7 +29,6 @@ import scala.concurrent.ExecutionContext
 class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex: ExecutionContext) extends UnitSpec with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
 
   trait Setup {
     def featuresList(countryCodeEnabled: Boolean = false, addressLine5Enabled: Boolean = false): JsValue = Json.arr(

@@ -17,15 +17,12 @@
 package controllers
 
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
-import org.mockito.Matchers
-import org.mockito.Matchers.{any, eq => eqTo}
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.mockito.MockitoSugar
+import org.mockito.scalatest.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest
@@ -39,7 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
-  implicit val materializer: ActorMaterializer = ActorMaterializer()
   val ACCEPT_HEADER_V1_0 = "application/vnd.hmrc.1.0+json"
   val ACCEPT_HEADER_V1_1 = "application/vnd.hmrc.1.1+json"
 
@@ -71,7 +67,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
   "sandbox userInfo" should {
     "retrieve user information v1.0" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(Matchers.any[HeaderCarrier])).willReturn(userInfoV1)
+      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
@@ -81,7 +77,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "retrieve user information v1.1" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_1))(Matchers.any[HeaderCarrier])).willReturn(userInfoV11)
+      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_1))(any[HeaderCarrier])).willReturn(userInfoV11)
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.1+json")))
 
@@ -91,7 +87,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(Matchers.any[HeaderCarrier])).willReturn(userInfoV1)
+      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
 
       val result = await(sandboxController.userInfo()(FakeRequest()))
 
