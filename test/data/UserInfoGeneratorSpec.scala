@@ -19,12 +19,11 @@ package data
 import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
-import org.scalatest.matchers.should.Matchers
 import domain.UserInfo
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import testSupport.UnitSpec
 
-class UserInfoGeneratorSpec extends UnitSpec with Matchers with ScalaCheckPropertyChecks with BeforeAndAfterEach {
+class UserInfoGeneratorSpec extends UnitSpec with ScalaCheckPropertyChecks with BeforeAndAfterEach {
   val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
   val from = new LocalDate(1939, 12, 27)
   val until = new LocalDate(1998, 12, 29)
