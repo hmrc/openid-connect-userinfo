@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ class APIAccessConfigSpec extends UnitSpec {
   val configuration: Configuration = Configuration.from(Map(
     "api.access.version.1_0.type" -> "PRIVATE",
     "api.access.version.1_0.status" -> "STABLE",
-    "api.access.version.1_0.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
-    "api.access.version.1_0.white-list.applicationIds.1" -> "df8c10db-01fb-4543-b77e-859267462231",
-    "api.access.version.1_0.white-list.applicationIds.2" -> "9a32c713-7741-4aae-b39d-957021fb97a9",
+    "api.access.version.1_0.allow-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
+    "api.access.version.1_0.allow-list.applicationIds.1" -> "df8c10db-01fb-4543-b77e-859267462231",
+    "api.access.version.1_0.allow-list.applicationIds.2" -> "9a32c713-7741-4aae-b39d-957021fb97a9",
     "api.access.version.1_0.endpointsEnabled" -> true,
     "api.access.version.1_1.type" -> "PRIVATE",
     "api.access.version.1_1.status" -> "ALPHA",
-    "api.access.version.1_1.white-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
+    "api.access.version.1_1.allow-list.applicationIds.0" -> "649def0f-3ed3-4df5-8ae1-3e687a9143ea",
     "api.access.version.1_1.endpointsEnabled" -> false
   ))
 
