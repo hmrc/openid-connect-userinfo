@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 HM Revenue & Customs
+ * Copyright 2022 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
 
       val accessType = if (value.hasPath("type")) value.getString("type") else "PRIVATE"
       val status = if (value.hasPath("status")) value.getString("status") else throw new IllegalArgumentException("Status missing")
-      val allowListedApplicationIds = if (value.hasPath("white-list.applicationIds")) Some(value.getStringList("white-list.applicationIds").asScala.toList) else None
+      val allowListedApplicationIds = if (value.hasPath("allow-list.applicationIds")) Some(value.getStringList("allow-list.applicationIds").asScala.toList) else None
       val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
       val versionNumber = version.replace('_', '.')
 
