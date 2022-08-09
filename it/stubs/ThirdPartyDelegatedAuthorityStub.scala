@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-package it.stubs
+package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
 
 trait ThirdPartyDelegatedAuthorityStub {
-  def willReturnScopesForAuthBearerToken(authBearerToken: String, scopes: Set[String]) = {
+  def willReturnScopesForAuthBearerToken(authBearerToken: String, scopes: Set[String]):StubMapping = {
     stubFor(get(urlPathEqualTo(s"/delegated-authority"))
-      .withQueryParam("auth_bearer_token", equalTo(authBearerToken))
+      .withHeader("auth-bearer-token", equalTo(authBearerToken))
       .willReturn(aResponse().withBody(
         s"""
           |{"token":

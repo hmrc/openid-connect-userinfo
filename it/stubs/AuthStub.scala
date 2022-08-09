@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package it.stubs
+package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json._
