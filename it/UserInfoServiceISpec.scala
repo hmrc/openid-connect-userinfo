@@ -15,17 +15,16 @@
  */
 
 import java.nio.file.Paths
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import controllers.Version_1_1
 import domain._
-import it.stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import scalaj.http.{Http, HttpOptions}
+import stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino

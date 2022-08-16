@@ -31,9 +31,9 @@ class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, h
   val serviceUrl: String = appContext.thirdPartyDelegatedAuthorityUrl
 
   def fetchScopes(authBearerToken: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Set[String]] = {
-    http.GET(s"$serviceUrl/delegated-authority", Seq("auth_bearer_token" -> authBearerToken))(readRaw, hc, ec) map { response =>
+    http.GET(s"$serviceUrl/delegated-authority", Nil, Seq("auth-bearer-token" -> authBearerToken))(readRaw, hc, ec) map { response =>
       if (response.status == Status.NOT_FOUND) {
-        Set.empty
+        Set[String]()
       } else {
         (response.json \ "token" \ "scopes").as[Set[String]]
       }
