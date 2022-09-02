@@ -16,7 +16,7 @@
 
 package domain
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, MdtpInformation}
 
 case class UserDetails(
@@ -36,7 +36,6 @@ case class UserDetails(
     agentId:            Option[String]             = None,
     gatewayInformation: Option[GatewayInformation],
     mdtpInformation:    Option[MdtpInformation],
-    unreadMessageCount: Option[Int],
     profile:            Option[String],
     groupProfile:       Option[String]
 )

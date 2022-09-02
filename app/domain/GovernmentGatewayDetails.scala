@@ -25,7 +25,7 @@ case class GovernmentGatewayDetails(
     agent_id:             Option[String],
     agent_friendly_name:  Option[String],
     gateway_token:        Option[String],
-    unread_message_count: Option[Int],
+    unread_message_count: Option[Int]         = None,
     profile_uri:          Option[String],
     group_profile_uri:    Option[String]
 )

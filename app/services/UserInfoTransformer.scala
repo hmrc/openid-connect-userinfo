@@ -17,7 +17,7 @@
 package services
 
 import javax.inject.Singleton
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import config.UserInfoFeatureSwitches
@@ -83,7 +83,7 @@ class UserInfoTransformer {
 
     Some(GovernmentGatewayDetails(user_id              = credId, user_name = userName, roles = credentialRoles, affinity_group = affinityGroup,
                                   agent_code           = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
-                                  gateway_token        = gatewayInformation.flatMap(_.gatewayToken), unread_message_count = userDetails.flatMap(_.unreadMessageCount),
+                                  gateway_token        = gatewayInformation.flatMap(_.gatewayToken), unread_message_count = None,
                                   profile_uri          = profileUrl, group_profile_uri = groupProfileUrl))
   }
 

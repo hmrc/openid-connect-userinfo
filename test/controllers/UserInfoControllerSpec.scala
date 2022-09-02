@@ -19,7 +19,7 @@ package controllers
 import akka.actor.ActorSystem
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
 import org.mockito.scalatest.MockitoSugar
