@@ -17,11 +17,12 @@
 package data
 
 import javax.inject.Singleton
-import org.joda.time._
 import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import config.UserInfoFeatureSwitches
 import domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
+
+import java.time.LocalDate
 
 @Singleton
 class UserInfoGenerator {
@@ -87,7 +88,7 @@ class UserInfoGenerator {
       day <- dayGen
       month <- monthGen
       year <- yearGen
-    } yield new LocalDate(year, month, day)
+    } yield LocalDate.of(year, month, day)
   }
 
   private def formattedNino = {

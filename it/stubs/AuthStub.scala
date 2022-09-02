@@ -22,10 +22,11 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.{Retrievals => V2Retrievals}
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.controllers.RestFormats.localDateFormats
 import controllers.{Version, Version_1_0, Version_1_1}
 import domain.{DesUserInfo, _}
 import com.github.ghik.silencer.silent
+
+import java.time.LocalDate
 
 @silent trait AuthStub {
 
@@ -95,7 +96,7 @@ import com.github.ghik.silencer.silent
 
     val response = Json.obj()
       .appendOptional("itmpName", jsonItmpName)
-      .appendOptional("itmpDateOfBirth", jsonDob.map(localDateFormats.writes))
+      .appendOptional("itmpDateOfBirth", jsonDob.map(writes.writes))
       .appendOptional("itmpAddress", jsonAddress)
       .appendOptional("agentInformation", jsonAgent)
       .appendOptional("email", email.map(e => JsString(e.value)))

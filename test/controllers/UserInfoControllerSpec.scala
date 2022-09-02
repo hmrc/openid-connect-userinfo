@@ -19,7 +19,6 @@ package controllers
 import akka.actor.ActorSystem
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
-import org.joda.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
 import org.mockito.scalatest.MockitoSugar
@@ -31,6 +30,7 @@ import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {

@@ -18,7 +18,6 @@ package services
 
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain._
-import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import org.mockito.scalatest.MockitoSugar
 import testSupport.UnitSpec
@@ -27,6 +26,7 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.LocalDate
 import scala.concurrent.ExecutionContext.Implicits.global
 
 class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach {

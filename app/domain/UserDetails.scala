@@ -16,8 +16,9 @@
 
 package domain
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, MdtpInformation}
+
+import java.time.LocalDate
 
 case class UserDetails(
     authProviderId:     Option[String]             = None,

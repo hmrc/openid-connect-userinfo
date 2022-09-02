@@ -17,11 +17,12 @@
 package services
 
 import javax.inject.Singleton
-import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
 import config.UserInfoFeatureSwitches
 import domain._
+
+import java.time.LocalDate
 
 @Singleton
 class UserInfoTransformer {

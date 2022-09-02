@@ -21,13 +21,14 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import controllers.Version_1_1
 import domain._
-import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import scalaj.http.{Http, HttpOptions}
 import stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
+
+import java.time.LocalDate
 
 class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
 

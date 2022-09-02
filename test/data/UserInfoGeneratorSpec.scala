@@ -16,17 +16,18 @@
 
 package data
 
-import org.joda.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain.UserInfo
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import testSupport.UnitSpec
 
+import java.time.LocalDate
+
 class UserInfoGeneratorSpec extends UnitSpec with ScalaCheckPropertyChecks with BeforeAndAfterEach {
   val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
-  val from = new LocalDate(1939, 12, 27)
-  val until = new LocalDate(1998, 12, 29)
+  val from = LocalDate.of(1939, 12, 27)
+  val until = LocalDate.of(1998, 12, 29)
 
   override protected def beforeEach(): Unit = {
     FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)

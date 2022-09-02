@@ -16,9 +16,10 @@
 
 package domain
 
-import org.joda.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
+
+import java.time.LocalDate
 
 case class Address(formatted:    String,
                    postal_code:  Option[String],
