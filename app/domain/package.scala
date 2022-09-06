@@ -17,12 +17,8 @@
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
-import java.time.LocalDate
 
 package object domain {
-
-  implicit val reads: Reads[LocalDate] = play.api.libs.json.Reads.DefaultLocalDateReads
-  implicit val writes: Writes[LocalDate] = play.api.libs.json.Writes.DefaultLocalDateWrites
 
   implicit val desUserName = Json.format[ItmpName]
 
@@ -40,4 +36,5 @@ package object domain {
   implicit val addressFmt = Json.format[Address]
   implicit val userInfoFmt = Json.format[UserInfo]
   implicit val apiAccessFmt = Json.format[APIAccess]
+
 }
