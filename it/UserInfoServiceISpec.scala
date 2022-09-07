@@ -21,7 +21,7 @@ import com.github.fge.jsonschema.main.JsonSchemaFactory
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import controllers.Version_1_1
 import domain._
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import play.api.libs.json.Json
 import scalaj.http.{Http, HttpOptions}
 import stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
@@ -60,8 +60,8 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
   val mdtp = Mdtp(deviceId, sessionId)
   val authMdtp = MdtpInformation(deviceId, sessionId)
   val gatewayInformation = GatewayInformation(Some("gateway-token-qwert"))
-  val government_gateway_v1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("Bob"), Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), None, None)
-  val government_gateway_v2: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("Bob"), Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), Some(10), Some("some_url"),
+  val government_gateway_v1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("Bob"), Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), None, None, None)
+  val government_gateway_v2: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("1304372065861347"), Some(Seq("User")), Some("Bob"), Some("Individual"), Some("AC-12345"), Some("ACC"), Some("AC Accounting"), Some("gateway-token-qwert"), None, Some("some_url"),
                                                                                  Some("some_other_url"))
   val email = "my-email@abc.uk"
 

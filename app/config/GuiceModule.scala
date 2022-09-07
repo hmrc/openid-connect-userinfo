@@ -20,10 +20,10 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.{CorePost, HttpGet}
+import uk.gov.hmrc.http.{CorePost, HttpClient, HttpGet}
 import connectors._
 import services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
-import uk.gov.hmrc.play.bootstrap.http.{DefaultHttpClient, HttpClient}
+import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 
 class GuiceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {

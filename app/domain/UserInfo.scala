@@ -16,7 +16,7 @@
 
 package domain
 
-import org.joda.time.LocalDate
+import java.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolment
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 

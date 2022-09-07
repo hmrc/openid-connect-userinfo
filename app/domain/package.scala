@@ -14,16 +14,11 @@
  * limitations under the License.
  */
 
-import org.joda.time._
 import play.api.libs.json._
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
 package object domain {
-  implicit val dFormat: Format[LocalDate] = new Format[LocalDate] {
-    override def reads(json: JsValue): JsResult[LocalDate] = JodaReads.DefaultJodaLocalDateReads.reads(json)
-    override def writes(o: LocalDate): JsValue = JodaWrites.DefaultJodaLocalDateWrites.writes(o)
-  }
 
   implicit val desUserName = Json.format[ItmpName]
 
@@ -38,9 +33,8 @@ package object domain {
   implicit val mdtp = Json.format[Mdtp]
   implicit val governmentGatewayDetails = Json.format[GovernmentGatewayDetails]
 
-  implicit val dateReads = JodaReads.jodaDateReads("yyyy-MM-dd")
-  implicit val dateWrites = JodaWrites.jodaDateWrites("yyyy-MM-dd")
   implicit val addressFmt = Json.format[Address]
   implicit val userInfoFmt = Json.format[UserInfo]
   implicit val apiAccessFmt = Json.format[APIAccess]
+
 }
