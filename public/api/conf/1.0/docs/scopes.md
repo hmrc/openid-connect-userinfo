@@ -2,7 +2,7 @@ Access to user information is controlled through scopes. Each access token (OAut
 
 Here is a list of supported scopes and the claims they contain. The details of each claim, including any contained fields, is documented further down.
 
-* 'profile': given_name, middle_name, familiy_name, birthdate
+* 'profile': given_name, middle_name, family_name, birthdate
 * 'address': address
 * 'email': email
 * 'openid:hmrc-enrolments': hmrc_enrolments
