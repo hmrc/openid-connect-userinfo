@@ -18,7 +18,6 @@ package services
 
 import javax.inject.{Inject, Named, Singleton}
 
-import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
@@ -91,11 +90,11 @@ class LiveUserInfoService @Inject() (
 @Singleton
 class SandboxUserInfoService @Inject() (userInfoGenerator: UserInfoGenerator) extends UserInfoService {
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    val generator: Gen[UserInfo] = version match {
-      case Version_1_0 => userInfoGenerator.userInfoV1_0
-      case Version_1_1 => userInfoGenerator.userInfoV1_1
+    val generator: UserInfo = version match {
+      case Version_1_0 => userInfoGenerator.userInfoV1_0()
+      case Version_1_1 => userInfoGenerator.userInfoV1_1()
+      case _           => UserInfo()
     }
-
-    Future.successful(generator.sample.getOrElse(UserInfo()))
+    Future.successful(generator)
   }
 }

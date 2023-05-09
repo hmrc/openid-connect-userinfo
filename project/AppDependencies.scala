@@ -1,6 +1,6 @@
 import play.core.PlayVersion
-import play.sbt.PlayImport._
-import sbt._
+import play.sbt.PlayImport.*
+import sbt.*
 
 object AppDependencies {
 
@@ -24,7 +24,7 @@ object AppDependencies {
     "org.jsoup"               % "jsoup"                    % "1.15.3"            % testScope,
     "org.scalaj"             %% "scalaj-http"              % "2.4.2"             % testScope,
     "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.12"           % testScope,
-    "org.scalacheck"         %% "scalacheck"               % "1.16.0",
+    "org.scalacheck"         %% "scalacheck"               % "1.16.0"            % testScope,
     "com.github.fge"          % "json-schema-validator"    % "2.2.6"             % testScope,
     "com.vladsch.flexmark"    %  "flexmark-all"            % "0.36.8"            % testScope
   )

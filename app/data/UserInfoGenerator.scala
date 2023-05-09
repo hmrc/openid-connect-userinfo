@@ -18,20 +18,21 @@ package data
 
 import javax.inject.Singleton
 import java.time.LocalDate
-import org.scalacheck.Gen
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import config.UserInfoFeatureSwitches
 import domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
 
+import scala.util.Random.{nextInt => randomNextInt}
+
 @Singleton
 class UserInfoGenerator {
-  val firstNames = List(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
-  val middleNames = List(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
-  val lastNames = List(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
+  val firstNames: Seq[Option[String]] = Seq(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
+  val middleNames: Seq[Option[String]] = Seq(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
+  val lastNames: Seq[Option[String]] = Seq(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
   val deviceId = "device-id-abc"
   val sessionId = "session-id-abcd"
 
-  val fullAddress = Some(Address(
+  val fullAddress: Option[Address] = Some(Address(
     """221B Baker Street
       |Town centre
       |London
@@ -48,33 +49,34 @@ class UserInfoGenerator {
       s"""221B Baker Street
         |Town centre
         |London
-        |England${addressLine5}
+        |England$addressLine5
         |NW1 9NT
         |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), code))
   }
 
-  def address = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
+  def address: Option[Address] = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
-  val enrolments = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
-  val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
-                                                                                   Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
-  val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
-                                                                                   Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
-  val mdtp = Mdtp(deviceId, sessionId)
+  val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
+  private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+                                                                                           Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
+  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+                                                                                           Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
+  val mdtp: Mdtp = Mdtp(deviceId, sessionId)
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
 
   private lazy val ninoSuffixes = "ABCD"
 
-  private val nameGen = Gen.oneOf(firstNames)
-  private val lastNameGen = Gen.oneOf(lastNames)
-  private val middleNameGen = Gen.oneOf(middleNames)
-  private val dayGen = Gen.choose(1, 28)
-  private val monthGen = Gen.choose(1, 12)
-  private val yearGen = Gen.choose(1940, 1998)
-  private val prefixGen = Gen.oneOf(ninoPrefixes)
-  private val suffixGen = Gen.oneOf(ninoSuffixes)
-  private val numbersGen = Gen.choose(100000, 999999)
+  private def firstNameGenerator: Option[String] = firstNames(randomNextInt(firstNames.size))
+  private def lastNameGenerator: Option[String] = lastNames(randomNextInt(lastNames.size))
+  private def middleNameGenerator: Option[String] = middleNames(randomNextInt(middleNames.size))
+  private def dayGenerator: Int = 1 + randomNextInt(28)
+  private def monthGenerator: Int = 1 + randomNextInt(12)
+  private def yearGenerator: Int = 1940 + randomNextInt(50)
+  private def ninoPrefixGenerator: Option[String] = Some(ninoPrefixes.charAt(randomNextInt(ninoPrefixes.length)).toString)
+  private def ninoSuffixGenerator: Option[String] = Some(ninoSuffixes.charAt(randomNextInt(ninoSuffixes.length)).toString)
+  private def numbersGenerator: Option[Int] = Some(100000 + randomNextInt(99999))
+
   private def email(name: Option[String], lastName: Option[String]): Option[String] = (name, lastName) match {
     case (Some(n), None)    ⇒ Some(s"$n@abc.com")
     case (None, Some(l))    ⇒ Some(s"$l@abc.com")
@@ -82,38 +84,34 @@ class UserInfoGenerator {
     case (None, None)       ⇒ None
   }
 
-  private def dateOfBirth = {
-    for {
-      day <- dayGen
-      month <- monthGen
-      year <- yearGen
-    } yield LocalDate.of(year, month, day)
-  }
+  private def dateOfBirth =
+    LocalDate.of(yearGenerator, monthGenerator, dayGenerator)
 
   private def formattedNino = {
-    for {
-      first <- prefixGen
-      second <- prefixGen
-      number <- numbersGen
-      suffix <- suffixGen
-    } yield s"$first$second$number$suffix"
+    val first = ninoPrefixGenerator.getOrElse("")
+    val second = ninoPrefixGenerator.getOrElse("")
+    val number = numbersGenerator.getOrElse("")
+    val suffix = ninoSuffixGenerator.getOrElse("")
+    s"$first$second$number$suffix"
   }
 
-  val userInfoV1_0: Gen[UserInfo] = for {
-    name <- nameGen
-    lastName <- lastNameGen
-    middleName <- middleNameGen
-    dob <- dateOfBirth
-    nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-                   Some(government_gateway_v1_0), Some(mdtp))
+  def userInfoV1_0(): UserInfo = {
+    val name = firstNameGenerator
+    val lastName = lastNameGenerator
+    val middleName = middleNameGenerator
+    val dob = dateOfBirth
+    val nino = formattedNino
+    UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
+             Some(government_gateway_v1_0), Some(mdtp))
+  }
 
-  val userInfoV1_1: Gen[UserInfo] = for {
-    name <- nameGen
-    lastName <- lastNameGen
-    middleName <- middleNameGen
-    dob <- dateOfBirth
-    nino <- formattedNino
-  } yield UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-                   Some(government_gateway_v1_1), Some(mdtp))
+  def userInfoV1_1(): UserInfo = {
+    val name = firstNameGenerator
+    val lastName = lastNameGenerator
+    val middleName = middleNameGenerator
+    val dob = dateOfBirth
+    val nino = formattedNino
+    UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
+             Some(government_gateway_v1_1), Some(mdtp))
+  }
 }
