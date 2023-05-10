@@ -17,7 +17,6 @@
 package services
 
 import javax.inject.{Inject, Named, Singleton}
-
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
@@ -26,8 +25,7 @@ import controllers.{Version, Version_1_0, Version_1_1}
 import data.UserInfoGenerator
 import domain._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 trait UserInfoService {
   def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo]
@@ -38,7 +36,8 @@ class LiveUserInfoService @Inject() (
   @Named("v2Connector") v2AuthConnector: AuthConnector,
   userInfoTransformer: UserInfoTransformer,
   thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
-) extends UserInfoService {
+)(implicit ec: ExecutionContext)
+    extends UserInfoService {
 
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
     def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
