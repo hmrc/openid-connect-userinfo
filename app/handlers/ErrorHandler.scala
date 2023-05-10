@@ -29,11 +29,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErrorHandler @Inject() (
-    env:          Environment,
-    config:       Configuration,
-    sourceMapper: OptionalSourceMapper,
-    router:       Provider[Router]
-)(implicit ec: ExecutionContext) extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
+  env: Environment,
+  config: Configuration,
+  sourceMapper: OptionalSourceMapper,
+  router: Provider[Router]
+)(implicit ec: ExecutionContext)
+    extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     super.onServerError(request, exception) map (res => {

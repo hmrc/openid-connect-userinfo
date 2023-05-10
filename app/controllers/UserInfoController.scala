@@ -72,14 +72,18 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 }
 
 @Singleton
-class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
+class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(
+  implicit val executionContext: ExecutionContext
+) extends UserInfoController {
   override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
   override protected def controllerComponents: ControllerComponents = cc
 }
 
 @Singleton
-class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
+class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(
+  implicit val executionContext: ExecutionContext
+) extends UserInfoController {
   override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
   override protected def controllerComponents: ControllerComponents = cc

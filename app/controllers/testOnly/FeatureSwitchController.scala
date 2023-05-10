@@ -57,4 +57,3 @@ class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents) ex
 }
 
 case class FeatureSwitchRequest(featureSwitches: Seq[FeatureSwitch]) {}
-

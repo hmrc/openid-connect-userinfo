@@ -62,18 +62,21 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     "return the scopes of the delegated authority" in new Setup {
       val authBearerToken = "AUTH_TOKEN"
 
-      stubFor(get(urlPathMatching(s"/delegated-authority")).withHeader("auth-bearer-token", equalTo(authBearerToken)).
-        willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(
-              s"""
+      stubFor(
+        get(urlPathMatching(s"/delegated-authority"))
+          .withHeader("auth-bearer-token", equalTo(authBearerToken))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(s"""
                |{
                |  "token": {
                |    "scopes": ["scope1", "scope2"]
                |  }
                |}
-            """.stripMargin)))
+            """.stripMargin)
+          )
+      )
 
       val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 
@@ -83,8 +86,11 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     "return an empty set when delegated authority is not found" in new Setup {
       val authBearerToken = "AUTH_TOKEN"
 
-      stubFor(get(urlPathMatching(s"/delegated-authority")).withHeader("auth-bearer-token", equalTo(authBearerToken)).
-        willReturn(aResponse().withStatus(404)))
+      stubFor(
+        get(urlPathMatching(s"/delegated-authority"))
+          .withHeader("auth-bearer-token", equalTo(authBearerToken))
+          .willReturn(aResponse().withStatus(404))
+      )
 
       val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 

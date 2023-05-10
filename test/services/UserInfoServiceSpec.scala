@@ -37,19 +37,43 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = Nino("AB123456A")
   val authBearerToken = "AUTH_BEARER_TOKEN"
-  val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")), None, ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
+  val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")),
+                                None,
+                                ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None)
+                               )
   val enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
   val authority: Authority = Authority("32131", Some("AB123456A"))
 
-  val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
-                                             Some("User"), None, None, None, None, None, None)
+  val userDetails: UserDetails =
+    UserDetails(None, None, None, None, None, None, None, None, Some("affinityGroup"), None, None, Some("User"), None, None, None, None, None, None)
 
-  val governmentGateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("John"),
-                                                                             Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11), None, None)
+  val governmentGateway: GovernmentGatewayDetails = GovernmentGatewayDetails(
+    Some("32131"),
+    Some(scala.collection.immutable.Seq("User")),
+    Some("John"),
+    Some("affinityGroup"),
+    Some("agent-code-12345"),
+    Some("agent-id-12345"),
+    Some("agent-friendly-name"),
+    Some("gateway-token-val"),
+    Some(11),
+    None,
+    None
+  )
   val mdtp = Mdtp("device-id-12", "session-id-133")
 
-  val userInfo = UserInfo(Some("John"), Some("Smith"), None, Some(Address("1 Station Road\nTown Centre", None, None, None)),
-                          None, None, Some(nino).map(_.nino), Some(enrolments.enrolments), Some(governmentGateway), Some(mdtp))
+  val userInfo = UserInfo(
+    Some("John"),
+    Some("Smith"),
+    None,
+    Some(Address("1 Station Road\nTown Centre", None, None, None)),
+    None,
+    None,
+    Some(nino).map(_.nino),
+    Some(enrolments.enrolments),
+    Some(governmentGateway),
+    Some(mdtp)
+  )
 
   trait Setup {
     implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(s"Bearer $authBearerToken")))
@@ -60,7 +84,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     val mockThirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
 
     val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)
-    val liveInfoService = new LiveUserInfoService(mockAuthConnector, mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
+    val liveInfoService =
+      new LiveUserInfoService(mockAuthConnector, mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
   }
 
   "LiveUserInfoService" should {
@@ -73,7 +98,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchEnrolments()(headers, implicitly)).willReturn(Some(enrolments))
       given(mockAuthConnector.fetchDesUserInfo()(headers, implicitly)).willReturn(Some(desUserInfo))
       when(mockAuthConnector.fetchUserDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
-      given(mockUserInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), Some(userDetails))).willReturn(any[UserInfo], any[UserInfo])
+      given(mockUserInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), Some(userDetails)))
+        .willReturn(any[UserInfo], any[UserInfo])
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
 

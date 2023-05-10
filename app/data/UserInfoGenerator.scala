@@ -26,41 +26,104 @@ import scala.util.Random.{nextInt => randomNextInt}
 
 @Singleton
 class UserInfoGenerator {
-  val firstNames: Seq[Option[String]] = Seq(Some("Roland"), Some("Eddie"), Some("Susanna"), Some("Jake"), Some("Oy"), Some("Cuthbert"), Some("Alain"), Some("Jamie"), Some("Thomas"), Some("Susan"), Some("Randall"), None)
-  val middleNames: Seq[Option[String]] = Seq(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
-  val lastNames: Seq[Option[String]] = Seq(Some("Deschain"), Some("Dean"), Some("Dean"), Some("Chambers"), Some("Bumbler"), Some("Allgood"), Some("Johns"), Some("Curry"), Some("Whitman"), Some("Delgado"), Some("Flagg"), Some("Bowen"), None)
+  val firstNames: Seq[Option[String]] = Seq(
+    Some("Roland"),
+    Some("Eddie"),
+    Some("Susanna"),
+    Some("Jake"),
+    Some("Oy"),
+    Some("Cuthbert"),
+    Some("Alain"),
+    Some("Jamie"),
+    Some("Thomas"),
+    Some("Susan"),
+    Some("Randall"),
+    None
+  )
+  val middleNames: Seq[Option[String]] =
+    Seq(Some("De"), Some("Donald"), Some("Billy"), Some("E"), Some("Alex"), Some("Abel"), None, None, None, None, None, None)
+  val lastNames: Seq[Option[String]] = Seq(
+    Some("Deschain"),
+    Some("Dean"),
+    Some("Dean"),
+    Some("Chambers"),
+    Some("Bumbler"),
+    Some("Allgood"),
+    Some("Johns"),
+    Some("Curry"),
+    Some("Whitman"),
+    Some("Delgado"),
+    Some("Flagg"),
+    Some("Bowen"),
+    None
+  )
   val deviceId = "device-id-abc"
   val sessionId = "session-id-abcd"
 
-  val fullAddress: Option[Address] = Some(Address(
-    """221B Baker Street
+  val fullAddress: Option[Address] = Some(
+    Address(
+      """221B Baker Street
       |Town centre
       |London
       |England
       |Line5
       |NW1 9NT
-      |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), Some("GB")))
+      |Great Britain""".stripMargin,
+      Some("NW1 9NT"),
+      Some("Great Britain"),
+      Some("GB")
+    )
+  )
 
   def addressWithToggleableFeatures(isAddressLine5: Boolean = false, isCountryCode: Boolean = false): Option[Address] = {
     val addressLine5 = if (isAddressLine5) "\n|Line5" else ""
     val code = if (isCountryCode) Some("GB") else None
 
-    Some(Address(
-      s"""221B Baker Street
+    Some(
+      Address(
+        s"""221B Baker Street
         |Town centre
         |London
         |England$addressLine5
         |NW1 9NT
-        |Great Britain""".stripMargin, Some("NW1 9NT"), Some("Great Britain"), code))
+        |Great Britain""".stripMargin,
+        Some("NW1 9NT"),
+        Some("Great Britain"),
+        code
+      )
+    )
   }
 
-  def address: Option[Address] = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
+  def address: Option[Address] =
+    addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
-  private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("Chambers"), Some("affinityGroup"),
-                                                                                           Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
-  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("Chambers"), Some("affinityGroup"),
-                                                                                           Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
+  private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(
+    Some("32131"),
+    Some(scala.collection.immutable.Seq("User")),
+    Some("Chambers"),
+    Some("affinityGroup"),
+    Some("agent-code-12345"),
+    Some("agent-id-12345"),
+    Some("agent-friendly-name-12345"),
+    Some("gateway-token-val"),
+    Some(10),
+    None,
+    None
+  )
+  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(
+    Some("32131"),
+    Some(scala.collection.immutable.Seq("User")),
+    Some("Chambers"),
+    Some("affinityGroup"),
+    Some("agent-code-12345"),
+    Some("agent-id-12345"),
+    Some("agent-friendly-name-12345"),
+    Some("gateway-token-val"),
+    Some(10),
+    Some("some_url"),
+    Some("some_other_url")
+  )
   val mdtp: Mdtp = Mdtp(deviceId, sessionId)
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
@@ -101,8 +164,17 @@ class UserInfoGenerator {
     val middleName = middleNameGenerator
     val dob = dateOfBirth
     val nino = formattedNino
-    UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-             Some(government_gateway_v1_0), Some(mdtp))
+    UserInfo(name,
+             lastName,
+             middleName,
+             address,
+             email(name, lastName),
+             Some(dob),
+             Some(nino),
+             Some(enrolments),
+             Some(government_gateway_v1_0),
+             Some(mdtp)
+            )
   }
 
   def userInfoV1_1(): UserInfo = {
@@ -111,7 +183,16 @@ class UserInfoGenerator {
     val middleName = middleNameGenerator
     val dob = dateOfBirth
     val nino = formattedNino
-    UserInfo(name, lastName, middleName, address, email(name, lastName), Some(dob), Some(nino), Some(enrolments),
-             Some(government_gateway_v1_1), Some(mdtp))
+    UserInfo(name,
+             lastName,
+             middleName,
+             address,
+             email(name, lastName),
+             Some(dob),
+             Some(nino),
+             Some(enrolments),
+             Some(government_gateway_v1_1),
+             Some(mdtp)
+            )
   }
 }

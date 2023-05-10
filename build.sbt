@@ -5,17 +5,18 @@ val appName = "openid-connect-userinfo"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
-  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
+  .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(scalaVersion := "2.13.8")
   .settings(scalacOptions := Seq("-Xfatal-warnings", "-feature", "-deprecation"))
   .settings(
-    majorVersion         := 0,
+    majorVersion := 0,
     libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
   )
   .configs(IntegrationTest)
   .settings(integrationTestSettings() *)
   .settings(resolvers += Resolver.jcenterRepo)
-  .settings(playDefaultPort:= 9836)
+  .settings(playDefaultPort := 9836)
   .settings(ScoverageSettings())
   .settings(SilencerSettings())
   .settings(ScalariformSettings())
+  .settings(scalafmtOnCompile := true)

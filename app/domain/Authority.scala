@@ -16,5 +16,4 @@
 
 package domain
 
-case class Authority(credId: String,
-                     nino:   Option[String] = None)
+case class Authority(credId: String, nino: Option[String] = None)

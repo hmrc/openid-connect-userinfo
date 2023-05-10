@@ -30,7 +30,9 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
       Then("the feature switches are returned as json with 200 OK")
 
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> false), Json.obj("name" -> "addressLine5", "isEnabled" -> false))
+      Json.parse(result.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> false),
+                                                Json.obj("name" -> "addressLine5", "isEnabled" -> false)
+                                               )
     }
   }
 
@@ -43,13 +45,18 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
       Then("the feature switches are returned as json with 200 OK")
 
       result.code shouldBe 200
-      Json.parse(result.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> false), Json.obj("name" -> "addressLine5", "isEnabled" -> false))
+      Json.parse(result.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> false),
+                                                Json.obj("name" -> "addressLine5", "isEnabled" -> false)
+                                               )
 
       When("we update the flags we should get 406 Accepted")
 
-      val payload = Json.obj("featureSwitches" -> Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> true), Json.obj("name" -> "addressLine5", "isEnabled" -> true)))
+      val payload = Json.obj(
+        "featureSwitches" -> Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> true), Json.obj("name" -> "addressLine5", "isEnabled" -> true))
+      )
 
-      val updateResult = Http(resource(s"$serviceUrl")).method("POST").header("Content-Type", "application/json").postData(payload.toString()).asString
+      val updateResult =
+        Http(resource(s"$serviceUrl")).method("POST").header("Content-Type", "application/json").postData(payload.toString()).asString
 
       updateResult.code shouldBe 202
 
@@ -58,7 +65,9 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
       val updatedResult = Http(resource(s"$serviceUrl")).asString
 
       updatedResult.code shouldBe 200
-      Json.parse(updatedResult.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> true), Json.obj("name" -> "addressLine5", "isEnabled" -> true))
+      Json.parse(updatedResult.body) shouldBe Json.arr(Json.obj("name" -> "countryCode", "isEnabled" -> true),
+                                                       Json.obj("name" -> "addressLine5", "isEnabled" -> true)
+                                                      )
 
     }
   }
