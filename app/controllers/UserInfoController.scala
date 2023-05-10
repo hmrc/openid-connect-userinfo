@@ -18,13 +18,15 @@ package controllers
 
 import com.google.inject.name.Named
 import config.AppContext
+
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
 import services.UserInfoService
 import uk.gov.hmrc.api.controllers.HeaderValidator
-import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse => UER}
+import uk.gov.hmrc.http.UpstreamErrorResponse.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext
@@ -61,10 +63,10 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 
       Ok(json)
     } recover {
-      case Upstream4xxResponse(msg, 401, _, _)  => Unauthorized(Json.toJson(ErrorUnauthorized()))
-      case Upstream4xxResponse(msg4xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
-      case Upstream5xxResponse(msg5xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException             => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
+      case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
+      case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
+      case bex: BadRequestException                  => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }

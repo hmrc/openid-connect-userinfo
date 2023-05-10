@@ -18,7 +18,7 @@ package config
 
 import com.typesafe.config.{Config, ConfigObject}
 
-import collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 
 case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
 

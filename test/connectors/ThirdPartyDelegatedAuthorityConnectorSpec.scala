@@ -47,12 +47,12 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     val connector: ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterEach(): Unit = {
     wireMockServer.resetMappings()
     wireMockServer.stop()
   }

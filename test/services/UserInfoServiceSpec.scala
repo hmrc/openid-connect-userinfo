@@ -44,7 +44,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val userDetails: UserDetails = UserDetails(None, None, None, None, None, None, None, None, Some("affinityGroup"), None, None,
                                              Some("User"), None, None, None, None, None, None)
 
-  val governmentGateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("John"),
+  val governmentGateway: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("John"),
                                                                              Some("affinityGroup"), Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name"), Some("gateway-token-val"), Some(11), None, None)
   val mdtp = Mdtp("device-id-12", "session-id-133")
 
@@ -143,7 +143,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   "SandboxUserInfoService" should {
     "return generated UserInfo v1.0" in new Setup {
-      given(mockUserInfoGenerator.userInfoV1_0).willReturn(userInfo)
+      given(mockUserInfoGenerator.userInfoV1_0()).willReturn(userInfo)
 
       val result: UserInfo = await(sandboxInfoService.fetchUserInfo(Version_1_0))
 
@@ -151,7 +151,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     }
 
     "return generated UserInfo v1.1" in new Setup {
-      given(mockUserInfoGenerator.userInfoV1_1).willReturn(userInfo)
+      given(mockUserInfoGenerator.userInfoV1_1()).willReturn(userInfo)
 
       val result = await(sandboxInfoService.fetchUserInfo(Version_1_1))
 

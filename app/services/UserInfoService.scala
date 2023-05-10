@@ -49,8 +49,8 @@ class LiveUserInfoService @Inject() (
       }
 
     val userDetailsFetcher = version match {
-      case Version_1_0 => v1AuthConnector.fetchUserDetails
-      case Version_1_1 => v2AuthConnector.fetchUserDetails
+      case Version_1_0 => v1AuthConnector.fetchUserDetails()
+      case Version_1_1 => v2AuthConnector.fetchUserDetails()
     }
 
     scopes flatMap { scopes =>
@@ -69,13 +69,13 @@ class LiveUserInfoService @Inject() (
         def maybeDesUserInfo = {
           getMaybeForScopes[DesUserInfo](scopesForDes, scopes,
             maybeAuthority flatMap {
-              case Some(auth) if auth.nino.isDefined => v1AuthConnector.fetchDesUserInfo
+              case Some(auth) if auth.nino.isDefined => v1AuthConnector.fetchDesUserInfo()
               case _                                 => Future.failed(new BadRequestException("NINO not found for this user"))
             }
           )
         }
 
-        def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, v1AuthConnector.fetchEnrolments)
+        def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, v1AuthConnector.fetchEnrolments())
 
       for {
         authority <- maybeAuthority

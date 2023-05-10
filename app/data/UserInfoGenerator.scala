@@ -57,9 +57,9 @@ class UserInfoGenerator {
   def address: Option[Address] = addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
-  private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+  private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("Chambers"), Some("affinityGroup"),
                                                                                            Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), None, None)
-  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("Chambers"), Some("affinityGroup"),
+  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(Some("32131"), Some(scala.collection.immutable.Seq("User")), Some("Chambers"), Some("affinityGroup"),
                                                                                            Some("agent-code-12345"), Some("agent-id-12345"), Some("agent-friendly-name-12345"), Some("gateway-token-val"), Some(10), Some("some_url"), Some("some_other_url"))
   val mdtp: Mdtp = Mdtp(deviceId, sessionId)
 
@@ -78,10 +78,10 @@ class UserInfoGenerator {
   private def numbersGenerator: Option[Int] = Some(100000 + randomNextInt(99999))
 
   private def email(name: Option[String], lastName: Option[String]): Option[String] = (name, lastName) match {
-    case (Some(n), None)    ⇒ Some(s"$n@abc.com")
-    case (None, Some(l))    ⇒ Some(s"$l@abc.com")
-    case (Some(n), Some(l)) ⇒ Some(s"$n.$l@abc.com")
-    case (None, None)       ⇒ None
+    case (Some(n), None)    => Some(s"$n@abc.com")
+    case (None, Some(l))    => Some(s"$l@abc.com")
+    case (Some(n), Some(l)) => Some(s"$n.$l@abc.com")
+    case (None, None)       => None
   }
 
   private def dateOfBirth =
