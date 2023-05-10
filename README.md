@@ -16,19 +16,13 @@ User details data structures follow the OpenId Connect UserInfo specification (s
 You can dive deeper into the documentation in the [API Developer Hub](https://developer.service.hmrc.gov.uk/api-documentation/docs/api#openid-connect-userinfo).
 
 ## Running Locally
+Run the service `sbt run -Drun.mode=Dev`
 
-Install [Service Manager](https://github.com/hmrc/service-manager), if you want live endpoints, then start dependencies:
+Run the tests & test coverage report `sbt clean compile coverage test it:test coverageReport`
 
-    sm --start AUTH -f
-    sm --start DATASTREAM -f
+Run the service in service manager; if you want live endpoints, then start dependencies thus: `sm --start AUTH DATASTREAM -r`
 
-Start the app:
-
-    sbt run -Drun.mode=Dev
- 
-Now you can test sandbox:
-
-     curl -v http://localhost:9000/sandbox/userinfo -H 'Accept: application/vnd.hmrc.1.0+json'
+Now you can test the sandbox `curl -v http://localhost:9000/sandbox/userinfo -H 'Accept: application/vnd.hmrc.1.0+json'`
 
 ### License
 
