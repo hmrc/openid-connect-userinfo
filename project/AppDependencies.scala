@@ -4,13 +4,14 @@ import sbt.*
 
 object AppDependencies {
 
-  val testScope = "test, it"
+  private val testScope = "test, it"
+  private val bPlayVersion = "7.1.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
-    "uk.gov.hmrc"       %% "bootstrap-backend-play-28"  % "7.1.0",
-    "uk.gov.hmrc"       %% "domain"                     % "8.1.0-play-28",
-    "uk.gov.hmrc"       %% "play-hmrc-api"              % "7.2.0-play-28"
+    "uk.gov.hmrc"       %% "bootstrap-backend-play-28" % bPlayVersion,
+    "uk.gov.hmrc"       %% "domain"                    % "8.1.0-play-28",
+    "uk.gov.hmrc"       %% "play-hmrc-api"             % "7.2.0-play-28"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -20,6 +21,7 @@ object AppDependencies {
     "com.typesafe.play"      %% "play-test"                % PlayVersion.current % testScope,
     "com.github.tomakehurst"  % "wiremock-jre8"            % "2.31.0"            % testScope,
     "uk.gov.hmrc"            %% "service-integration-test" % "1.3.0-play-28"     % testScope,
+    "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % bPlayVersion        % testScope,
     "org.pegdown"             % "pegdown"                  % "1.6.0"             % testScope,
     "org.jsoup"               % "jsoup"                    % "1.15.3"            % testScope,
     "org.scalaj"             %% "scalaj-http"              % "2.4.2"             % testScope,
