@@ -46,8 +46,8 @@ object Version {
 }
 
 trait UserInfoController extends BackendBaseController with HeaderValidator {
-  val service:                   UserInfoService
-  val appContext:                AppContext
+  val service: UserInfoService
+  val appContext: AppContext
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
 
@@ -66,7 +66,7 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
       case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
       case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case bex: BadRequestException                  => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }

@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit
   val mat: Materializer,
-  ec:      ExecutionContext
+  ec: ExecutionContext
 ) extends Filter
     with AuthorisedFunctions
     with Results {

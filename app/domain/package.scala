@@ -28,7 +28,7 @@ package object domain {
   implicit val enrloment = Json.format[Enrolment]
 
   implicit val gatewayInformationFmt: Format[GatewayInformation] = Json.format[GatewayInformation]
-  implicit val mdtpInformationFmt:    Format[MdtpInformation] = Json.format[MdtpInformation]
+  implicit val mdtpInformationFmt: Format[MdtpInformation] = Json.format[MdtpInformation]
   implicit val userDetails = Json.format[UserDetails]
   implicit val mdtp = Json.format[Mdtp]
   implicit val governmentGatewayDetails = Json.format[GovernmentGatewayDetails]
