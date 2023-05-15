@@ -98,34 +98,34 @@ import com.github.ghik.silencer.silent
     )
   }
 
-  def willFindUser(desUserInfo: Option[DesUserInfo] = None,
-                   agentInformation: Option[AgentInformation] = None,
-                   credentials: Option[Credentials] = None,
-                   name: Option[Name] = None,
-                   email: Option[Email] = None,
-                   affinityGroup: Option[AffinityGroup] = None,
-                   role: Option[CredentialRole] = None,
-                   mdtp: Option[MdtpInformation] = None,
+  def willFindUser(desUserInfo:        Option[DesUserInfo] = None,
+                   agentInformation:   Option[AgentInformation] = None,
+                   credentials:        Option[Credentials] = None,
+                   name:               Option[Name] = None,
+                   email:              Option[Email] = None,
+                   affinityGroup:      Option[AffinityGroup] = None,
+                   role:               Option[CredentialRole] = None,
+                   mdtp:               Option[MdtpInformation] = None,
                    gatewayInformation: Option[GatewayInformation] = None,
                    unreadMessageCount: Option[Int] = None,
-                   profileUrl: Option[String] = None,
-                   groupProfileUrl: Option[String] = None,
-                   version: Version = Version_1_0
+                   profileUrl:         Option[String] = None,
+                   groupProfileUrl:    Option[String] = None,
+                   version:            Version = Version_1_0
                   ): Unit = {
     implicit val agentWrites = Json.writes[AgentInformation]
     implicit val credentialWrites = Json.writes[Credentials]
     implicit val nameWrites = Json.writes[Name]
     implicit val emailWrites = Json.writes[Email]
-    val jsonAddress: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
-    val jsonItmpName: Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
-    val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
+    val jsonAddress:     Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
+    val jsonItmpName:    Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
+    val jsonAgent:       Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
-    val jsonName: Option[JsValue] = name.map(Json.toJson(_))
+    val jsonName:        Option[JsValue] = name.map(Json.toJson(_))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
-    val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
+    val jsonMdtp:               Option[JsValue] = mdtp.map(Json.toJson(_))
     val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
-    val jsonProfile: Option[JsValue] = profileUrl.map(Json.toJson(_))
-    val jsonGroupProfile: Option[JsValue] = groupProfileUrl.map(Json.toJson(_))
+    val jsonProfile:            Option[JsValue] = profileUrl.map(Json.toJson(_))
+    val jsonGroupProfile:       Option[JsValue] = groupProfileUrl.map(Json.toJson(_))
 
     val response = Json
       .obj()

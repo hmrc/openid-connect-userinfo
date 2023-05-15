@@ -31,7 +31,7 @@ import scala.concurrent.{ExecutionContext, Future}
   self: UserDetailsFetcher =>
 
   val appContext: AppContext
-  val http: CorePost
+  val http:       CorePost
   val serviceUrl: String = appContext.authUrl
 
   override def authConnector: AuthConnector = this

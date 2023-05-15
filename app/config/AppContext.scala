@@ -25,12 +25,12 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 class AppContext @Inject() (val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig(runModeConfiguration) {
   protected def mode: Mode = environment.mode
 
-  lazy val appName: String = runModeConfiguration.get[String]("appName")
-  lazy val appUrl: String = runModeConfiguration.get[String]("appUrl")
-  lazy val authUrl: String = baseUrl("auth")
+  lazy val appName:                         String = runModeConfiguration.get[String]("appName")
+  lazy val appUrl:                          String = runModeConfiguration.get[String]("appUrl")
+  lazy val authUrl:                         String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
-  lazy val access: Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
-  lazy val desEnvironment: String = runModeConfiguration.get[String](s"microservice.services.des.environment")
-  lazy val desBearerToken: String = runModeConfiguration.get[String](s"microservice.services.des.bearer-token")
-  lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
+  lazy val access:                          Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
+  lazy val desEnvironment:                  String = runModeConfiguration.get[String](s"microservice.services.des.environment")
+  lazy val desBearerToken:                  String = runModeConfiguration.get[String](s"microservice.services.des.bearer-token")
+  lazy val logUserInfoResponsePayload:      Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
 }
