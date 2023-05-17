@@ -31,10 +31,8 @@ class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents, ec
   implicit val featureSwitchWrites: OWrites[FeatureSwitch] = Json.writes[FeatureSwitch]
   implicit val FeatureSwitchRequestReads: Reads[FeatureSwitchRequest] = Json.reads[FeatureSwitchRequest]
 
-  def getFlags: Action[AnyContent] = {
-    Action { _ =>
-      Ok(currentFeatureSwitchesAsJson)
-    }
+  def getFlags: Action[AnyContent] = Action {
+    Ok(currentFeatureSwitchesAsJson)
   }
 
   def setFlags(): Action[JsValue] = {
