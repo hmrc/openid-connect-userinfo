@@ -27,8 +27,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents, ec: ExecutionContext) extends BackendController(cc) {
 
-  implicit val featureSwitchReads: Reads[FeatureSwitch] = Json.reads[FeatureSwitch]
-  implicit val featureSwitchWrites: OWrites[FeatureSwitch] = Json.writes[FeatureSwitch]
+  implicit val featureSwitchReads:        Reads[FeatureSwitch] = Json.reads[FeatureSwitch]
+  implicit val featureSwitchWrites:       OWrites[FeatureSwitch] = Json.writes[FeatureSwitch]
   implicit val FeatureSwitchRequestReads: Reads[FeatureSwitchRequest] = Json.reads[FeatureSwitchRequest]
 
   def getFlags: Action[AnyContent] = Action {

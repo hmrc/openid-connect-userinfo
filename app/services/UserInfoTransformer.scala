@@ -26,10 +26,10 @@ import domain._
 @Singleton
 class UserInfoTransformer {
 
-  def transform(scopes: Set[String],
-                authority: Option[Authority],
+  def transform(scopes:      Set[String],
+                authority:   Option[Authority],
                 desUserInfo: Option[DesUserInfo],
-                enrolments: Option[Enrolments],
+                enrolments:  Option[Enrolments],
                 userDetails: Option[UserDetails]
                ): UserInfo = {
 

@@ -29,10 +29,10 @@ import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ErrorHandler @Inject() (
-  env: Environment,
-  config: Configuration,
+  env:          Environment,
+  config:       Configuration,
   sourceMapper: OptionalSourceMapper,
-  router: Provider[Router]
+  router:       Provider[Router]
 )(implicit ec: ExecutionContext)
     extends DefaultHttpErrorHandler(env, config, sourceMapper, router) {
 

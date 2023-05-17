@@ -34,7 +34,7 @@ trait UserInfoService {
 class LiveUserInfoService @Inject() (
   @Named("v1Connector") v1AuthConnector: AuthConnector,
   @Named("v2Connector") v2AuthConnector: AuthConnector,
-  userInfoTransformer: UserInfoTransformer,
+  userInfoTransformer:                   UserInfoTransformer,
   thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 )(implicit ec: ExecutionContext)
     extends UserInfoService {
