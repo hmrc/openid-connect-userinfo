@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,36 +16,34 @@
 
 package controllers.testOnly
 
-import javax.inject.{Inject, Singleton}
-import play.api.libs.json.Json
-import play.api.mvc.{Action, ControllerComponents}
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
+import play.api.libs.json.{JsValue, Json, OWrites, Reads}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents) extends BackendController(cc) {
+class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents, ec: ExecutionContext) extends BackendController(cc) {
 
-  implicit val featureSwitchReads = Json.reads[FeatureSwitch]
-  implicit val featureSwitchWrites = Json.writes[FeatureSwitch]
-  implicit val FeatureSwitchRequestReads = Json.reads[FeatureSwitchRequest]
+  implicit val featureSwitchReads:        Reads[FeatureSwitch] = Json.reads[FeatureSwitch]
+  implicit val featureSwitchWrites:       OWrites[FeatureSwitch] = Json.writes[FeatureSwitch]
+  implicit val FeatureSwitchRequestReads: Reads[FeatureSwitchRequest] = Json.reads[FeatureSwitchRequest]
 
-  def getFlags = {
-    Action.async { implicit request =>
-      Future(Ok(currentFeatureSwitchesAsJson))
-    }
+  def getFlags: Action[AnyContent] = Action {
+    Ok(currentFeatureSwitchesAsJson)
   }
 
-  def setFlags = {
+  def setFlags(): Action[JsValue] = {
     Action.async(parse.json) { implicit request =>
       withJsonBody[FeatureSwitchRequest] { ffRequest =>
         val featureSwitches: Seq[FeatureSwitch] = ffRequest.featureSwitches
         featureSwitches.foreach(fs =>
-          fs.isEnabled match {
-            case true => FeatureSwitch.enable(FeatureSwitch.forName(fs.name))
-            case _    => FeatureSwitch.disable(FeatureSwitch.forName(fs.name))
+          if (fs.isEnabled) {
+            FeatureSwitch.enable(FeatureSwitch.forName(fs.name))
+          } else {
+            FeatureSwitch.disable(FeatureSwitch.forName(fs.name))
           }
         )
         Future(Accepted(currentFeatureSwitchesAsJson))
@@ -53,8 +51,7 @@ class FeatureSwitchController @Inject() ()(implicit cc: ControllerComponents) ex
     }
   }
 
-  def currentFeatureSwitchesAsJson = Json.toJson(for (fs <- UserInfoFeatureSwitches.allSwitches) yield FeatureSwitch(fs.name, fs.isEnabled))
+  private def currentFeatureSwitchesAsJson = Json.toJson(for (fs <- UserInfoFeatureSwitches.allSwitches) yield FeatureSwitch(fs.name, fs.isEnabled))
 }
 
 case class FeatureSwitchRequest(featureSwitches: Seq[FeatureSwitch]) {}
-

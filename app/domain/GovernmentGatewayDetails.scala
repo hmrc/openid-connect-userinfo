@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@
 package domain
 
 case class GovernmentGatewayDetails(
-    user_id:              Option[String],
-    roles:                Option[Seq[String]],
-    user_name:            Option[String],
-    affinity_group:       Option[String],
-    agent_code:           Option[String],
-    agent_id:             Option[String],
-    agent_friendly_name:  Option[String],
-    gateway_token:        Option[String],
-    unread_message_count: Option[Int]         = None,
-    profile_uri:          Option[String],
-    group_profile_uri:    Option[String]
+  user_id:              Option[String],
+  roles:                Option[Seq[String]],
+  user_name:            Option[String],
+  affinity_group:       Option[String],
+  agent_code:           Option[String],
+  agent_id:             Option[String],
+  agent_friendly_name:  Option[String],
+  gateway_token:        Option[String],
+  unread_message_count: Option[Int] = None,
+  profile_uri:          Option[String],
+  group_profile_uri:    Option[String]
 )

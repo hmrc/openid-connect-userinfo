@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,14 @@ package controllers
 
 import play.mvc.Http.Status._
 
-sealed abstract class ErrorResponse(val httpStatusCode: Int,
-                                    val errorCode:      String,
-                                    val message:        String)
+sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String)
 
 case class ErrorUnauthorized(msg: String = "Bearer token is missing or not authorized") extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
 
 case class ErrorNotFound(msg: String = "Resource was not found") extends ErrorResponse(NOT_FOUND, "NOT_FOUND", msg)
 
-case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is missing or invalid") extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
+case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is missing or invalid")
+    extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
 
 case class ErrorBadGateway(msg: String = "Bad gateway") extends ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
 

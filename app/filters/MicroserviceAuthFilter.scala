@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,7 +30,12 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit val mat: Materializer, ec: ExecutionContext) extends Filter with AuthorisedFunctions with Results {
+class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit
+  val mat: Materializer,
+  ec:      ExecutionContext
+) extends Filter
+    with AuthorisedFunctions
+    with Results {
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
     implicit val hc = HeaderCarrierConverter.fromRequest(rh)
@@ -39,8 +44,8 @@ class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authCo
       case Some(name) if controllerNeedsAuth(name.controller).getOrElse(false) =>
         authorised() {
           next(rh)
-        } recoverWith {
-          case e: AuthorisationException => Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
+        } recoverWith { case e: AuthorisationException =>
+          Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
         }
       case _ => next(rh)
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +18,15 @@ package controllers
 
 import com.google.inject.name.Named
 import config.AppContext
+
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
 import services.UserInfoService
 import uk.gov.hmrc.api.controllers.HeaderValidator
-import uk.gov.hmrc.http.{BadRequestException, Upstream4xxResponse, Upstream5xxResponse}
+import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse => UER}
+import uk.gov.hmrc.http.UpstreamErrorResponse.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
 import scala.concurrent.ExecutionContext
@@ -44,8 +46,8 @@ object Version {
 }
 
 trait UserInfoController extends BackendBaseController with HeaderValidator {
-  val service: UserInfoService
-  val appContext: AppContext
+  val service:                   UserInfoService
+  val appContext:                AppContext
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
 
@@ -61,23 +63,27 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 
       Ok(json)
     } recover {
-      case Upstream4xxResponse(msg, 401, _, _)  => Unauthorized(Json.toJson(ErrorUnauthorized()))
-      case Upstream4xxResponse(msg4xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
-      case Upstream5xxResponse(msg5xx, _, _, _) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException             => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
+      case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
+      case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
+      case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
     }
   }
 }
 
 @Singleton
-class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
+class SandboxUserInfoController @Inject() (@Named("sandbox") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(
+  implicit val executionContext: ExecutionContext
+) extends UserInfoController {
   override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
   override protected def controllerComponents: ControllerComponents = cc
 }
 
 @Singleton
-class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(implicit val executionContext: ExecutionContext) extends UserInfoController {
+class LiveUserInfoController @Inject() (@Named("live") val service: UserInfoService, val appContext: AppContext, val cc: ControllerComponents)(
+  implicit val executionContext: ExecutionContext
+) extends UserInfoController {
   override val parser: BodyParser[AnyContent] = cc.parsers.defaultBodyParser
 
   override protected def controllerComponents: ControllerComponents = cc

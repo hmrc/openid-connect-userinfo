@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -44,15 +44,15 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
 
     val httpClient: HttpClient = app.injector.instanceOf[HttpClient]
-    val connector: ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
+    val connector:  ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
-  override def beforeEach() {
+  override def beforeEach(): Unit = {
     wireMockServer.start()
     WireMock.configureFor(stubHost, stubPort)
   }
 
-  override def afterEach() {
+  override def afterEach(): Unit = {
     wireMockServer.resetMappings()
     wireMockServer.stop()
   }
@@ -62,18 +62,21 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     "return the scopes of the delegated authority" in new Setup {
       val authBearerToken = "AUTH_TOKEN"
 
-      stubFor(get(urlPathMatching(s"/delegated-authority")).withHeader("auth-bearer-token", equalTo(authBearerToken)).
-        willReturn(
-          aResponse()
-            .withStatus(200)
-            .withBody(
-              s"""
+      stubFor(
+        get(urlPathMatching(s"/delegated-authority"))
+          .withHeader("auth-bearer-token", equalTo(authBearerToken))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(s"""
                |{
                |  "token": {
                |    "scopes": ["scope1", "scope2"]
                |  }
                |}
-            """.stripMargin)))
+            """.stripMargin)
+          )
+      )
 
       val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 
@@ -83,8 +86,11 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     "return an empty set when delegated authority is not found" in new Setup {
       val authBearerToken = "AUTH_TOKEN"
 
-      stubFor(get(urlPathMatching(s"/delegated-authority")).withHeader("auth-bearer-token", equalTo(authBearerToken)).
-        willReturn(aResponse().withStatus(404)))
+      stubFor(
+        get(urlPathMatching(s"/delegated-authority"))
+          .withHeader("auth-bearer-token", equalTo(authBearerToken))
+          .willReturn(aResponse().withStatus(404))
+      )
 
       val scopes: Set[String] = await(connector.fetchScopes(authBearerToken))
 

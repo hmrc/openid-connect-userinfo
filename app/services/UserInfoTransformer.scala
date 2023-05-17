@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,16 +26,24 @@ import domain._
 @Singleton
 class UserInfoTransformer {
 
-  def transform(scopes: Set[String], authority: Option[Authority], desUserInfo: Option[DesUserInfo], enrolments: Option[Enrolments], userDetails: Option[UserDetails]): UserInfo = {
+  def transform(scopes:      Set[String],
+                authority:   Option[Authority],
+                desUserInfo: Option[DesUserInfo],
+                enrolments:  Option[Enrolments],
+                userDetails: Option[UserDetails]
+               ): UserInfo = {
 
-      def profile = if (scopes.contains("profile")) desUserInfo map (u => UserProfile(u.name.givenName, u.name.familyName, u.name.middleName, u.dateOfBirth)) else None
+    def profile = if (scopes.contains("profile"))
+      desUserInfo map (u => UserProfile(u.name.givenName, u.name.familyName, u.name.middleName, u.dateOfBirth))
+    else None
 
-      def address = if (scopes.contains("address")) {
-        val countryName = desUserInfo flatMap { c => c.address.countryName }
-        val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled) { desUserInfo flatMap { u => u.address.countryCode } } else None
-        desUserInfo map (u => Address(formattedAddress(u.address), u.address.postCode, countryName, countryCode))
+    def address = if (scopes.contains("address")) {
+      val countryName = desUserInfo flatMap { c => c.address.countryName }
+      val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled) { desUserInfo flatMap { u => u.address.countryCode } }
+      else None
+      desUserInfo map (u => Address(formattedAddress(u.address), u.address.postCode, countryName, countryCode))
 
-      } else None
+    } else None
 
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap (_.nino) else None
 
@@ -45,20 +53,23 @@ class UserInfoTransformer {
       formatGGInfo(authority, userDetails)
     } else None
 
-    val email = if (scopes.contains("email")) userDetails flatMap { _.email } else None
+    val email = if (scopes.contains("email")) userDetails flatMap { _.email }
+    else None
 
     val mdtp = if (scopes.contains("openid:mdtp")) userDetails.flatMap(_.mdtpInformation.map(m => Mdtp(m.deviceId, m.sessionId))) else None
 
-    UserInfo(profile.flatMap(_.firstName),
-             profile.flatMap(_.familyName),
-             profile.flatMap(_.middleName),
-             address,
-             email,
-             profile.flatMap(_.birthDate),
-             identifier,
-             userEnrolments.map(_.enrolments),
-             ggInfo,
-             mdtp)
+    UserInfo(
+      profile.flatMap(_.firstName),
+      profile.flatMap(_.familyName),
+      profile.flatMap(_.middleName),
+      address,
+      email,
+      profile.flatMap(_.birthDate),
+      identifier,
+      userEnrolments.map(_.enrolments),
+      ggInfo,
+      mdtp
+    )
   }
 
   private def formattedAddress(desAddress: ItmpAddress) = {
@@ -81,10 +92,21 @@ class UserInfoTransformer {
     val profileUrl = userDetails flatMap { _.profile }
     val groupProfileUrl = userDetails flatMap { _.groupProfile }
 
-    Some(GovernmentGatewayDetails(user_id              = credId, user_name = userName, roles = credentialRoles, affinity_group = affinityGroup,
-                                  agent_code           = agentCode, agent_id = agentId, agent_friendly_name = agentFriendlyName,
-                                  gateway_token        = gatewayInformation.flatMap(_.gatewayToken), unread_message_count = None,
-                                  profile_uri          = profileUrl, group_profile_uri = groupProfileUrl))
+    Some(
+      GovernmentGatewayDetails(
+        user_id              = credId,
+        user_name            = userName,
+        roles                = credentialRoles,
+        affinity_group       = affinityGroup,
+        agent_code           = agentCode,
+        agent_id             = agentId,
+        agent_friendly_name  = agentFriendlyName,
+        gateway_token        = gatewayInformation.flatMap(_.gatewayToken),
+        unread_message_count = None,
+        profile_uri          = profileUrl,
+        group_profile_uri    = groupProfileUrl
+      )
+    )
   }
 
   private case class UserProfile(firstName: Option[String], familyName: Option[String], middleName: Option[String], birthDate: Option[LocalDate])

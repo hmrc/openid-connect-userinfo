@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +19,13 @@ package data
 import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
-import domain.UserInfo
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import testSupport.UnitSpec
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.wordspec.AnyWordSpec
 
-class UserInfoGeneratorSpec extends UnitSpec with ScalaCheckPropertyChecks with BeforeAndAfterEach {
-  val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
-  val from = LocalDate.of(1939, 12, 27)
-  val until = LocalDate.of(1998, 12, 29)
+class UserInfoGeneratorSpec extends AnyWordSpec with Matchers with BeforeAndAfterEach {
+  private val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
+  private val from = LocalDate.of(1939, 12, 27)
+  private val until = LocalDate.of(1998, 12, 29)
 
   override protected def beforeEach(): Unit = {
     FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
@@ -39,56 +38,47 @@ class UserInfoGeneratorSpec extends UnitSpec with ScalaCheckPropertyChecks with 
   }
 
   "userInfo" should {
-    "generate an OpenID Connect compliant UserInfo response v1.0" in forAll(TestUserInfoGenerator.userInfoV1_0) { userInfo: UserInfo =>
-      TestUserInfoGenerator.firstNames should contain(userInfo.given_name)
+    "generate an OpenID Connect compliant UserInfo response v1.0" in {
+      val userInfo = TestUserInfoGenerator.userInfoV1_0()
+      TestUserInfoGenerator.firstNames  should contain(userInfo.given_name)
       TestUserInfoGenerator.middleNames should contain(userInfo.middle_name)
-      TestUserInfoGenerator.lastNames should contain(userInfo.family_name)
-      userInfo.address shouldBe TestUserInfoGenerator.fullAddress
+      TestUserInfoGenerator.lastNames   should contain(userInfo.family_name)
+      userInfo.address                shouldBe TestUserInfoGenerator.fullAddress
       assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
-      userInfo.government_gateway.get.profile_uri should not be defined
+      userInfo.government_gateway.get.profile_uri       should not be defined
       userInfo.government_gateway.get.group_profile_uri should not be defined
     }
 
-    "generate an OpenID Connect compliant UserInfo response v1.1" in forAll(TestUserInfoGenerator.userInfoV1_1) { userInfo: UserInfo =>
-      TestUserInfoGenerator.firstNames should contain(userInfo.given_name)
+    "generate an OpenID Connect compliant UserInfo response v1.1" in {
+      val userInfo = TestUserInfoGenerator.userInfoV1_1()
+      TestUserInfoGenerator.firstNames  should contain(userInfo.given_name)
       TestUserInfoGenerator.middleNames should contain(userInfo.middle_name)
-      TestUserInfoGenerator.lastNames should contain(userInfo.family_name)
-      userInfo.address shouldBe TestUserInfoGenerator.fullAddress
+      TestUserInfoGenerator.lastNames   should contain(userInfo.family_name)
+      userInfo.address                shouldBe TestUserInfoGenerator.fullAddress
       assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
-      userInfo.government_gateway.get.profile_uri shouldBe defined
+      userInfo.government_gateway.get.profile_uri       shouldBe defined
       userInfo.government_gateway.get.group_profile_uri shouldBe defined
     }
 
-    "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in forAll({
+    "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in {
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-      TestUserInfoGenerator.userInfoV1_0
-    }) { userInfo: UserInfo =>
-      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(true, false)
+      val userInfo = TestUserInfoGenerator.userInfoV1_0()
+      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(isAddressLine5 = true, isCountryCode = false)
     }
 
-    "generate an OpenID Connect UserInfo response without addressLine5 when feature flag is disabled" in forAll({
+    "generate an OpenID Connect UserInfo response without addressLine5 when feature flag is disabled" in {
       FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-      TestUserInfoGenerator.userInfoV1_0
-    }) { userInfo: UserInfo =>
-      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(false, true)
+      val userInfo = TestUserInfoGenerator.userInfoV1_0()
+      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(isAddressLine5 = false, isCountryCode = true)
     }
   }
 
-  private def assertValid(name: String, expected: List[String], actual: Option[String]): Unit = {
-    expected should contain(actual.getOrElse(fail(s"Generated user's $name is not defined")))
-  }
+  private def assertValidDob(dob: LocalDate): Unit =
+    if (!dob.isAfter(from) || !dob.isBefore(until)) fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")
 
-  private def assertValidDob(dob: LocalDate): Unit = {
-
-    dob.isAfter(from) && dob.isBefore(until) match {
-      case true  =>
-      case false => fail(s"Generated user's dob: $dob is not within valid range: 1940-01-01 / 1998-12-28")
-    }
-  }
-
-  private def assertValidNino(nino: String) = {
+  private def assertValidNino(nino: String): Unit = {
     ninoPattern.findFirstIn(nino) match {
       case Some(s) =>
       case None    => fail(s"Generated invalid user's NINO: $nino")

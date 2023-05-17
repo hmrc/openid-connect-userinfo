@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import scala.language.dynamics
 
 @Singleton
 class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appContext: AppContext, assets: Assets, cc: ControllerComponents)
-  extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets, errorHandler) {
+    extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets, errorHandler) {
 
   override def definition(): Action[AnyContent] = Action {
     val versions = APIAccessVersions(appContext.access)

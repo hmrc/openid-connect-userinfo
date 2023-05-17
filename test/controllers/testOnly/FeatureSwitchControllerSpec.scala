@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex:
 
   trait Setup {
     def featuresList(countryCodeEnabled: Boolean = false, addressLine5Enabled: Boolean = false): JsValue = Json.arr(
-      Json.obj("name" -> "countryCode", "isEnabled" -> countryCodeEnabled),
+      Json.obj("name" -> "countryCode", "isEnabled"  -> countryCodeEnabled),
       Json.obj("name" -> "addressLine5", "isEnabled" -> addressLine5Enabled)
     )
 
@@ -45,7 +45,7 @@ class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex:
       val expectedBody = featuresList()
 
       val result = await(controller.getFlags()(FakeRequest()))
-      status(result) shouldBe 200
+      status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe expectedBody
     }
 
@@ -57,7 +57,7 @@ class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex:
 
       val result: Result = await(controller.setFlags()(updateRequest))
 
-      status(result) shouldBe 202
+      status(result)     shouldBe 202
       jsonBodyOf(result) shouldBe expectedBody
     }
 
@@ -69,7 +69,7 @@ class FeatureSwitchControllerSpec(implicit val cc: ControllerComponents, val ex:
 
       val result: Result = await(controller.setFlags()(updateRequest))
 
-      status(result) shouldBe 202
+      status(result)     shouldBe 202
       jsonBodyOf(result) shouldBe expectedBody
     }
   }

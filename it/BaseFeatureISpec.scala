@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -28,11 +28,11 @@ import play.api.inject.guice.GuiceApplicationBuilder
 
 import scala.concurrent.duration.{Duration, _}
 import scala.concurrent.{Await, Future}
-import scala.collection.JavaConverters._
+import scala.jdk.CollectionConverters._
 import scala.util.Try
 
 trait BaseFeatureISpec
-  extends AnyFeatureSpec
+    extends AnyFeatureSpec
     with GivenWhenThen
     with Matchers
     with GuiceOneServerPerSuite
@@ -41,10 +41,12 @@ trait BaseFeatureISpec
 
   implicit val timeout: Duration = 1.minutes
 
-  override def fakeApplication(): Application = GuiceApplicationBuilder().configure(
-    flatStructurePortMapping()
-      ++ extraConfig
-  ).build()
+  override def fakeApplication(): Application = GuiceApplicationBuilder()
+    .configure(
+      flatStructurePortMapping()
+        ++ extraConfig
+    )
+    .build()
 
   protected def resource(resource: String) = s"http://localhost:$port$resource"
 
@@ -59,14 +61,15 @@ trait BaseFeatureISpec
       .collect {
         case e if e.getKey.endsWith("port") =>
           "microservice.services." + e.getKey -> stubPort
-      }.toMap
+      }
+      .toMap
 
   }
 
   def extraConfig: Map[String, Any] = Map[String, Any](
-      "run.mode" -> "Test",
-      "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
-    )
+    "run.mode"           -> "Test",
+    "application.router" -> "testOnlyDoNotUseInAppConf.Routes"
+  )
 
   val stubHost = "localhost"
   val stubPort: Int = sys.env.getOrElse("WIREMOCK_SERVICE_LOCATOR_PORT", "6008").toInt

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 HM Revenue & Customs
+ * Copyright 2023 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,9 +39,20 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
   val ACCEPT_HEADER_V1_0 = "application/vnd.hmrc.1.0+json"
   val ACCEPT_HEADER_V1_1 = "application/vnd.hmrc.1.1+json"
 
-  val ggDetailsV1 = GovernmentGatewayDetails(Some("32131"), Some(Seq("User")), Some("John"), Some("affinityGroup"), Some("agent-code-12345"),
-                                             Some("agent-id-12345"), Some("agent-friendly-name"), None, None, None, None)
-  val ggDetailsV11 = ggDetailsV1.copy(profile_uri       = Some("some_url"), group_profile_uri = Some("some_other_url"))
+  val ggDetailsV1 = GovernmentGatewayDetails(
+    Some("32131"),
+    Some(Seq("User")),
+    Some("John"),
+    Some("affinityGroup"),
+    Some("agent-code-12345"),
+    Some("agent-id-12345"),
+    Some("agent-friendly-name"),
+    None,
+    None,
+    None,
+    None
+  )
+  val ggDetailsV11 = ggDetailsV1.copy(profile_uri = Some("some_url"), group_profile_uri = Some("some_other_url"))
 
   val userInfoV1 = UserInfo(
     Some("John"),
@@ -52,7 +63,9 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
     Some(LocalDate.parse("1982-11-15")),
     Some("AR778351B"),
     Some(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))),
-    Some(ggDetailsV1), None)
+    Some(ggDetailsV1),
+    None
+  )
   val userInfoV11 = userInfoV1.copy(government_gateway = Some(ggDetailsV11))
 
   trait Setup {
@@ -71,7 +84,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
-      status(result) shouldBe 200
+      status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV1)
     }
 
@@ -81,7 +94,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.1+json")))
 
-      status(result) shouldBe 200
+      status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV11)
     }
 
@@ -103,7 +116,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
-      status(result) shouldBe 200
+      status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV1)
     }
 
@@ -113,7 +126,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.1+json")))
 
-      status(result) shouldBe 200
+      status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV11)
     }
 
@@ -126,11 +139,12 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "fail with Bad Request if service throws BadRequestException" in new Setup {
 
-      given(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(Future.failed(new BadRequestException("NINO is required")))
+      given(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier]))
+        .willReturn(Future.failed(new BadRequestException("NINO is required")))
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
-      status(result) shouldBe 400
+      status(result)     shouldBe 400
       jsonBodyOf(result) shouldBe Json.toJson(ErrorBadRequest("NINO is required"))
     }
   }
