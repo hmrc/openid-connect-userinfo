@@ -18,13 +18,7 @@ servers:
   variables: {}
 security:
   - userRestricted:
-      - "profile"
-      - "address"
-      - "email"
-      - "openid:hmrc-enrolments"
-      - "openid:government-gateway"
-      - "openid:mdtp"
-      - "openid:gov-uk-identifiers"
+      - "openid"
 paths:
   /userinfo/:
     get:
@@ -330,13 +324,7 @@ components:
           tokenUrl: https://api.service.hmrc.gov.uk/oauth/token
           refreshUrl: https://api.service.hmrc.gov.uk/oauth/refresh
           scopes:
-            "profile": given_name, middle_name, family_name
-            "address": address
-            "email": email
-            "openid:hmrc-enrolments": hmrc_enrolments
-            "openid:government-gateway": government_gateway
-            "openid:mdtp": mdtp
-            "openid:gov-uk-identifiers": uk_gov_nino
+            "openid": openid
 tags:
 - name: userinfo
   description: ''
