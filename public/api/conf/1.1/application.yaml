@@ -149,7 +149,7 @@ components:
     authorizationHeader:
       name: Authorization
       in: header
-      description: "An OAuth 2.0 Bearer Token. For example: Bearer bb7fed3fe10dd235a2ccda3d50fb"
+      description: "An OAuth 2.0 Bearer Token"
       schema:
         type: string
       required: true
