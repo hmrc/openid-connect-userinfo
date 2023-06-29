@@ -128,6 +128,25 @@ paths:
                     code: FORBIDDEN
       deprecated: false
 components:
+  parameters:
+    acceptHeader:
+      name: Accept
+      in: header
+      description: "Specifies the response format and the version of the API to be used. For example: application/vnd.hmrc.2.0+json"
+      schema:
+        type: string
+        enum: [
+          "application/vnd.hmrc.2.0+json",
+          "application/vnd.hmrc.2.0+xml"
+        ]
+      required: true
+    authorizationHeader:
+      name: Authorization
+      in: header
+      description: "An OAuth 2.0 Bearer Token"
+      schema:
+        type: string
+      required: true
   schemas:
     errorResponse:
       title: errorResponse
