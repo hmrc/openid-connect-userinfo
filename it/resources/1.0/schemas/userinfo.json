@@ -1,0 +1,190 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "User Info",
+  "type": "object",
+  "properties": {
+    "given_name": {
+      "type": "string",
+      "description": "End-user's first name.",
+      "example": "Thomas"
+    },
+    "middle_name": {
+      "type": "string",
+      "description": "End user's middle name.",
+      "example": "A."
+    },
+    "family_name": {
+      "type": "string",
+      "description": "End-user's last name.",
+      "example": "Delgado"
+    },
+    "email": {
+      "type": "string",
+      "description": "User email",
+      "example": "Cling.Eastwood@wildwest.com"
+    },
+    "birthdate": {
+      "type": "string",
+      "description": "End-User's birthday, represented as an ISO 8601:2004 [ISO8601‑2004] YYYY-MM-DD format.",
+      "example": "1996-08-10"
+    },
+    "uk_gov_nino": {
+      "type": "string",
+      "description": "End-User's National Insurance Number.",
+      "example": "AA000003D"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "formatted": {
+          "type": "string",
+          "description": "End-user's mailing address, formatted for display or use on a mailing label.",
+          "example": "221B Baker Street\nLondon\nNW1 9NT\nGreat Britain"
+        },
+        "postal_code": {
+          "type": "string",
+          "description": "End-user's Zip code or postal code.",
+          "example": "NW1 9NT"
+        },
+        "country": {
+          "type": "string",
+          "description": "End-user's country name.",
+          "example": "Great Britain"
+        },
+        "country_code": {
+          "type": "string",
+          "description": "ISO 3166 Alpha-2-code of a given country",
+          "example": "GB"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hmrc_enrolments": {
+      "type": "array",
+      "description": "End-user's HMRC enrolments.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "description": "HMRC service name.",
+            "example": "IR-SA"
+          },
+          "identifiers": {
+            "type": "array",
+            "description": "End-user's identifiers associated to this HMRC service.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "string",
+                  "example": "UTR"
+                },
+                "value": {
+                  "type": "string",
+                  "example": "174371121"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "key",
+                "value"
+              ]
+            },
+            "additionalProperties": false,
+            "example": "[{\"key\": \"UTR\", \"value\": \"174371121\"}]"
+          },
+          "state": {
+            "type": "string",
+            "description": "End-user's HMRC enrolment status.",
+            "enum": [
+              "awaitingActivation",
+              "activated",
+              "Active",
+              "Activated",
+              "pending",
+              "givenToAgent"
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "identifiers",
+          "state"
+        ]
+      }
+    },
+    "mdtp": {
+      "type": "object",
+      "description": "Mdtp information based on government gateway input",
+      "properties": {
+        "device_id": {
+          "type": "string",
+          "description": "Device id",
+          "example": "3012345"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Session id",
+          "example": "2012345"
+        }
+      }
+    },
+    "government_gateway": {
+      "type": "object",
+      "description": "Legacy properties based on government gateway input.",
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "Cred id",
+          "example": "1012345"
+        },
+        "roles": {
+          "type": "array",
+          "description": "List of user's roles",
+          "items": {
+            "type": "string",
+            "example": "User"
+          }
+        },
+        "user_name": {
+          "type": "string",
+          "description": "Government Gateway user name",
+          "example": "Bob"
+        },
+        "affinity_group": {
+          "type": "string",
+          "description": "User affinity group",
+          "example": "Individual"
+        },
+        "agent_code": {
+          "type": "string",
+          "description": "Agent code",
+          "example": "123456-abc"
+        },
+        "agent_friendly_name": {
+          "type": "string",
+          "description": "Agent friendly name",
+          "example": "AC Accounting"
+        },
+        "agent_id": {
+          "type": "string",
+          "description": "Agent id",
+          "example": "AC"
+        },
+        "gateway_token": {
+          "type": "string",
+          "description": "Government gateway token",
+          "example": "123456789"
+        },
+        "unread_message_count": {
+          "type": "integer",
+          "description": "Unread message count",
+          "example": "234"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
