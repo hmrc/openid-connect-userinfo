@@ -243,18 +243,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
         .asString
 
       val validator = JsonSchemaFactory.byDefault().getValidator
-      val root = System.getProperty("user.dir")
-      val public10 = Paths.get(root, "public", "api", "conf", "1.0").toString
       val mapper = new ObjectMapper
 
-      val schema = mapper.readTree(Paths.get(public10, "schemas", "userinfo.json").toFile)
-      println(result.body)
+      val schema = mapper.readTree(Paths.get(getClass.getResource("1.0/schemas/userinfo.json").toURI).toFile)
       val json = Json.parse(result.body)
 
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
       Then("The user information is returned")
-      println(result.body)
       result.code shouldBe 200
 
       import scala.jdk.CollectionConverters._
@@ -315,12 +311,8 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
         .asString
 
       val validator = JsonSchemaFactory.byDefault().getValidator
-      val root = System.getProperty("user.dir")
-      val public10 = Paths.get(root, "public", "api", "conf", "1.1").toString
       val mapper = new ObjectMapper
-
-      val schema = mapper.readTree(Paths.get(public10, "schemas", "userinfo.json").toFile)
-      println(result.body)
+      val schema = mapper.readTree(Paths.get(getClass.getResource("1.1/schemas/userinfo.json").toURI).toFile)
       val json = Json.parse(result.body)
 
       val report = validator.validate(schema, mapper.readTree(json.toString()))

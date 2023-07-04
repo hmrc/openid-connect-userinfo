@@ -14,20 +14,18 @@
  * limitations under the License.
  */
 
-import java.nio.file.Paths
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import org.scalatest.flatspec.AnyFlatSpec
 
+import java.nio.file.Paths
+
 class SchemaISpec extends AnyFlatSpec {
   val validator = JsonSchemaFactory.byDefault().getValidator
-  val root = System.getProperty("user.dir")
-  val public10 = Paths.get(root, "public", "api", "conf", "1.0").toString
   val mapper = new ObjectMapper
-
-  val schema = mapper.readTree(Paths.get(public10, "schemas", "userinfo.json").toFile)
-  val exampleJSON = mapper.readTree(Paths.get(public10, "examples", "get-user-info-example-1.json").toFile)
+  val schema = mapper.readTree(Paths.get(getClass.getResource("1.0/schemas/userinfo.json").toURI).toFile)
+  val exampleJSON = mapper.readTree(Paths.get(getClass.getResource("1.0/examples/get-user-info-example-1.json").toURI).toFile)
 
   "A schema and example JSON" should "be valid" in {
     val syntaxValidator = JsonSchemaFactory.byDefault().getSyntaxValidator
