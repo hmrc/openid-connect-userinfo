@@ -55,6 +55,7 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 
   val responseLogger = Logger("userInfoResponsePayloadLogger")
 
+  // use custom rule as Accept header is optional therefore it has to return true (see more in play.api.mvc.ActionBuilder) if absent in order to let the controller handle it
   private val acceptHeaderValidationRulesCustom: Option[String] => Boolean =
     _.flatMap(a => matchHeader(a).map(res => validateContentType(res.group("contenttype")) && validateVersion(res.group("version")))).getOrElse(true)
 
