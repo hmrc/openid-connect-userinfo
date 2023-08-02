@@ -136,8 +136,7 @@ components:
       schema:
         type: string
         enum: [
-          "application/vnd.hmrc.1.0+json",
-          "application/vnd.hmrc.1.1+json"
+          "application/vnd.hmrc.1.0+json"
         ]
       required: false
     authorizationHeader:
