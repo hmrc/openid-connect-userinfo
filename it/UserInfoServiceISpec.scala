@@ -259,6 +259,70 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       json shouldBe Json.toJson(userInfo_v1)
     }
 
+    Scenario("fetch user profile v1 when Accept Header is missing") {
+
+      Given(
+        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+          "'email' and 'openid:government-gateway' scopes"
+      )
+      willReturnScopesForAuthBearerToken(
+        authBearerToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "agentInformation",
+          "openid:mdtp"
+        )
+      )
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will authorise DES contains user information for the NINO")
+      willFindUser(
+        Some(desUserInfo),
+        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
+        Some(Email(email)),
+        Some(AffinityGroup.Individual),
+        Some(User),
+        Some(authMdtp),
+        Some(gatewayInformation),
+        Some(10)
+      )
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "", "token" -> "ggToken"))
+        .asString
+
+      val validator = JsonSchemaFactory.byDefault().getValidator
+      val mapper = new ObjectMapper
+
+      val schema = mapper.readTree(Paths.get(getClass.getResource("1.0/schemas/userinfo.json").toURI).toFile)
+      val json = Json.parse(result.body)
+
+      val report = validator.validate(schema, mapper.readTree(json.toString()))
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+
+      import scala.jdk.CollectionConverters._
+      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+
+      json shouldBe Json.toJson(userInfo_v1)
+    }
+
     Scenario("fetch user profile v2") {
 
       Given(
