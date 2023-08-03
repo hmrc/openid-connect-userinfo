@@ -24,8 +24,7 @@ case class ErrorUnauthorized(msg: String = "Bearer token is missing or not autho
 
 case class ErrorNotFound(msg: String = "Resource was not found") extends ErrorResponse(NOT_FOUND, "NOT_FOUND", msg)
 
-case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is missing or invalid")
-    extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
+case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is invalid") extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
 
 case class ErrorBadGateway(msg: String = "Bad gateway") extends ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
 
