@@ -132,7 +132,7 @@ components:
     acceptHeader:
       name: Accept
       in: header
-      description: "Optional, if not provided, v1.0 will be assumed. Specifies the response format and the version of the API to be used. For example: application/vnd.hmrc.2.0+json"
+      description: "Optional, if not provided, v1.0 will be assumed. Specifies the response format and the version of the API to be used. For example: application/vnd.hmrc.1.0+json"
       schema:
         type: string
         enum: [
