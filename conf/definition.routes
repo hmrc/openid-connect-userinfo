@@ -1,2 +1,1 @@
 GET  /api/definition                             @controllers.DocumentationController.definition()
-GET  /api/conf/:version/*filename                @controllers.DocumentationController.ramlDocs(version, filename)

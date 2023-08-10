@@ -32,8 +32,4 @@ class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appCont
     val versions = APIAccessVersions(appContext.access)
     Ok(txt.definition(versions.versions.getOrElse(List()))).withHeaders("Content-Type" -> "application/json")
   }
-
-  def ramlDocs(version: String, filename: String): Action[AnyContent] = {
-    assets.at(s"/public/api/conf/$version", filename)
-  }
 }
