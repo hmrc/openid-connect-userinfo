@@ -29,7 +29,6 @@ import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 class GuiceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {
   override def configure() = {
     bind(classOf[AuthConnector]).annotatedWith(Names.named("v1Connector")).to(classOf[AuthConnectorV1])
-    bind(classOf[AuthConnector]).annotatedWith(Names.named("v2Connector")).to(classOf[AuthConnectorV2])
     bind(classOf[AuthConnector]).to(classOf[AuthConnectorV2])
     bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
     bind(classOf[UserInfoService]).annotatedWith(Names.named("live")).to(classOf[LiveUserInfoService])

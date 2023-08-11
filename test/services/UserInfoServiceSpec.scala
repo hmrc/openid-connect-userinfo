@@ -17,7 +17,7 @@
 package services
 
 import connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityConnector}
-import controllers.{Version_1_0, Version_1_1}
+import controllers.Version_1_0
 import data.UserInfoGenerator
 import domain._
 import org.mockito.BDDMockito.given
@@ -85,7 +85,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
     val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)
     val liveInfoService =
-      new LiveUserInfoService(mockAuthConnector, mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
+      new LiveUserInfoService(mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
   }
 
   "LiveUserInfoService" should {
@@ -172,14 +172,6 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockUserInfoGenerator.userInfoV1_0()).willReturn(userInfo)
 
       val result: UserInfo = await(sandboxInfoService.fetchUserInfo(Version_1_0))
-
-      result shouldBe userInfo
-    }
-
-    "return generated UserInfo v1.1" in new Setup {
-      given(mockUserInfoGenerator.userInfoV1_1()).willReturn(userInfo)
-
-      val result = await(sandboxInfoService.fetchUserInfo(Version_1_1))
 
       result shouldBe userInfo
     }
