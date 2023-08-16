@@ -23,7 +23,7 @@ import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.auth.core.retrieve.v2.{Retrievals => V2Retrievals}
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
-import controllers.{Version, Version_1_0, Version_1_1}
+import controllers.{Version, Version_1_0}
 import domain.{DesUserInfo, _}
 import com.github.ghik.silencer.silent
 
@@ -170,31 +170,6 @@ import com.github.ghik.silencer.silent
             .willReturn(
               aResponse()
                 .withBody(v10response.toString())
-                .withStatus(200)
-            )
-        )
-      case Version_1_1 =>
-        stubFor(
-          post(urlPathEqualTo(s"/auth/authorise"))
-            .withRequestBody(
-              equalToJson(
-                Json
-                  .obj(
-                    "authorise" -> JsArray(),
-                    "retrieve" -> JsArray(
-                      (V2Retrievals.allUserDetails
-                        and V2Retrievals.mdtpInformation
-                        and V2Retrievals.gatewayInformation
-                        and V2Retrievals.profile
-                        and V2Retrievals.groupProfile).propertyNames.map(JsString)
-                    )
-                  )
-                  .toString()
-              )
-            )
-            .willReturn(
-              aResponse()
-                .withBody(v11response.toString())
                 .withStatus(200)
             )
         )

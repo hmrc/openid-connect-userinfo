@@ -19,7 +19,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
-import controllers.Version_1_1
 import domain._
 import java.time.LocalDate
 import play.api.libs.json.Json
@@ -378,73 +377,6 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
       json shouldBe Json.toJson(userInfo_v1)
-    }
-
-    Scenario("fetch user profile v2") {
-
-      Given(
-        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
-          "'email' and 'openid:government-gateway' scopes"
-      )
-      willReturnScopesForAuthBearerToken(
-        authBearerToken,
-        Set(
-          "openid",
-          "profile",
-          "address",
-          "openid:gov-uk-identifiers",
-          "openid:hmrc-enrolments",
-          "openid:government-gateway",
-          "email",
-          "agentInformation",
-          "openid:mdtp"
-        )
-      )
-      willAuthoriseWith(200)
-
-      And("The Auth token has a NINO")
-      willReturnAuthorityWith(Nino(nino))
-
-      And("The authority has enrolments")
-      willReturnEnrolmentsWith()
-
-      And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(
-        Some(desUserInfo),
-        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
-        Some(Credentials("1304372065861347", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
-        Some(Email(email)),
-        Some(AffinityGroup.Individual),
-        Some(User),
-        Some(authMdtp),
-        Some(gatewayInformation),
-        Some(10),
-        Some("some_url"),
-        Some("some_other_url"),
-        Version_1_1
-      )
-
-      When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(Seq("Authorization" -> s"Bearer $authBearerToken", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
-        .asString
-
-      val validator = JsonSchemaFactory.byDefault().getValidator
-      val mapper = new ObjectMapper
-      val schema = mapper.readTree(Paths.get(getClass.getResource("1.1/schemas/userinfo.json").toURI).toFile)
-      val json = Json.parse(result.body)
-
-      val report = validator.validate(schema, mapper.readTree(json.toString()))
-
-      Then("The user information is returned")
-      result.code shouldBe 200
-
-      import scala.jdk.CollectionConverters._
-      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
-
-      json shouldBe Json.toJson(userInfo_v2)
     }
 
     Scenario("fetch user profile without family name") {

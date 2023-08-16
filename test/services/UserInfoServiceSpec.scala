@@ -93,13 +93,20 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "requests all available data" in new Setup {
 
       val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "email", "openid:government-gateway")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers, implicitly)).willReturn(scopes)
-      given(mockAuthConnector.fetchAuthority()(headers, implicitly)).willReturn(Some(authority))
-      given(mockAuthConnector.fetchEnrolments()(headers, implicitly)).willReturn(Some(enrolments))
-      given(mockAuthConnector.fetchDesUserInfo()(headers, implicitly)).willReturn(Some(desUserInfo))
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authBearerToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Some(enrolments))
+      given(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).willReturn(Some(desUserInfo))
       when(mockAuthConnector.fetchUserDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
-      given(mockUserInfoTransformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), Some(userDetails)))
-        .willReturn(any[UserInfo], any[UserInfo])
+      given(
+        mockUserInfoTransformer.transform(eqTo(scopes),
+                                          eqTo(Some(authority)),
+                                          eqTo(Some(desUserInfo)),
+                                          eqTo(Some(enrolments)),
+                                          eqTo(Some(userDetails))
+                                         )
+      )
+        .willReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
 
@@ -109,12 +116,11 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
-    "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested" in new Setup {
+    "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested UNICORN" in new Setup {
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers, implicitly)).willReturn(scopes)
-      given(mockAuthConnector.fetchAuthority()(headers, implicitly)).willReturn(Future(Some(authority.copy(nino = None))))
-      given(mockAuthConnector.fetchEnrolments()(headers, implicitly)).willReturn(Future(None))
-      when(mockAuthConnector.fetchUserDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authBearerToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Future(Some(authority.copy(nino = None))))
+      given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Future(None))
 
       a[BadRequestException] should be thrownBy await(liveInfoService.fetchUserInfo(Version_1_0))
     }
@@ -122,48 +128,51 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
 
       val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers, implicitly)).willReturn(scopes)
-      given(mockAuthConnector.fetchAuthority()(headers, implicitly)).willReturn(Some(authority))
-      given(mockAuthConnector.fetchEnrolments()(headers, implicitly)).willReturn(Future(Some(enrolments)))
-      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
-      given(mockAuthConnector.fetchUserDetails()(headers, implicitly)).willReturn(Future.successful(Some(userDetails)))
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authBearerToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Future(Some(enrolments)))
+      given(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None)))
+        .willReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchEnrolments()
+      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
 
       val scopes = Set("openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers, implicitly)).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authBearerToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
 
-      given(mockAuthConnector.fetchAuthority()(headers, implicitly)).willReturn(Some(authority))
-      given(mockAuthConnector.fetchEnrolments()(headers, implicitly)).willReturn(Some(enrolments))
-      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, Some(enrolments), None)).willReturn(any[UserInfo], any[UserInfo])
-      given(mockAuthConnector.fetchUserDetails()(headers, implicitly)).willReturn(Future.successful(Some(userDetails)))
+      given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
+      given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Some(enrolments))
+      given(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None)))
+        .willReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchEnrolments()
+      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "does not request AUTH::fetchEnrolments when the scopes does not contain 'openid:hmrc-enrolments'" in new Setup {
 
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(authBearerToken)(headers, implicitly)).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authBearerToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
 
-      given(mockAuthConnector.fetchAuthority()(headers, implicitly)).willReturn(Some(authority))
-      given(mockAuthConnector.fetchDesUserInfo()(headers, implicitly)).willReturn(None)
-      given(mockUserInfoTransformer.transform(scopes, Some(authority), None, None, None)).willReturn(any[UserInfo], any[UserInfo])
-      given(mockAuthConnector.fetchUserDetails()(headers, implicitly)).willReturn(Future.successful(Some(userDetails)))
+      given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
+      given(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).willReturn(None)
+      given(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(None), eqTo(None)))
+        .willReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
 
       verify(mockAuthConnector, never).fetchEnrolments()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
   }
 
