@@ -21,7 +21,7 @@ import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.Authorization
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import connectors._
-import controllers.{Version, Version_1_0, Version_1_1}
+import controllers.{Version, Version_1_0}
 import data.UserInfoGenerator
 import domain._
 
@@ -32,8 +32,7 @@ trait UserInfoService {
 }
 
 class LiveUserInfoService @Inject() (
-  @Named("v1Connector") v1AuthConnector: AuthConnector,
-  @Named("v2Connector") v2AuthConnector: AuthConnector,
+  v1AuthConnector:                       AuthConnector,
   userInfoTransformer:                   UserInfoTransformer,
   thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 )(implicit ec: ExecutionContext)
@@ -47,11 +46,6 @@ class LiveUserInfoService @Inject() (
       case None                => Future.failed(new UnauthorizedException("Bearer token is required"))
     }
 
-    val userDetailsFetcher = version match {
-      case Version_1_0 => v1AuthConnector.fetchUserDetails()
-      case Version_1_1 => v2AuthConnector.fetchUserDetails()
-    }
-
     scopes flatMap { scopes =>
       def getMaybeForScopes[T](maybeScopes: Set[String], allScopes: Set[String], f: => Future[Option[T]]): Future[Option[T]] = {
         if ((maybeScopes intersect allScopes).nonEmpty) f
@@ -63,7 +57,7 @@ class LiveUserInfoService @Inject() (
       val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, v1AuthConnector.fetchAuthority())
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, userDetailsFetcher)
+      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, v1AuthConnector.fetchUserDetails())
 
       val scopesForDes = Set("profile", "address")
       def maybeDesUserInfo = {
@@ -94,7 +88,6 @@ class SandboxUserInfoService @Inject() (userInfoGenerator: UserInfoGenerator) ex
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
     val generator: UserInfo = version match {
       case Version_1_0 => userInfoGenerator.userInfoV1_0()
-      case Version_1_1 => userInfoGenerator.userInfoV1_1()
       case _           => UserInfo()
     }
     Future.successful(generator)

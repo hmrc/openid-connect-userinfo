@@ -77,8 +77,3 @@ import scala.concurrent.{ExecutionContext, Future}
 class AuthConnectorV1 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)
     extends AuthConnector
     with AuthV1UserDetailsFetcher
-
-@Singleton
-class AuthConnectorV2 @Inject() (val appContext: AppContext, val http: CorePost)(implicit val executionContext: ExecutionContext)
-    extends AuthConnector
-    with AuthV2UserDetailsFetcher

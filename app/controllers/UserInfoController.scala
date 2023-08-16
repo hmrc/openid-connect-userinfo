@@ -33,7 +33,6 @@ import scala.concurrent.ExecutionContext
 
 sealed trait Version
 case object Version_1_0 extends Version
-case object Version_1_1 extends Version
 
 object Version {
   def fromAcceptHeader(header: Option[String]): Version =
@@ -42,7 +41,6 @@ object Version {
       // integration test using scalaj.http which inject "Accept" header with default values if you don't provide any so we need a case when empty string is like missing Accept Header
       case Some("")                              => Version_1_0
       case Some("application/vnd.hmrc.1.0+json") => Version_1_0
-      case Some("application/vnd.hmrc.1.1+json") => Version_1_1
       case _                                     => throw new IllegalArgumentException("Valid version not supplied")
     }
 }

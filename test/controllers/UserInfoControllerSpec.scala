@@ -88,16 +88,6 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV1)
     }
 
-    "retrieve user information v1.1" in new Setup {
-
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_1))(any[HeaderCarrier])).willReturn(userInfoV11)
-
-      val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.1+json")))
-
-      status(result)     shouldBe 200
-      jsonBodyOf(result) shouldBe Json.toJson(userInfoV11)
-    }
-
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
 
       given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
@@ -118,16 +108,6 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
       status(result)     shouldBe 200
       jsonBodyOf(result) shouldBe Json.toJson(userInfoV1)
-    }
-
-    "retrieve user information v1.1" in new Setup {
-
-      given(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_1))(any[HeaderCarrier])).willReturn(userInfoV11)
-
-      val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.1+json")))
-
-      status(result)     shouldBe 200
-      jsonBodyOf(result) shouldBe Json.toJson(userInfoV11)
     }
 
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
