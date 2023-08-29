@@ -39,14 +39,13 @@ class LiveUserInfoService @Inject() (
     extends UserInfoService {
 
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
-    def bearerToken(authorization: Authorization) = augmentString(authorization.value).stripPrefix("Bearer ")
 
-    def scopes = hc.authorization match {
-      case Some(authorization) => thirdPartyDelegatedAuthorityConnector.fetchScopes(bearerToken(authorization))
-      case None                => Future.failed(new UnauthorizedException("Bearer token is required"))
+    val scopes = hc.authorization match {
+      case Some(authorisationTokens) => thirdPartyDelegatedAuthorityConnector.fetchScopes(authorisationTokens.value)
+      case None                      => Future.failed(new UnauthorizedException("Authorization token is required"))
     }
 
-    scopes flatMap { scopes =>
+    scopes.flatMap { scopes =>
       def getMaybeForScopes[T](maybeScopes: Set[String], allScopes: Set[String], f: => Future[Option[T]]): Future[Option[T]] = {
         if ((maybeScopes intersect allScopes).nonEmpty) f
         else Future.successful(None)

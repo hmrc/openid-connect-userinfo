@@ -19,7 +19,6 @@ object AppDependencies {
     "org.scalatestplus.play" %% "scalatestplus-play"       % "5.1.0",
     "com.typesafe.play"      %% "play-test"                % PlayVersion.current,
     "com.github.tomakehurst"  % "wiremock"                 % "2.27.2",
-    "uk.gov.hmrc"            %% "service-integration-test" % "1.3.0-play-28",
     "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % bootstrapPlayVersion,
     "org.pegdown"             % "pegdown"                  % "1.6.0",
     "org.jsoup"               % "jsoup"                    % "1.15.4",

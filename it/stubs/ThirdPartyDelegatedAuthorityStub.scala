@@ -21,10 +21,10 @@ import com.github.tomakehurst.wiremock.stubbing.StubMapping
 import play.api.libs.json.Json
 
 trait ThirdPartyDelegatedAuthorityStub {
-  def willReturnScopesForAuthBearerToken(authBearerToken: String, scopes: Set[String]): StubMapping = {
+  def willReturnScopesForAuthTokens(authorizationTokens: String, scopes: Set[String]): StubMapping = {
     stubFor(
       get(urlPathEqualTo(s"/delegated-authority"))
-        .withHeader("auth-bearer-token", equalTo(authBearerToken))
+        .withHeader("internal-auth-header", equalTo(s"Bearer $authorizationTokens"))
         .willReturn(aResponse().withBody(s"""
           |{"token":
           | {
