@@ -20,7 +20,7 @@ Run the service `sbt run -Drun.mode=Dev`
 
 Run the tests & test coverage report `sbt clean compile coverage test it:test coverageReport`
 
-Run the service in service manager; if you want live endpoints, then start dependencies thus: `sm2 --start AUTH DATASTREAM -r`
+Run the service in Service Manager; if you want live endpoints, then start dependencies thus: `sm2 --start AUTH DATASTREAM -r`
 
 Now you can test the sandbox `curl -v http://localhost:9000/sandbox/userinfo -H 'Accept: application/vnd.hmrc.1.0+json'`
 
