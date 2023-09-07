@@ -36,8 +36,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
-  val ACCEPT_HEADER_V1_0 = "application/vnd.hmrc.1.0+json"
-  val ACCEPT_HEADER_V1_1 = "application/vnd.hmrc.1.1+json"
 
   val ggDetailsV1 = GovernmentGatewayDetails(
     Some("32131"),

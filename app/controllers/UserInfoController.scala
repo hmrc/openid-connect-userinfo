@@ -49,7 +49,7 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
   val service:                   UserInfoService
   val appContext:                AppContext
   implicit val executionContext: ExecutionContext
-  override val validateVersion: String => Boolean = version => (version == "1.0") | (version == "1.1")
+  override val validateVersion: String => Boolean = version => version == "1.0"
 
   val responseLogger = Logger("userInfoResponsePayloadLogger")
 
