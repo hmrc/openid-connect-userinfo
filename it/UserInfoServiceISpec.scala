@@ -658,7 +658,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       When("We request the user information")
       val result = Http(s"$serviceUrl")
         .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
+        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
       Then("The user information is returned")
@@ -700,7 +700,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       When("We request the user information")
       val result = Http(s"$serviceUrl")
         .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.1+json", "token" -> "ggToken"))
+        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
         .asString
 
       Then("The user information is returned")

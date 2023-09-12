@@ -50,18 +50,6 @@ class UserInfoGeneratorSpec extends AnyWordSpec with Matchers with BeforeAndAfte
       userInfo.government_gateway.get.group_profile_uri should not be defined
     }
 
-    "generate an OpenID Connect compliant UserInfo response v1.1" in {
-      val userInfo = TestUserInfoGenerator.userInfoV1_1()
-      TestUserInfoGenerator.firstNames  should contain(userInfo.given_name)
-      TestUserInfoGenerator.middleNames should contain(userInfo.middle_name)
-      TestUserInfoGenerator.lastNames   should contain(userInfo.family_name)
-      userInfo.address                shouldBe TestUserInfoGenerator.fullAddress
-      assertValidDob(userInfo.birthdate.getOrElse(fail(s"Generated user's dob is not defined")))
-      assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
-      userInfo.government_gateway.get.profile_uri       shouldBe defined
-      userInfo.government_gateway.get.group_profile_uri shouldBe defined
-    }
-
     "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in {
       FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
       val userInfo = TestUserInfoGenerator.userInfoV1_0()

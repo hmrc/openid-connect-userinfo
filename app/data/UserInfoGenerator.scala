@@ -111,19 +111,7 @@ class UserInfoGenerator {
     None,
     None
   )
-  private val government_gateway_v1_1: GovernmentGatewayDetails = GovernmentGatewayDetails(
-    Some("32131"),
-    Some(scala.collection.immutable.Seq("User")),
-    Some("Chambers"),
-    Some("affinityGroup"),
-    Some("agent-code-12345"),
-    Some("agent-id-12345"),
-    Some("agent-friendly-name-12345"),
-    Some("gateway-token-val"),
-    Some(10),
-    Some("some_url"),
-    Some("some_other_url")
-  )
+
   val mdtp: Mdtp = Mdtp(deviceId, sessionId)
 
   private lazy val ninoPrefixes = "ABCEGHJKLMNPRSTWXYZ"
@@ -173,25 +161,6 @@ class UserInfoGenerator {
              Some(nino),
              Some(enrolments),
              Some(government_gateway_v1_0),
-             Some(mdtp)
-            )
-  }
-
-  def userInfoV1_1(): UserInfo = {
-    val name = firstNameGenerator
-    val lastName = lastNameGenerator
-    val middleName = middleNameGenerator
-    val dob = dateOfBirth
-    val nino = formattedNino
-    UserInfo(name,
-             lastName,
-             middleName,
-             address,
-             email(name, lastName),
-             Some(dob),
-             Some(nino),
-             Some(enrolments),
-             Some(government_gateway_v1_1),
              Some(mdtp)
             )
   }
