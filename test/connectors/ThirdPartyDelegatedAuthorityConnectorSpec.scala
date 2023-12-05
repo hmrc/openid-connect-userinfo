@@ -39,6 +39,8 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
+    val accessToken = "ACCESS_TOKEN"
+
     val mockAppContext: AppContext = mock[AppContext]
 
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
@@ -60,11 +62,10 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
   "fetchScopes" should {
 
     "return the scopes of the delegated authority" in new Setup {
-      val authorizationTokens = "AUTH_TOKENs"
 
       stubFor(
         get(urlPathMatching(s"/delegated-authority"))
-          .withHeader("internal-auth-header", equalTo(authorizationTokens))
+          .withHeader("access-token", equalTo(accessToken))
           .willReturn(
             aResponse()
               .withStatus(200)
@@ -78,21 +79,20 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
           )
       )
 
-      val scopes: Set[String] = await(connector.fetchScopes(authorizationTokens))
+      val scopes: Set[String] = await(connector.fetchScopes(accessToken))
 
       scopes shouldBe Set("scope1", "scope2")
     }
 
     "return an empty set when delegated authority is not found" in new Setup {
-      val authorizationTokens = "AUTH_TOKENS"
 
       stubFor(
         get(urlPathMatching(s"/delegated-authority"))
-          .withHeader("internal-auth-header", equalTo(authorizationTokens))
+          .withHeader("access-token", equalTo(accessToken))
           .willReturn(aResponse().withStatus(404))
       )
 
-      val scopes: Set[String] = await(connector.fetchScopes(authorizationTokens))
+      val scopes: Set[String] = await(connector.fetchScopes(accessToken))
 
       scopes shouldBe Set()
     }

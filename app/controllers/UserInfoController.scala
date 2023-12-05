@@ -25,7 +25,7 @@ import play.api.libs.json.Json
 import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
 import services.UserInfoService
 import uk.gov.hmrc.api.controllers.HeaderValidator
-import uk.gov.hmrc.http.{BadRequestException, UpstreamErrorResponse => UER}
+import uk.gov.hmrc.http.{BadRequestException, UnauthorizedException, UpstreamErrorResponse => UER}
 import uk.gov.hmrc.http.UpstreamErrorResponse.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
@@ -70,7 +70,8 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
       case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
       case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case bex: BadRequestException   => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case uex: UnauthorizedException => Unauthorized(Json.toJson(ErrorUnauthorized(uex.getMessage)))
     }
   }
 }

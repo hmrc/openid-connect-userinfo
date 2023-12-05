@@ -40,9 +40,12 @@ class LiveUserInfoService @Inject() (
 
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
 
-    val scopes = hc.authorization match {
-      case Some(authorisationTokens) => thirdPartyDelegatedAuthorityConnector.fetchScopes(authorisationTokens.value)
-      case None                      => Future.failed(new UnauthorizedException("Authorization token is required"))
+    val accessTokenHeaderName = "X-Client-Authorization-Token"
+    val accessTokenHeader = hc.otherHeaders.find(x => x._1 == "X-Client-Authorization-Token")
+
+    val scopes = accessTokenHeader match {
+      case Some(accessTokenHeader) => thirdPartyDelegatedAuthorityConnector.fetchScopes(accessTokenHeader._2)
+      case None                    => Future.failed(new UnauthorizedException(s"$accessTokenHeaderName header is missing"))
     }
 
     scopes.flatMap { scopes =>
