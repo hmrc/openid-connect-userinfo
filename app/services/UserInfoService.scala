@@ -41,7 +41,7 @@ class LiveUserInfoService @Inject() (
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
 
     val accessTokenHeaderName = "X-Client-Authorization-Token"
-    val accessTokenHeader = hc.otherHeaders.find(x => x._1 == accessTokenHeaderName)
+    val accessTokenHeader = hc.otherHeaders.find(x => accessTokenHeaderName.equalsIgnoreCase(x._1))
 
     val scopes = accessTokenHeader match {
       case Some(accessTokenHeader) => thirdPartyDelegatedAuthorityConnector.fetchScopes(accessTokenHeader._2)

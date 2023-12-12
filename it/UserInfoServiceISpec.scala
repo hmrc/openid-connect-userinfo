@@ -461,14 +461,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
         Some(10)
       )
 
-      When("We request the user information")
+      When("We request the user information with x-client-authorization-token header name in lowercase")
       val result = Http(s"$serviceUrl")
         .headers(
           Seq(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
-            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+            "x-client-authorization-token" -> "ACCESS_TOKEN"
           )
         )
         .asString
