@@ -27,8 +27,7 @@ import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
 import uk.gov.hmrc.domain.Nino
-import uk.gov.hmrc.http.Authorization
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
+import uk.gov.hmrc.http.{Authorization, BadRequestException, HeaderCarrier, UnauthorizedException}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,6 +36,8 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   val nino = Nino("AB123456A")
   val authorizationTokens = "Bearer AUTH_TOKENS"
+  val accessToken = "ACCESS_TOKEN"
+  val otherHeaders = Seq(("X-Client-Authorization-Token", accessToken))
   val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")),
                                 None,
                                 ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None)
@@ -76,7 +77,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   )
 
   trait Setup {
-    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)))
+    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
 
     val mockAuthConnector:     AuthConnector = mock[AuthConnectorV1]
     val mockUserInfoGenerator: UserInfoGenerator = mock[UserInfoGenerator]
@@ -90,10 +91,10 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
   "LiveUserInfoService" should {
 
-    "requests all available data" in new Setup {
+    "requests all available data when access token in otherHeaders" in new Setup {
 
       val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "email", "openid:government-gateway")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authorizationTokens))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
       given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Some(enrolments))
       given(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).willReturn(Some(desUserInfo))
@@ -116,9 +117,14 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
+    "should fail with UnauthorizedException when access token is not in the headers" in new Setup {
+      val headersWithoutAccessToken = headers.copy(otherHeaders = Seq.empty)
+      a[UnauthorizedException] should be thrownBy await(liveInfoService.fetchUserInfo(Version_1_0)(headersWithoutAccessToken))
+    }
+
     "should fail with BadRequestException when the NINO is not in the authority and a scope that requires a NINO is requested UNICORN" in new Setup {
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authorizationTokens))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Future(Some(authority.copy(nino = None))))
       given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Future(None))
 
@@ -128,7 +134,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "does not request DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile'" in new Setup {
 
       val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authorizationTokens))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
       given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Future(Some(enrolments)))
       given(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None)))
@@ -144,7 +150,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
 
       val scopes = Set("openid:hmrc-enrolments")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authorizationTokens))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
 
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
       given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Some(enrolments))
@@ -161,7 +167,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     "does not request AUTH::fetchEnrolments when the scopes does not contain 'openid:hmrc-enrolments'" in new Setup {
 
       val scopes = Set("address", "profile", "openid:gov-uk-identifiers")
-      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(authorizationTokens))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
+      given(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext])).willReturn(scopes)
 
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
       given(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).willReturn(None)

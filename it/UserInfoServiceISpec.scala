@@ -49,6 +49,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
   val serviceUrl: String = resource("")
 
   val authorizationTokens = "AUTHORIZATION_TOKENS"
+  val accessToken = "ACCESS_TOKEN"
   val nino = "AB123456A"
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(
@@ -201,122 +202,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
           "'email' and 'openid:government-gateway' scopes"
       )
       willReturnScopesForAuthTokens(
-        authorizationTokens,
-        Set(
-          "openid",
-          "profile",
-          "address",
-          "openid:gov-uk-identifiers",
-          "openid:hmrc-enrolments",
-          "openid:government-gateway",
-          "email",
-          "agentInformation",
-          "openid:mdtp"
-        )
-      )
-      willAuthoriseWith(200)
-
-      And("The Auth token has a NINO")
-      willReturnAuthorityWith(Nino(nino))
-
-      And("The authority has enrolments")
-      willReturnEnrolmentsWith()
-
-      And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(
-        Some(desUserInfo),
-        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
-        Some(Credentials("1304372065861347", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
-        Some(Email(email)),
-        Some(AffinityGroup.Individual),
-        Some(User),
-        Some(authMdtp),
-        Some(gatewayInformation),
-        Some(10)
-      )
-
-      When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
-        .asString
-
-      val validator = JsonSchemaFactory.byDefault().getValidator
-      val mapper = new ObjectMapper
-
-      val schema = mapper.readTree(Paths.get(getClass.getResource("1.0/schemas/userinfo.json").toURI).toFile)
-      val json = Json.parse(result.body)
-
-      val report = validator.validate(schema, mapper.readTree(json.toString()))
-
-      Then("The user information is returned")
-      result.code shouldBe 200
-
-      import scala.jdk.CollectionConverters._
-      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
-
-      json shouldBe Json.toJson(userInfo_v1)
-    }
-
-    Scenario("fetch user profile but bad accept header") {
-
-      Given(
-        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
-          "'email' and 'openid:government-gateway' scopes"
-      )
-      willReturnScopesForAuthTokens(
-        authorizationTokens,
-        Set(
-          "openid",
-          "profile",
-          "address",
-          "openid:gov-uk-identifiers",
-          "openid:hmrc-enrolments",
-          "openid:government-gateway",
-          "email",
-          "agentInformation",
-          "openid:mdtp"
-        )
-      )
-      willAuthoriseWith(200)
-
-      And("The Auth token has a NINO")
-      willReturnAuthorityWith(Nino(nino))
-
-      And("The authority has enrolments")
-      willReturnEnrolmentsWith()
-
-      And("The auth will authorise DES contains user information for the NINO")
-      willFindUser(
-        Some(desUserInfo),
-        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
-        Some(Credentials("1304372065861347", "")),
-        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
-        Some(Email(email)),
-        Some(AffinityGroup.Individual),
-        Some(User),
-        Some(authMdtp),
-        Some(gatewayInformation),
-        Some(10)
-      )
-
-      When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.2.0+json", "token" -> "ggToken"))
-        .asString
-
-      Then("return Not Acceptable http response")
-      result.code shouldBe 406
-    }
-
-    Scenario("fetch user profile v1 when Accept Header is missing") {
-
-      Given(
-        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
-          "'email' and 'openid:government-gateway' scopes"
-      )
-      willReturnScopesForAuthTokens(
-        authorizationTokens,
+        accessToken,
         Set(
           "openid",
           "profile",
@@ -355,8 +241,138 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val result = Http(s"$serviceUrl")
         .headers(
           Seq(
-            "Authorization" -> s"Bearer $authorizationTokens",
-            "token"         -> "ggToken",
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
+        .asString
+
+      val validator = JsonSchemaFactory.byDefault().getValidator
+      val mapper = new ObjectMapper
+
+      val schema = mapper.readTree(Paths.get(getClass.getResource("1.0/schemas/userinfo.json").toURI).toFile)
+      val json = Json.parse(result.body)
+
+      val report = validator.validate(schema, mapper.readTree(json.toString()))
+
+      Then("The user information is returned")
+      result.code shouldBe 200
+
+      import scala.jdk.CollectionConverters._
+      assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
+
+      json shouldBe Json.toJson(userInfo_v1)
+    }
+
+    Scenario("fetch user profile but bad accept header") {
+
+      Given(
+        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+          "'email' and 'openid:government-gateway' scopes"
+      )
+      willReturnScopesForAuthTokens(
+        accessToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "agentInformation",
+          "openid:mdtp"
+        )
+      )
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will authorise DES contains user information for the NINO")
+      willFindUser(
+        Some(desUserInfo),
+        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
+        Some(Email(email)),
+        Some(AffinityGroup.Individual),
+        Some(User),
+        Some(authMdtp),
+        Some(gatewayInformation),
+        Some(10)
+      )
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.2.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
+        .asString
+
+      Then("return Not Acceptable http response")
+      result.code shouldBe 406
+    }
+
+    Scenario("fetch user profile v1 when Accept Header is missing") {
+
+      Given(
+        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+          "'email' and 'openid:government-gateway' scopes"
+      )
+      willReturnScopesForAuthTokens(
+        accessToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "agentInformation",
+          "openid:mdtp"
+        )
+      )
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will authorise DES contains user information for the NINO")
+      willFindUser(
+        Some(desUserInfo),
+        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
+        Some(Email(email)),
+        Some(AffinityGroup.Individual),
+        Some(User),
+        Some(authMdtp),
+        Some(gatewayInformation),
+        Some(10)
+      )
+
+      When("We request the user information")
+      val result = Http(s"$serviceUrl")
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN",
             "Accept" -> "" // "" is needed to pretend it is missing as test http libraries (such as scalaj.http and play.api.http) inject default Accept header if this is absent
           )
         )
@@ -382,7 +398,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Scenario("fetch user profile without family name") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
       willAuthoriseWith(200)
 
       And("The Auth token has a NINO")
@@ -396,7 +412,12 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("The user information is returned")
@@ -410,7 +431,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
         "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'email', 'openid:government-gateway' and 'openid:hmrc-enrolments' scopes"
       )
       willReturnScopesForAuthTokens(
-        authorizationTokens,
+        accessToken,
         Set("openid",
             "profile",
             "address",
@@ -442,7 +463,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
         .asString
 
       Then("The user information is returned")
@@ -453,7 +481,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Scenario("fetch user data without address and user details when there are no address and user details") {
 
       Given("A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers' and 'openid:hmrc-enrolments' scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid", "profile", "address", "openid:gov-uk-identifiers", "openid:hmrc-enrolments"))
       willAuthoriseWith(200)
 
       And("The Auth token has a NINO")
@@ -467,7 +495,12 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("The user information is returned")
@@ -487,7 +520,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Scenario("fetch enrolments only when scope contains 'openid:hmrc-enrolments'") {
 
       Given("A Auth token with 'openid:hmrc-enrolments' scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid:hmrc-enrolments"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid:hmrc-enrolments"))
       willAuthoriseWith(200)
 
       And("The Auth token has a NINO")
@@ -498,7 +531,12 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("The user information is returned")
@@ -519,7 +557,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Scenario("fetch government gateway details only when scope contains 'openid:government-gateway'") {
 
       Given("A Auth token with 'openid:government-gateway' scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid:government-gateway"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway"))
       willAuthoriseWith(200)
 
       And("The Auth token has a NINO")
@@ -544,7 +582,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
         .asString
 
       Then("The user information is returned")
@@ -567,14 +612,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
     Scenario("return 401 when Auth returns Unauthorized") {
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("Auth returns unauthorized")
       willAuthoriseWith(401)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("Unauthorized status is returned")
@@ -589,14 +639,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val expectedErrorMessage =
         s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 503. Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("Auth returns unauthorized")
       willAuthoriseWith(503, errorMsg)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("Bad gateway status is returned")
@@ -609,14 +664,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val expectedErrorMessage =
         s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 404 (Not Found). Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
-      willReturnScopesForAuthTokens(authorizationTokens, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
+      willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
       And("Auth returns not found")
       willAuthoriseWith(404, errorMsg)
 
       When("We request the user information")
       val result = Http(s"$serviceUrl")
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json"))
+        .headers(
+          Seq("Authorization"                -> s"Bearer $authorizationTokens",
+              "Accept"                       -> "application/vnd.hmrc.1.0+json",
+              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+             )
+        )
         .asString
 
       Then("Bad gateway status is returned")
@@ -631,7 +691,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
           "'email' and 'openid:government-gateway' scopes"
       )
       willReturnScopesForAuthTokens(
-        authorizationTokens,
+        accessToken,
         Set(
           "openid",
           "profile",
@@ -658,7 +718,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       When("We request the user information")
       val result = Http(s"$serviceUrl")
         .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
         .asString
 
       Then("The user information is returned")
@@ -673,7 +740,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
           "'email' and 'openid:government-gateway' scopes"
       )
       willReturnScopesForAuthTokens(
-        authorizationTokens,
+        accessToken,
         Set(
           "openid",
           "profile",
@@ -700,11 +767,66 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       When("We request the user information")
       val result = Http(s"$serviceUrl")
         .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(Seq("Authorization" -> s"Bearer $authorizationTokens", "Accept" -> "application/vnd.hmrc.1.0+json", "token" -> "ggToken"))
+        .headers(
+          Seq(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+        )
         .asString
 
       Then("The user information is returned")
       result.code shouldBe 502
+
+    }
+
+    Scenario("fetching user info returns 401 then we return 401 when X-Client-Authorization-Token header missing") {
+
+      Given(
+        "A Auth token with 'openid', 'profile', 'address', 'openid:gov-uk-identifiers', 'openid:hmrc-enrolments', 'openid:mdtp'," +
+          "'email' and 'openid:government-gateway' scopes"
+      )
+      willReturnScopesForAuthTokens(
+        accessToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "agentInformation",
+          "openid:mdtp"
+        )
+      )
+      willAuthoriseWith(200)
+
+      And("The Auth token has a NINO")
+      willReturnAuthorityWith(Nino(nino))
+
+      And("The authority has enrolments")
+      willReturnEnrolmentsWith()
+
+      And("The auth will user details call will fail with 400")
+      willFindUserFailed(409)
+
+      When("We request the user information without the X-Client-Authorization-Token header")
+      val result = Http(s"$serviceUrl")
+        .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
+        .headers(
+          Seq(
+            "Authorization" -> s"Bearer $authorizationTokens",
+            "Accept"        -> "application/vnd.hmrc.1.0+json",
+            "token"         -> "ggToken"
+          )
+        )
+        .asString
+
+      Then("The user information is not returned")
+      result.code shouldBe 401
 
     }
 

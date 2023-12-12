@@ -30,8 +30,8 @@ import scala.util.control.NonFatal
 class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, http: HttpGet) {
   val serviceUrl: String = appContext.thirdPartyDelegatedAuthorityUrl
 
-  def fetchScopes(authorizationTokens: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Set[String]] = {
-    http.GET(s"$serviceUrl/delegated-authority", Nil, Seq("internal-auth-header" -> authorizationTokens))(readRaw, hc, ec) map { response =>
+  def fetchScopes(accessToken: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Set[String]] = {
+    http.GET(s"$serviceUrl/delegated-authority", Nil, Seq("access-token" -> accessToken))(readRaw, hc, ec) map { response =>
       if (response.status == Status.NOT_FOUND) {
         Set[String]()
       } else {
