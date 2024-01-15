@@ -141,7 +141,7 @@ class UserInfoGenerator {
   private def formattedNino = {
     val first = ninoPrefixGenerator.getOrElse("")
     val second = ninoPrefixGenerator.getOrElse("")
-    val number = numbersGenerator.getOrElse("")
+    val number = numbersGenerator.map(_.toString).getOrElse("")
     val suffix = ninoSuffixGenerator.getOrElse("")
     s"$first$second$number$suffix"
   }

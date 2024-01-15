@@ -22,7 +22,6 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import config.{APIAccessVersions, AppContext}
 import views._
 
-import scala.language.dynamics
 
 @Singleton
 class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appContext: AppContext, assets: Assets, cc: ControllerComponents)

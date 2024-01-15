@@ -88,7 +88,7 @@ class UserInfoTransformer {
     val agentFriendlyName = userDetails flatMap { _.agentFriendlyName }
     val agentId = userDetails flatMap { _.agentId }
     val gatewayInformation = userDetails flatMap { _.gatewayInformation }
-    val mdtp = userDetails flatMap { _.mdtpInformation }
+//    val mdtp = userDetails flatMap { _.mdtpInformation }
     val profileUrl = userDetails flatMap { _.profile }
     val groupProfileUrl = userDetails flatMap { _.groupProfile }
 

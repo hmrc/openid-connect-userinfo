@@ -15,10 +15,14 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     playDefaultPort := 9836,
     libraryDependencies ++= AppDependencies(),
-    scalacOptions := Seq("-Xfatal-warnings", "-feature", "-deprecation")
+    scalacOptions ++= Seq(
+      "-Werror",
+      "-feature",
+      "-Wconf:cat=unused-imports&src=views/.*:s",
+      "-Wconf:src=routes/.*:s"
+    )
   )
   .settings(ScoverageSettings())
-  .settings(SilencerSettings())
   .settings(scalafmtOnCompile := true)
 
 lazy val it = project

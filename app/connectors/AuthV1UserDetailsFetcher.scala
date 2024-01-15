@@ -16,21 +16,21 @@
 
 package connectors
 
-import com.github.ghik.silencer.silent
 import uk.gov.hmrc.auth.core.AuthorisedFunctions
-import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import domain.UserDetails
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@silent trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
+trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
   self: AuthorisedFunctions =>
 
   def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
     authorised()
       .retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
-        case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
+        case Some(credentials) ~ Some(name) ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
             credentialRole ~ description ~ groupId ~ mdtp ~ gatewayInformation =>
           Future.successful(
             Some(
@@ -58,7 +58,7 @@ import scala.concurrent.{ExecutionContext, Future}
           )
         case _ => Future.successful(None)
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }

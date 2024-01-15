@@ -18,8 +18,8 @@ package connectors
 
 import javax.inject.{Inject, Singleton}
 
-import com.github.ghik.silencer.silent
-import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import domain.{Authority, DesUserInfo, UserDetails}
@@ -27,7 +27,7 @@ import config.AppContext
 
 import scala.concurrent.{ExecutionContext, Future}
 
-@silent abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
+abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
   self: UserDetailsFetcher =>
 
   val appContext: AppContext
@@ -49,10 +49,10 @@ import scala.concurrent.{ExecutionContext, Future}
   def fetchAuthority()(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[Authority]] = {
     authorised()
       .retrieve(Retrievals.credentials and Retrievals.nino) {
-        case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
-        case _                  => Future.successful(None)
+        case Some(credentials) ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
+        case _                        => Future.successful(None)
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }
@@ -63,11 +63,11 @@ import scala.concurrent.{ExecutionContext, Future}
     val nothing = Future.successful(None)
     authorised()
       .retrieve(Retrievals.allItmpUserDetails) {
-        case name ~ dateOfBirth ~ address =>
+        case Some(name) ~ dateOfBirth ~ Some(address) =>
           Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
         case _ => nothing
       }
-      .recoverWith { case ex: NotFoundException =>
+      .recoverWith { case _: NotFoundException =>
         nothing
       }
   }

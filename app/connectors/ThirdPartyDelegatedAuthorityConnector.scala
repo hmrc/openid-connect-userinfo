@@ -16,15 +16,13 @@
 
 package connectors
 
-import javax.inject.{Inject, Singleton}
-import play.api.http.Status
-
-import scala.concurrent.{ExecutionContext, Future}
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet, HttpResponse, NotFoundException}
 import config.AppContext
+import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
+import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
 
-import scala.util.control.NonFatal
+import javax.inject.{Inject, Singleton}
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, http: HttpGet) {
