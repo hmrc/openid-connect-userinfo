@@ -20,14 +20,13 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json._
 import play.api.libs.json.Writes.DefaultLocalDateWrites
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.{Retrievals => V2Retrievals}
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
 import controllers.{Version, Version_1_0}
 import domain.{DesUserInfo, _}
-import com.github.ghik.silencer.silent
 
-@silent trait AuthStub {
+trait AuthStub {
 
   implicit class JsOptAppendable(jsObject: JsObject) {
     def appendOptional(key: String, value: Option[JsValue]): JsObject = value
@@ -112,10 +111,9 @@ import com.github.ghik.silencer.silent
                    groupProfileUrl:    Option[String] = None,
                    version:            Version = Version_1_0
                   ): Unit = {
-    implicit val agentWrites = Json.writes[AgentInformation]
-    implicit val credentialWrites = Json.writes[Credentials]
-    implicit val nameWrites = Json.writes[Name]
-    implicit val emailWrites = Json.writes[Email]
+    implicit val agentWrites: OWrites[AgentInformation] = Json.writes[AgentInformation]
+    implicit val credentialWrites: OWrites[Credentials] = Json.writes[Credentials]
+    implicit val nameWrites: OWrites[Name] = Json.writes[Name]
     val jsonAddress:     Option[JsValue] = desUserInfo.map(d => Json.toJson(d.address))
     val jsonItmpName:    Option[JsValue] = desUserInfo.map(d => Json.toJson(d.name))
     val jsonAgent:       Option[JsValue] = agentInformation.map(Json.toJson(_))
