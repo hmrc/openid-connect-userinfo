@@ -6,14 +6,14 @@ object AppDependencies {
 
   private val bootstrapPlayVersion = "8.4.0"
 
-  val compile: Seq[ModuleID] = Seq(
+  private val compile: Seq[ModuleID] = Seq(
     ws,
     "uk.gov.hmrc" %% "bootstrap-backend-play-28" % bootstrapPlayVersion,
     "uk.gov.hmrc" %% "domain"                    % "8.3.0-play-28",
     "uk.gov.hmrc" %% "play-hmrc-api"             % "7.2.0-play-28"
   )
 
-  val test: Seq[ModuleID] = Seq(
+  private val test: Seq[ModuleID] = Seq(
     "org.scalatest"             %% "scalatest"               % "3.2.17",
     "org.scalatestplus"         %% "scalacheck-1-17"         % "3.2.17.0",
     "org.scalatestplus.play"    %% "scalatestplus-play"      % "5.1.0",
@@ -27,7 +27,7 @@ object AppDependencies {
     "org.scalacheck"            %% "scalacheck"              % "1.17.0",
     "com.github.java-json-tools" % "json-schema-validator"   % "2.2.14",
     "com.vladsch.flexmark"       % "flexmark-all"            % "0.64.0"
-  ).map(_ % "test, it")
+  ).map(_ % Test)
 
   def apply(): Seq[ModuleID] = compile ++ test
 

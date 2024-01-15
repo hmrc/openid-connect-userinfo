@@ -1,25 +1,33 @@
 import play.sbt.PlayImport.PlayKeys.playDefaultPort
-import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
+import sbt.Keys.scalacOptions
+import uk.gov.hmrc.DefaultBuildSettings
+
+import scala.collection.Seq
 
 val appName = "openid-connect-userinfo"
-
+ThisBuild / majorVersion := 1
+ThisBuild / scalaVersion := "2.13.8"
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always // it should not be needed but the build still fails without it
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .enablePlugins(PlayScala, SbtDistributablesPlugin)
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
-  .settings(scalaVersion := "2.13.8")
-  .settings(scalacOptions := Seq("-Xfatal-warnings", "-feature", "-deprecation"))
   .settings(
-    majorVersion := 0,
-    libraryDependencies ++= AppDependencies.compile ++ AppDependencies.test
+    playDefaultPort := 9836,
+    libraryDependencies ++= AppDependencies(),
+    scalacOptions := Seq("-Xfatal-warnings", "-feature", "-deprecation")
   )
-  .configs(IntegrationTest)
-  .settings(integrationTestSettings() *)
-  .settings(IntegrationTest / dependencyClasspath ++= (Test / exportedProducts).value)
-  .settings(IntegrationTest / unmanagedResourceDirectories += baseDirectory.value / "it" / "resources")
-  .settings(resolvers += Resolver.jcenterRepo)
-  .settings(playDefaultPort := 9836)
   .settings(ScoverageSettings())
   .settings(SilencerSettings())
   .settings(scalafmtOnCompile := true)
+
+lazy val it = project
+  .enablePlugins(PlayScala)
+  .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
+  .settings(DefaultBuildSettings.itSettings())
+  .settings(Test / dependencyClasspath ++= (Test / exportedProducts).value)
+  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / "it" / "resources")
+  .settings(
+    Test / parallelExecution := false,
+    Test / fork := false
+  )

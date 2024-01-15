@@ -18,7 +18,7 @@ You can dive deeper into the documentation in the [API Developer Hub](https://de
 ## Running Locally
 Run the service `sbt run -Drun.mode=Dev`
 
-Run the tests & test coverage report `sbt clean compile coverage test it:test coverageReport`
+Run the tests & test coverage report `sbt clean coverage test it/test coverageReport`
 
 Run the service in service manager; if you want live endpoints, then start dependencies thus: `sm2 --start AUTH DATASTREAM -r`
 
