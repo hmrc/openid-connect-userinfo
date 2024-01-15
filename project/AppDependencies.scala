@@ -4,7 +4,7 @@ import sbt.*
 
 object AppDependencies {
 
-  private val bootstrapPlayVersion = "7.15.0"
+  private val bootstrapPlayVersion = "8.4.0"
 
   val compile: Seq[ModuleID] = Seq(
     ws,
@@ -27,7 +27,7 @@ object AppDependencies {
     "org.scalacheck"         %% "scalacheck"               % "1.17.0",
     "com.github.fge"          % "json-schema-validator"    % "2.2.6",
     "com.vladsch.flexmark"    % "flexmark-all"             % "0.64.0"
-  ).map(_ % "test, it")
+  ).map(_ % Test)
 
   def apply(): Seq[ModuleID] = compile ++ test
 
