@@ -14,20 +14,20 @@ object AppDependencies {
   )
 
   val test: Seq[ModuleID] = Seq(
-    "org.scalatest"          %% "scalatest"                % "3.2.15",
-    "org.scalatestplus"      %% "scalacheck-1-15"          % "3.2.11.0",
-    "org.scalatestplus.play" %% "scalatestplus-play"       % "5.1.0",
-    "com.typesafe.play"      %% "play-test"                % PlayVersion.current,
-    "com.github.tomakehurst"  % "wiremock"                 % "2.27.2",
-    "uk.gov.hmrc"            %% "bootstrap-test-play-28"   % bootstrapPlayVersion,
-    "org.pegdown"             % "pegdown"                  % "1.6.0",
-    "org.jsoup"               % "jsoup"                    % "1.15.4",
-    "org.scalaj"             %% "scalaj-http"              % "2.4.2",
-    "org.mockito"            %% "mockito-scala-scalatest"  % "1.17.12",
-    "org.scalacheck"         %% "scalacheck"               % "1.17.0",
-    "com.github.fge"          % "json-schema-validator"    % "2.2.6",
-    "com.vladsch.flexmark"    % "flexmark-all"             % "0.64.0"
-  ).map(_ % Test)
+    "org.scalatest"             %% "scalatest"               % "3.2.17",
+    "org.scalatestplus"         %% "scalacheck-1-17"         % "3.2.17.0",
+    "org.scalatestplus.play"    %% "scalatestplus-play"      % "5.1.0",
+    "com.typesafe.play"         %% "play-test"               % PlayVersion.current,
+    "com.github.tomakehurst"     % "wiremock"                % "2.27.2",
+    "uk.gov.hmrc"               %% "bootstrap-test-play-28"  % bootstrapPlayVersion,
+    "org.pegdown"                % "pegdown"                 % "1.6.0",
+    "org.jsoup"                  % "jsoup"                   % "1.17.2",
+    "org.scalaj"                %% "scalaj-http"             % "2.4.2",
+    "org.mockito"               %% "mockito-scala-scalatest" % "1.17.30",
+    "org.scalacheck"            %% "scalacheck"              % "1.17.0",
+    "com.github.java-json-tools" % "json-schema-validator"   % "2.2.14",
+    "com.vladsch.flexmark"       % "flexmark-all"            % "0.64.0"
+  ).map(_ % "test, it")
 
   def apply(): Seq[ModuleID] = compile ++ test
 
