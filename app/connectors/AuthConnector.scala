@@ -17,16 +17,17 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
-
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import domain.{Authority, DesUserInfo, UserDetails}
 import config.AppContext
 
+import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
+@nowarn("cat=deprecation")
 abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
   self: UserDetailsFetcher =>
 
@@ -41,7 +42,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
       .retrieve(Retrievals.allEnrolments) { enrolments =>
         Future.successful(Some(enrolments))
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }
@@ -49,8 +50,8 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
   def fetchAuthority()(implicit headerCarrier: HeaderCarrier, ec: ExecutionContext): Future[Option[Authority]] = {
     authorised()
       .retrieve(Retrievals.credentials and Retrievals.nino) {
-        case Some(credentials) ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
-        case _                        => Future.successful(None)
+        case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
+        case _ => Future.successful(None)
       }
       .recover { case _: NotFoundException =>
         None
@@ -63,7 +64,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
     val nothing = Future.successful(None)
     authorised()
       .retrieve(Retrievals.allItmpUserDetails) {
-        case Some(name) ~ dateOfBirth ~ Some(address) =>
+        case name ~ dateOfBirth ~ address =>
           Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
         case _ => nothing
       }

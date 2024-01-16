@@ -15,6 +15,11 @@ User details data structures follow the OpenId Connect UserInfo specification (s
 
 You can dive deeper into the documentation in the [API Developer Hub](https://developer.service.hmrc.gov.uk/api-documentation/docs/api#openid-connect-userinfo).
 
+## Deprecated Class Usage
+You can find the deprecation suppression `@nowarn("cat=deprecation")` in the code in few places.
+
+The reason is that when the latest `v2.Retrievals` was used then the integration tests were broken and wasn't obvious why.
+
 ## Running Locally
 Run the service `sbt run -Drun.mode=Dev`
 

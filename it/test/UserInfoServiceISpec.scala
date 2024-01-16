@@ -20,6 +20,7 @@ import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain._
+
 import java.time.LocalDate
 import play.api.libs.json.Json
 import scalaj.http.{Http, HttpOptions}
@@ -28,12 +29,9 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
 
-class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
+import scala.jdk.CollectionConverters.CollectionHasAsScala
 
-  override protected def beforeEach(): Unit = {
-    super.beforeEach()
-    wireMockServer.resetMappings()
-  }
+class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
 
   override def beforeAll(): Unit = {
     super.beforeAll()

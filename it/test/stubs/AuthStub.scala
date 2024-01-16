@@ -20,12 +20,15 @@ import com.github.tomakehurst.wiremock.client.WireMock._
 import play.api.libs.json._
 import play.api.libs.json.Writes.DefaultLocalDateWrites
 import uk.gov.hmrc.auth.core.retrieve._
-import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.Retrievals
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
 import controllers.{Version, Version_1_0}
 import domain.{DesUserInfo, _}
 
+import scala.annotation.nowarn
+
+@nowarn("cat=deprecation")
 trait AuthStub {
 
   implicit class JsOptAppendable(jsObject: JsObject) {

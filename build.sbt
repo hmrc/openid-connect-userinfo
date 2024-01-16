@@ -29,8 +29,7 @@ lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
   .settings(DefaultBuildSettings.itSettings())
-  .settings(Test / dependencyClasspath ++= (Test / exportedProducts).value)
-  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / "it" / "resources")
+  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / "test" / "resources")
   .settings(
     Test / parallelExecution := false,
     Test / fork := false
