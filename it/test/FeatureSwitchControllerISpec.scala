@@ -19,11 +19,11 @@ import scalaj.http.Http
 
 class FeatureSwitchControllerISpec extends BaseFeatureISpec {
 
-  val serviceUrl = "/feature-switches"
+  val serviceUrl = "/test-only/feature-switches"
 
   Feature("getting feature switches") {
-    Scenario("calling GET /feature-switches") {
-      Given("we call GET /feature-switches")
+    Scenario("calling GET /test-only/feature-switches") {
+      Given("we call GET /test-only/feature-switches")
 
       val result = Http(resource(s"$serviceUrl")).asString
 
@@ -37,8 +37,8 @@ class FeatureSwitchControllerISpec extends BaseFeatureISpec {
   }
 
   Feature("updating feature switches") {
-    Scenario("calling POST /feature-switches") {
-      Given("we call GET /feature-switches")
+    Scenario("calling POST /test-only/feature-switches") {
+      Given("we call GET /test-only/feature-switches")
 
       val result = Http(resource(s"$serviceUrl")).asString
 
