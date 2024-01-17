@@ -6,7 +6,7 @@ import scala.collection.Seq
 
 val appName = "openid-connect-userinfo"
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.8"
+ThisBuild / scalaVersion := "2.13.12"
 ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always // it should not be needed but the build still fails without it
 
 lazy val microservice = Project(appName, file("."))

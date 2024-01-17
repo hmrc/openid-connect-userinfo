@@ -20,21 +20,21 @@ import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
 package object domain {
 
-  implicit val desUserName = Json.format[ItmpName]
+  implicit val desUserName: OFormat[ItmpName] = Json.format
 
-  implicit val desAddress = Json.format[ItmpAddress]
+  implicit val desAddress: OFormat[ItmpAddress] = Json.format
 
-  implicit val enrolmentIdentifier = Json.format[EnrolmentIdentifier]
-  implicit val enrloment = Json.format[Enrolment]
+  implicit val enrolmentIdentifier: OFormat[EnrolmentIdentifier] = Json.format
+  implicit val enrloment:           OFormat[Enrolment] = Json.format
 
-  implicit val gatewayInformationFmt: Format[GatewayInformation] = Json.format[GatewayInformation]
-  implicit val mdtpInformationFmt:    Format[MdtpInformation] = Json.format[MdtpInformation]
-  implicit val userDetails = Json.format[UserDetails]
-  implicit val mdtp = Json.format[Mdtp]
-  implicit val governmentGatewayDetails = Json.format[GovernmentGatewayDetails]
+  implicit val gatewayInformationFmt:    Format[GatewayInformation] = Json.format
+  implicit val mdtpInformationFmt:       Format[MdtpInformation] = Json.format
+  implicit val userDetails:              OFormat[UserDetails] = Json.format
+  implicit val mdtp:                     OFormat[Mdtp] = Json.format
+  implicit val governmentGatewayDetails: OFormat[GovernmentGatewayDetails] = Json.format
 
-  implicit val addressFmt = Json.format[Address]
-  implicit val userInfoFmt = Json.format[UserInfo]
-  implicit val apiAccessFmt = Json.format[APIAccess]
+  implicit val addressFmt:   OFormat[Address] = Json.format
+  implicit val userInfoFmt:  OFormat[UserInfo] = Json.format
+  implicit val apiAccessFmt: OFormat[APIAccess] = Json.format
 
 }

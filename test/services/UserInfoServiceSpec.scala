@@ -77,7 +77,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   )
 
   trait Setup {
-    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
+    implicit val headers: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
 
     val mockAuthConnector:     AuthConnector = mock[AuthConnectorV1]
     val mockUserInfoGenerator: UserInfoGenerator = mock[UserInfoGenerator]

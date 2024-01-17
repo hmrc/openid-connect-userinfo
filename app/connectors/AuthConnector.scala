@@ -51,7 +51,7 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
     authorised()
       .retrieve(Retrievals.credentials and Retrievals.nino) {
         case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
-        case _ => Future.successful(None)
+        case _                  => Future.successful(None)
       }
       .recover { case _: NotFoundException =>
         None
