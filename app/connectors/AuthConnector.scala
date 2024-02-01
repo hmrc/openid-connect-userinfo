@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,17 +17,18 @@
 package connectors
 
 import javax.inject.{Inject, Singleton}
-
-import com.github.ghik.silencer.silent
-import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.auth.core.{AuthorisedFunctions, Enrolments, PlayAuthConnector}
 import uk.gov.hmrc.http.{CorePost, HeaderCarrier, NotFoundException}
 import domain.{Authority, DesUserInfo, UserDetails}
 import config.AppContext
 
+import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
-@silent abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
+@nowarn("cat=deprecation")
+abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions {
   self: UserDetailsFetcher =>
 
   val appContext: AppContext
@@ -41,7 +42,7 @@ import scala.concurrent.{ExecutionContext, Future}
       .retrieve(Retrievals.allEnrolments) { enrolments =>
         Future.successful(Some(enrolments))
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }
@@ -52,7 +53,7 @@ import scala.concurrent.{ExecutionContext, Future}
         case credentials ~ nino => Future.successful(Some(Authority(credentials.providerId, nino)))
         case _                  => Future.successful(None)
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }
@@ -67,7 +68,7 @@ import scala.concurrent.{ExecutionContext, Future}
           Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
         case _ => nothing
       }
-      .recoverWith { case ex: NotFoundException =>
+      .recoverWith { case _: NotFoundException =>
         nothing
       }
   }

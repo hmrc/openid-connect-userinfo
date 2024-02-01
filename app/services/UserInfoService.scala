@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,14 @@
 
 package services
 
-import javax.inject.{Inject, Named, Singleton}
-import uk.gov.hmrc.auth.core.Enrolments
-import uk.gov.hmrc.http.Authorization
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 import connectors._
 import controllers.{Version, Version_1_0}
 import data.UserInfoGenerator
 import domain._
+import uk.gov.hmrc.auth.core.Enrolments
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 trait UserInfoService {

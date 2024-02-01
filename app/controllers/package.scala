@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-import play.api.libs.json.{JsValue, Json, Writes}
+import play.api.libs.json.{Json, Writes}
 
 package object controllers {
 
-  def errorWrites[T <: ErrorResponse] = new Writes[T] {
-    override def writes(o: T): JsValue = Json.obj("code" -> o.errorCode, "message" -> o.message)
-  }
+  private def errorWrites[T <: ErrorResponse]: Writes[T] = (o: T) => Json.obj("code" -> o.errorCode, "message" -> o.message)
 
-  implicit val errorResponseWrites = errorWrites[ErrorResponse]
-  implicit val errorUnauthorizedWrites = errorWrites[ErrorUnauthorized]
-  implicit val errorNotFoundWrites = errorWrites[ErrorNotFound]
-  implicit val errorAcceptHeaderInvalidWrites = errorWrites[ErrorAcceptHeaderInvalid]
-  implicit val errorBadGatewayWrites = errorWrites[ErrorBadGateway]
-  implicit val errorBadRequestWrites = errorWrites[ErrorBadRequest]
+  implicit val errorResponseWrites:            Writes[ErrorResponse] = errorWrites[ErrorResponse]
+  implicit val errorUnauthorizedWrites:        Writes[ErrorUnauthorized] = errorWrites[ErrorUnauthorized]
+  implicit val errorNotFoundWrites:            Writes[ErrorNotFound] = errorWrites[ErrorNotFound]
+  implicit val errorAcceptHeaderInvalidWrites: Writes[ErrorAcceptHeaderInvalid] = errorWrites[ErrorAcceptHeaderInvalid]
+  implicit val errorBadGatewayWrites:          Writes[ErrorBadGateway] = errorWrites[ErrorBadGateway]
+  implicit val errorBadRequestWrites:          Writes[ErrorBadRequest] = errorWrites[ErrorBadRequest]
 }

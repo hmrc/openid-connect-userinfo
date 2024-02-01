@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,8 +75,20 @@ trait BaseFeatureISpec
   val stubPort: Int = sys.env.getOrElse("WIREMOCK_SERVICE_LOCATOR_PORT", "6008").toInt
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
-  wireMockServer.start()
-  WireMock.configureFor(stubHost, stubPort)
-  stubFor(post(urlPathMatching("/registration")).willReturn(aResponse().withStatus(204)))
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    wireMockServer.start()
+    WireMock.configureFor(stubHost, stubPort)
+    stubFor(post(urlPathMatching("/registration")).willReturn(aResponse().withStatus(204)))
+  }
 
+  override def afterAll(): Unit = {
+    super.afterAll()
+    wireMockServer.stop()
+  }
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    wireMockServer.resetMappings()
+  }
 }

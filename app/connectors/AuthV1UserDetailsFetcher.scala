@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,15 +16,17 @@
 
 package connectors
 
-import com.github.ghik.silencer.silent
 import uk.gov.hmrc.auth.core.AuthorisedFunctions
-import uk.gov.hmrc.auth.core.retrieve.{Retrievals, ~}
+import uk.gov.hmrc.auth.core.retrieve.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import domain.UserDetails
 
+import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
-@silent trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
+@nowarn("cat=deprecation")
+trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
   self: AuthorisedFunctions =>
 
   def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
@@ -58,7 +60,7 @@ import scala.concurrent.{ExecutionContext, Future}
           )
         case _ => Future.successful(None)
       }
-      .recover { case e: NotFoundException =>
+      .recover { case _: NotFoundException =>
         None
       }
   }

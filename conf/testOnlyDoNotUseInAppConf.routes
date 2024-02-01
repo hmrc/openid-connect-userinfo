@@ -1,4 +1,4 @@
-GET     /feature-switches            @controllers.testOnly.FeatureSwitchController.getFlags
-POST    /feature-switches            @controllers.testOnly.FeatureSwitchController.setFlags
+GET   /test-only/feature-switches  @controllers.testOnly.FeatureSwitchController.getFlags
+POST  /test-only/feature-switches  @controllers.testOnly.FeatureSwitchController.setFlags
 
-->      /                            prod.Routes
+->    /                            prod.Routes

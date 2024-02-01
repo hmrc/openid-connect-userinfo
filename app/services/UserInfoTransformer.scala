@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -88,7 +88,7 @@ class UserInfoTransformer {
     val agentFriendlyName = userDetails flatMap { _.agentFriendlyName }
     val agentId = userDetails flatMap { _.agentId }
     val gatewayInformation = userDetails flatMap { _.gatewayInformation }
-    val mdtp = userDetails flatMap { _.mdtpInformation }
+//    val mdtp = userDetails flatMap { _.mdtpInformation }
     val profileUrl = userDetails flatMap { _.profile }
     val groupProfileUrl = userDetails flatMap { _.groupProfile }
 

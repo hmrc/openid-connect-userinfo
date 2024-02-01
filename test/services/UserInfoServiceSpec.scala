@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -77,7 +77,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   )
 
   trait Setup {
-    implicit val headers = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
+    implicit val headers: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
 
     val mockAuthConnector:     AuthConnector = mock[AuthConnectorV1]
     val mockUserInfoGenerator: UserInfoGenerator = mock[UserInfoGenerator]

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,6 +26,8 @@ import services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 
+import scala.annotation.unused
+
 class GuiceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {
   override def configure() = {
     bind(classOf[AuthConnector]).to(classOf[AuthConnectorV1])
@@ -36,6 +38,7 @@ class GuiceModule(val environment: Environment, val configuration: Configuration
     bind(classOf[HttpGet]).to(classOf[DefaultHttpClient])
     bind(classOf[ControllerConfig]).toInstance {
       new ControllerConfig {
+        @unused
         def controllerConfigs: Config = configuration.underlying.getConfig("controllers")
       }
     }

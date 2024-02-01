@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,8 +21,6 @@ import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import config.{APIAccessVersions, AppContext}
 import views._
-
-import scala.language.dynamics
 
 @Singleton
 class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appContext: AppContext, assets: Assets, cc: ControllerComponents)
