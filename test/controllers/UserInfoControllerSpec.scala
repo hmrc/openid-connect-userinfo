@@ -16,9 +16,10 @@
 
 package controllers
 
-import akka.actor.ActorSystem
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
+import org.apache.pekko.actor.ActorSystem
+
 import java.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
