@@ -16,7 +16,6 @@
 
 package filters
 
-import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import play.api.Configuration
 import play.api.libs.json.Json
@@ -25,6 +24,7 @@ import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import connectors.AuthConnector
 import controllers.ErrorUnauthorized
+import org.apache.pekko.stream.Materializer
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
