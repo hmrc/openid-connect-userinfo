@@ -16,12 +16,12 @@
 
 package controllers.testOnly
 
-import akka.actor.ActorSystem
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json._
 import play.api.mvc.{ControllerComponents, Request, Result}
 import play.api.test.FakeRequest
 import config.{FeatureSwitch, UserInfoFeatureSwitches}
+import org.apache.pekko.actor.ActorSystem
 import testSupport.UnitSpec
 
 import scala.concurrent.ExecutionContext

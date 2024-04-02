@@ -7,10 +7,10 @@ import scala.collection.Seq
 val appName = "openid-connect-userinfo"
 ThisBuild / majorVersion := 1
 ThisBuild / scalaVersion := "2.13.12"
-ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-xml" % VersionScheme.Always // it should not be needed but the build still fails without it
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
+  .settings(DefaultBuildSettings.defaultSettings(): _*)
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     playDefaultPort := 9836,
@@ -29,8 +29,3 @@ lazy val it = project
   .enablePlugins(PlayScala)
   .dependsOn(microservice % "test->test") // the "test->test" allows reusing test code and test dependencies
   .settings(DefaultBuildSettings.itSettings())
-  .settings(Test / unmanagedResourceDirectories += baseDirectory.value / "test" / "resources")
-  .settings(
-    Test / parallelExecution := false,
-    Test / fork := false
-  )
