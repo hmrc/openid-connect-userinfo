@@ -18,19 +18,14 @@ package config
 
 import com.typesafe.config.ConfigObject
 import javax.inject.{Inject, Singleton}
-import play.api.{Configuration, Environment, Mode}
+import play.api.Configuration
 import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
-class AppContext @Inject() (val runModeConfiguration: Configuration, environment: Environment) extends ServicesConfig(runModeConfiguration) {
-  protected def mode: Mode = environment.mode
-
+class AppContext @Inject() (val runModeConfiguration: Configuration) extends ServicesConfig(runModeConfiguration) {
   lazy val appName:                         String = runModeConfiguration.get[String]("appName")
-  lazy val appUrl:                          String = runModeConfiguration.get[String]("appUrl")
   lazy val authUrl:                         String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
   lazy val access:                          Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
-  lazy val desEnvironment:                  String = runModeConfiguration.get[String](s"microservice.services.des.environment")
-  lazy val desBearerToken:                  String = runModeConfiguration.get[String](s"microservice.services.des.bearer-token")
   lazy val logUserInfoResponsePayload:      Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
 }
