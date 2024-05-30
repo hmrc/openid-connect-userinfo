@@ -1,4 +1,1 @@
-GET   /test-only/feature-switches  @controllers.testOnly.FeatureSwitchController.getFlags
-POST  /test-only/feature-switches  @controllers.testOnly.FeatureSwitchController.setFlags
-
 ->    /                            prod.Routes

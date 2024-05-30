@@ -2,15 +2,20 @@ openapi: 3.0.3
 info:
   title: User Information
   description: >-
-    Access to user information is controlled through scopes. Each access token (OAuth 2.0 Bearer Token) is associated with a set of scopes at login. When a request is made for user information, only information belonging to the provided scopes is returned. The information is returned in the form of claims, which sometimes are simple fields and sometimes objects that contain further fields.
-    Here is a list of supported scopes and the claims they contain. The details of each claim, including any contained fields, is documented further down.
-    * 'profile': given_name, middle_name, family_name, birthdate
-    * 'address': address
-    * 'email': email
-    * 'openid:hmrc-enrolments': hmrc_enrolments
-    * 'openid:government-gateway': government_gateway
-    * 'openid:mdtp': mdtp
-    * 'openid:gov-uk-identifiers': uk_gov_nino
+    Only the GET method is supported.<br><br>
+
+    Access to user information is controlled through scopes. Each access token (OAuth 2.0 Bearer Token) is associated with a set of scopes at login.<br><br> 
+    
+    When a request is made for user information, only information belonging to the provided scopes is returned. The information is returned in the form of claims, which sometimes are simple fields and sometimes objects that contain further fields.<br><br>
+    
+    Here is the supported scope list and the claims they contain. The details of each claim, including any contained fields, is documented further down.<br>
+    * 'profile': given_name, middle_name, family_name, birthdate<br>
+    * 'address': address<br>
+    * 'email': email<br>
+    * 'openid:hmrc-enrolments': hmrc_enrolments<br>
+    * 'openid:government-gateway': government_gateway<br>
+    * 'openid:mdtp': mdtp<br>
+    * 'openid:gov-uk-identifiers': uk_gov_nino<br>
   contact: {}
   version: '1.0'
 servers:
@@ -60,7 +65,7 @@ paths:
                         value: '174371121'
                       state: activated
                     government_gateway:
-                      user_id: '019283'
+                      user_id: '019283739713'
                       roles:
                       - User
                       affinity_group: Individual
@@ -98,7 +103,7 @@ paths:
                         value: '174371121'
                       state: activated
                     government_gateway:
-                      user_id: '019283'
+                      user_id: '019283739713'
                       roles:
                       - User
                       affinity_group: Individual
@@ -161,7 +166,7 @@ components:
       properties:
         formatted:
           type: string
-          description: End-user's mailing address, formatted for display or use on a mailing label.
+          description: End-User's mailing address, formatted for display or use on a mailing label.
           example: >-
             221B Baker Street
 
@@ -172,15 +177,15 @@ components:
             Great Britain
         postal_code:
           type: string
-          description: End-user's Zip code or postal code.
+          description: End-User's Zip code or postal code.
           example: NW1 9NT
         country:
           type: string
-          description: End-user's country name.
+          description: End-User's country name.
           example: Great Britain
         country_code:
           type: string
-          description: ISO 3166 Alpha-2-code of a given country
+          description: Take the first 2 chars to obtain the ISO 3166 Alpha-2-code of a given country
           example: GB
     GovernmentGateway:
       title: GovernmentGateway
@@ -241,14 +246,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Identifier'
-          description: End-user's identifiers associated to this HMRC service.
+          description: End-User's identifiers associated to this HMRC service.
           example:
           - key: UTR
             value: '174371121'
         state:
           allOf:
           - $ref: '#/components/schemas/State'
-          - description: End-user's HMRC enrolment status.
+          - description: End-User's HMRC enrolment status.
     Identifier:
       title: Identifier
       required:
@@ -274,7 +279,7 @@ components:
           type: string
           description: Session id
           example: '2012345'
-      description: Mdtp information based on government gateway input
+      description: MDTP platform information on the End-User’s session for auditing & log correlation purposes
     State:
       title: State
       enum:
@@ -285,14 +290,14 @@ components:
       - pending
       - givenToAgent
       type: string
-      description: End-user's HMRC enrolment status.
+      description: End-User's HMRC enrolment status.
     Userinforesponse:
       title: Userinforesponse
       type: object
       properties:
         given_name:
           type: string
-          description: End-user's first name.
+          description: End-User's first name.
           example: Thomas
         middle_name:
           type: string
@@ -300,7 +305,7 @@ components:
           example: A.
         family_name:
           type: string
-          description: End-user's last name.
+          description: End-User's last name.
           example: Delgado
         email:
           type: string
@@ -320,7 +325,7 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/HmrcEnrolment'
-          description: End-user's HMRC enrolments.
+          description: End-User's HMRC enrolments.
         mdtp:
           allOf:
           - $ref: '#/components/schemas/Mdtp'

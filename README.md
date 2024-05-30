@@ -3,7 +3,7 @@
 
 [![Build Status](https://travis-ci.org/hmrc/openid-connect-userinfo.svg?branch=master)](https://travis-ci.org/hmrc/openid-connect-userinfo) [ ![Download](https://api.bintray.com/packages/hmrc/releases/openid-connect-userinfo/images/download.svg) ](https://bintray.com/hmrc/releases/openid-connect-userinfo/_latestVersion)
 
-This Beta REST API aims to provide a specification compliant OpenID Connect implementation. It allows consumers to access user details with consent and in the OpenID Connect UserInfo format.
+The REST API, exposed by the HMRC API Platform as /userinfo to external clients, aims to provide a specification compliant OpenID Connect implementation. It allows consumers to access user details with consent and in the OpenID Connect UserInfo format.
 
 A typical workflow would be:
 
@@ -15,10 +15,15 @@ User details data structures follow the OpenId Connect UserInfo specification (s
 
 You can dive deeper into the documentation in the [API Developer Hub](https://developer.service.hmrc.gov.uk/api-documentation/docs/api#openid-connect-userinfo).
 
-## Deprecated Class Usage
-You can find the deprecation suppression `@nowarn("cat=deprecation")` in the code in few places.
+## Authentication tokens
+Note, the /userinfo endpoint is an external API endpoint. This endpoint requires an API token for authentication.
 
-The reason is that when the latest `v2.Retrievals` was used then the integration tests were broken and wasn't obvious why.
+## API
+
+| Method | HMRC API Platform Path | Internal Path | Description                                                                                                          |
+|--------|------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
+| GET    | /userinfo              | /             | Returns information about an End-User as requested in the openid scopes as documented in the published API document. |
+| POST   | Internal use only      | /             |                                                                                                                      |
 
 ## Running Locally
 Run the service `sbt run -Drun.mode=Dev`

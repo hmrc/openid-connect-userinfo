@@ -19,11 +19,12 @@ package controllers
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.apache.pekko.actor.ActorSystem
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 
 import java.time.LocalDate
 import org.mockito.BDDMockito.given
 import org.scalatest.concurrent.ScalaFutures
-import org.mockito.scalatest.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
 import play.api.mvc.ControllerComponents
 import play.api.test.FakeRequest

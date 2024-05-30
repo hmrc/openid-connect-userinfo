@@ -20,9 +20,11 @@ import connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityC
 import controllers.Version_1_0
 import data.UserInfoGenerator
 import domain._
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.BDDMockito.given
+import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.mockito.scalatest.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}

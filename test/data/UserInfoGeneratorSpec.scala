@@ -18,7 +18,6 @@ package data
 
 import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
@@ -26,16 +25,6 @@ class UserInfoGeneratorSpec extends AnyWordSpec with Matchers with BeforeAndAfte
   private val ninoPattern = "^[A-CEGHJ-NOPR-TW-Z]{2}[0-9]{6}[ABCD\\s]{1}$".r
   private val from = LocalDate.of(1939, 12, 27)
   private val until = LocalDate.of(1998, 12, 29)
-
-  override protected def beforeEach(): Unit = {
-    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
-  }
-
-  override protected def afterEach(): Unit = {
-    FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-  }
 
   "userInfo" should {
     "generate an OpenID Connect compliant UserInfo response v1.0" in {
@@ -48,18 +37,6 @@ class UserInfoGeneratorSpec extends AnyWordSpec with Matchers with BeforeAndAfte
       assertValidNino(userInfo.uk_gov_nino.getOrElse(fail(s"Generated user's NINO is not defined")))
       userInfo.government_gateway.get.profile_uri       should not be defined
       userInfo.government_gateway.get.group_profile_uri should not be defined
-    }
-
-    "generate an OpenID Connect compliant UserInfo response without country code when feature flag is disabled" in {
-      FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-      val userInfo = TestUserInfoGenerator.userInfoV1_0()
-      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(isAddressLine5 = true, isCountryCode = false)
-    }
-
-    "generate an OpenID Connect UserInfo response without addressLine5 when feature flag is disabled" in {
-      FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-      val userInfo = TestUserInfoGenerator.userInfoV1_0()
-      userInfo.address shouldBe TestUserInfoGenerator.addressWithToggleableFeatures(isAddressLine5 = false, isCountryCode = true)
     }
   }
 

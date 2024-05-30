@@ -19,7 +19,6 @@ package data
 import javax.inject.Singleton
 import java.time.LocalDate
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
-import config.UserInfoFeatureSwitches
 import domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
 
 import scala.util.Random.{nextInt => randomNextInt}
@@ -75,27 +74,21 @@ class UserInfoGenerator {
     )
   )
 
-  def addressWithToggleableFeatures(isAddressLine5: Boolean = false, isCountryCode: Boolean = false): Option[Address] = {
-    val addressLine5 = if (isAddressLine5) "\n|Line5" else ""
-    val code = if (isCountryCode) Some("GB") else None
-
+  def address: Option[Address] =
     Some(
       Address(
         s"""221B Baker Street
-        |Town centre
-        |London
-        |England$addressLine5
-        |NW1 9NT
-        |Great Britain""".stripMargin,
+           |Town centre
+           |London
+           |England
+           |Line5
+           |NW1 9NT
+           |Great Britain""".stripMargin,
         Some("NW1 9NT"),
         Some("Great Britain"),
-        code
+        Some("GB")
       )
     )
-  }
-
-  def address: Option[Address] =
-    addressWithToggleableFeatures(UserInfoFeatureSwitches.addressLine5.isEnabled, UserInfoFeatureSwitches.countryCode.isEnabled)
 
   val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
   private val government_gateway_v1_0: GovernmentGatewayDetails = GovernmentGatewayDetails(
