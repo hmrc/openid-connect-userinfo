@@ -18,7 +18,6 @@ import java.nio.file.Paths
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain._
 
 import java.time.LocalDate
@@ -29,21 +28,7 @@ import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.auth.core.retrieve._
 import uk.gov.hmrc.domain.Nino
 
-import scala.jdk.CollectionConverters.CollectionHasAsScala
-
 class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
-
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
-  }
-  override def afterAll(): Unit = {
-    super.afterAll()
-    FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-  }
-
   val serviceUrl: String = resource("")
 
   val authorizationTokens = "AUTHORIZATION_TOKENS"

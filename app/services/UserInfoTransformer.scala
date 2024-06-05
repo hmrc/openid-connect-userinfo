@@ -20,7 +20,6 @@ import javax.inject.Singleton
 import java.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
-import config.UserInfoFeatureSwitches
 import domain._
 
 @Singleton
@@ -39,10 +38,8 @@ class UserInfoTransformer {
 
     def address = if (scopes.contains("address")) {
       val countryName = desUserInfo flatMap { c => c.address.countryName }
-      val countryCode = if (UserInfoFeatureSwitches.countryCode.isEnabled) { desUserInfo flatMap { u => u.address.countryCode } }
-      else None
+      val countryCode = desUserInfo flatMap { u => u.address.countryCode }
       desUserInfo map (u => Address(formattedAddress(u.address), u.address.postCode, countryName, countryCode))
-
     } else None
 
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap (_.nino) else None
@@ -74,7 +71,7 @@ class UserInfoTransformer {
 
   private def formattedAddress(desAddress: ItmpAddress) = {
     val countryName = desAddress.countryName
-    val addressLine5 = if (UserInfoFeatureSwitches.addressLine5.isEnabled) desAddress.line5 else None
+    val addressLine5 = desAddress.line5
     Seq(desAddress.line1, desAddress.line2, desAddress.line3, desAddress.line4, addressLine5, desAddress.postCode, countryName).flatten.mkString("\n")
   }
 

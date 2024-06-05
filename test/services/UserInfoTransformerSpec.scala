@@ -16,11 +16,11 @@
 
 package services
 
-import config.{FeatureSwitch, UserInfoFeatureSwitches}
 import domain._
+
 import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
-import org.mockito.scalatest.MockitoSugar
+import org.scalatestplus.mockito.MockitoSugar
 import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier, Enrolments}
@@ -93,16 +93,6 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
     Some(government_gateway),
     Some(mdtp)
   )
-
-  override protected def beforeEach() = {
-    FeatureSwitch.enable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.enable(UserInfoFeatureSwitches.addressLine5)
-  }
-
-  override protected def afterEach() = {
-    FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
-    FeatureSwitch.disable(UserInfoFeatureSwitches.addressLine5)
-  }
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -252,17 +242,60 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
       result shouldBe userInfoMissingPostCode
     }
 
-    "not return country code when feature flag is off" in new Setup {
+    "return object containing country code if country code is defined in DES response" in new Setup {
 
-      FeatureSwitch.disable(UserInfoFeatureSwitches.countryCode)
       val scopes =
         Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
       val result = await(transformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), Some(userDetails)))
 
-      val userInfoMissingCountryCode = userInfo.copy(address =
-        Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", country_code = None))
+      result.address                    should be(defined)
+      result.address.get.country_code shouldBe desUserInfo.address.countryCode
+    }
+
+    "return object not containing country code if country code isn't defined in DES response" in new Setup {
+
+      val scopes =
+        Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
+      val result = await(
+        transformer.transform(scopes,
+                              Some(authority),
+                              Some(desUserInfo.copy(address = desAddress.copy(countryCode = None))),
+                              Some(enrolments),
+                              Some(userDetails)
+                             )
       )
-      result shouldBe userInfoMissingCountryCode
+
+      result.address                    should be(defined)
+      result.address.get.country_code shouldBe None
+    }
+
+    "return object containing line 5 if line 5 is defined in DES response" in new Setup {
+
+      val scopes =
+        Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
+      val result = await(transformer.transform(scopes, Some(authority), Some(desUserInfo), Some(enrolments), Some(userDetails)))
+
+      val userInfoWithFormattedAddress =
+        userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom")))
+      result shouldBe userInfoWithFormattedAddress
+    }
+
+    "return object not containing line 5 if line 5 isn't defined in DES response" in new Setup {
+
+      val scopes =
+        Set("address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "openid:government-gateway", "email", "openid:mdtp")
+      val result = await(
+        transformer.transform(scopes,
+                              Some(authority),
+                              Some(desUserInfo.copy(address = desAddress.copy(line5 = None))),
+                              Some(enrolments),
+                              Some(userDetails)
+                             )
+      )
+
+      val userInfoWithFormattedAddress =
+        userInfo.copy(address = Some(userAddress.copy(formatted = "1 Station Road\nTown Centre\nLondon\nEngland\nNW1 6XE\nUnited Kingdom")))
+      result shouldBe userInfoWithFormattedAddress
     }
   }
 }
