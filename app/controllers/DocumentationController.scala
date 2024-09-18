@@ -17,16 +17,15 @@
 package controllers
 
 import javax.inject.{Inject, Singleton}
-import play.api.http.HttpErrorHandler
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import config.{APIAccessVersions, AppContext}
-import views._
+import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
+import views.txt
 
 @Singleton
-class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appContext: AppContext, assets: Assets, cc: ControllerComponents)
-    extends uk.gov.hmrc.api.controllers.DocumentationController(cc, assets, errorHandler) {
+class DocumentationController @Inject() (appContext: AppContext, assets: Assets, cc: ControllerComponents) extends BackendController(cc) {
 
-  override def definition(): Action[AnyContent] = Action {
+  def definition(): Action[AnyContent] = Action {
     val versions = APIAccessVersions(appContext.access)
     Ok(txt.definition(versions.versions.getOrElse(List()))).withHeaders("Content-Type" -> "application/json")
   }
@@ -34,4 +33,5 @@ class DocumentationController @Inject() (errorHandler: HttpErrorHandler, appCont
   def ramlDocs(version: String, filename: String): Action[AnyContent] = {
     assets.at(s"/public/api/conf/$version", filename)
   }
+
 }

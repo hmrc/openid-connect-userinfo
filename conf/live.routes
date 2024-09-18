@@ -1,2 +1,2 @@
-GET  /            @controllers.LiveUserInfoController.userInfo
-POST /            @controllers.LiveUserInfoController.userInfo
+GET  /            @controllers.LiveUserInfoController.userInfo()
+POST /            @controllers.LiveUserInfoController.userInfo()

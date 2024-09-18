@@ -20,22 +20,17 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
 import play.api.{Configuration, Environment}
-import uk.gov.hmrc.http.{CorePost, HttpClient, HttpGet}
 import connectors._
 import services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
-import uk.gov.hmrc.play.bootstrap.http.DefaultHttpClient
 import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 
 import scala.annotation.unused
 
 class GuiceModule(val environment: Environment, val configuration: Configuration) extends AbstractModule {
-  override def configure() = {
+  override def configure(): Unit = {
     bind(classOf[AuthConnector]).to(classOf[AuthConnectorV1])
-    bind(classOf[HttpClient]).to(classOf[DefaultHttpClient])
     bind(classOf[UserInfoService]).annotatedWith(Names.named("live")).to(classOf[LiveUserInfoService])
     bind(classOf[UserInfoService]).annotatedWith(Names.named("sandbox")).to(classOf[SandboxUserInfoService])
-    bind(classOf[CorePost]).to(classOf[DefaultHttpClient])
-    bind(classOf[HttpGet]).to(classOf[DefaultHttpClient])
     bind(classOf[ControllerConfig]).toInstance {
       new ControllerConfig {
         @unused

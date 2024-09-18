@@ -21,6 +21,7 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:cat=unused-imports&src=views/.*:s",
       "-Wconf:src=routes/.*:s"
     )
+
   )
   .settings(ScoverageSettings())
   .settings(scalafmtOnCompile := true)

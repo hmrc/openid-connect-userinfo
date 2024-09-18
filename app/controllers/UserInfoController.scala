@@ -22,9 +22,8 @@ import config.AppContext
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.libs.json.Json
-import play.api.mvc.{AnyContent, BodyParser, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents}
 import services.UserInfoService
-import uk.gov.hmrc.api.controllers.HeaderValidator
 import uk.gov.hmrc.http.{BadRequestException, UnauthorizedException, UpstreamErrorResponse => UER}
 import uk.gov.hmrc.http.UpstreamErrorResponse.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
@@ -51,13 +50,13 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => version == "1.0"
 
-  val responseLogger = Logger("userInfoResponsePayloadLogger")
+  val responseLogger: Logger = Logger("userInfoResponsePayloadLogger")
 
   // use custom rule as Accept header is optional therefore it has to return true (see more in play.api.mvc.ActionBuilder) if absent in order to let the controller handle it
   private val acceptHeaderValidationRulesCustom: Option[String] => Boolean =
     _.flatMap(a => matchHeader(a).map(res => validateContentType(res.group("contenttype")) && validateVersion(res.group("version")))).getOrElse(true)
 
-  final def userInfo() = validateAccept(acceptHeaderValidationRulesCustom).async { implicit request =>
+  final def userInfo(): Action[AnyContent] = validateAccept(acceptHeaderValidationRulesCustom).async { implicit request =>
     service.fetchUserInfo(Version.fromAcceptHeader(request.headers.get(ACCEPT))) map { userInfo =>
       val json = Json.toJson(userInfo)
 

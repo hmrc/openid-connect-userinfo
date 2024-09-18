@@ -42,4 +42,4 @@ case class UserInformation(profile: Option[UserProfile], address: Option[Address
 
 case class UserProfile(given_name: Option[String], family_name: Option[String], middle_name: Option[String], birthdate: Option[LocalDate])
 
-case class DesUserInfo(name: ItmpName, dateOfBirth: Option[LocalDate], address: ItmpAddress)
+case class DesUserInfo(name: Option[ItmpName], dateOfBirth: Option[LocalDate], address: Option[ItmpAddress])

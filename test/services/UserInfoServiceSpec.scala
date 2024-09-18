@@ -40,9 +40,9 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val authorizationTokens = "Bearer AUTH_TOKENS"
   val accessToken = "ACCESS_TOKEN"
   val otherHeaders = Seq(("X-Client-Authorization-Token", accessToken))
-  val desUserInfo = DesUserInfo(ItmpName(Some("John"), None, Some("Smith")),
+  val desUserInfo = DesUserInfo(Some(ItmpName(Some("John"), None, Some("Smith"))),
                                 None,
-                                ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None)
+                                Some(ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
                                )
   val enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
   val authority: Authority = Authority("32131", Some("AB123456A"))
@@ -100,7 +100,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       given(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).willReturn(Some(authority))
       given(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).willReturn(Some(enrolments))
       given(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).willReturn(Some(desUserInfo))
-      when(mockAuthConnector.fetchUserDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
+      when(mockAuthConnector.fetchDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
       given(
         mockUserInfoTransformer.transform(eqTo(scopes),
                                           eqTo(Some(authority)),
@@ -116,7 +116,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(mockAuthConnector).fetchDesUserInfo()
       verify(mockAuthConnector).fetchEnrolments()
       verify(mockAuthConnector).fetchAuthority()
-      verify(mockAuthConnector).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuthConnector).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "should fail with UnauthorizedException when access token is not in the headers" in new Setup {
@@ -146,7 +146,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchEnrolments()
-      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuthConnector, never).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "does not request AUTH::fetchNino nor DES::fetchUserInfo when the scopes does not contain 'address' nor 'profile' nor 'openid:gov-uk-identifiers'" in new Setup {
@@ -163,7 +163,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       verify(mockAuthConnector, never).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchEnrolments()
-      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuthConnector, never).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "does not request AUTH::fetchEnrolments when the scopes does not contain 'openid:hmrc-enrolments'" in new Setup {
@@ -180,7 +180,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       verify(mockAuthConnector, never).fetchEnrolments()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
-      verify(mockAuthConnector, never).fetchUserDetails()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockAuthConnector, never).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
     }
   }
 

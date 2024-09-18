@@ -58,7 +58,7 @@ class LiveUserInfoService @Inject() (
       val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, v1AuthConnector.fetchAuthority())
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, v1AuthConnector.fetchUserDetails())
+      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, v1AuthConnector.fetchDetails())
 
       val scopesForDes = Set("profile", "address")
       def maybeDesUserInfo = {
@@ -79,7 +79,9 @@ class LiveUserInfoService @Inject() (
         enrolments  <- maybeEnrolments
         desUserInfo <- maybeDesUserInfo
         userDetails <- maybeUserDetails
-      } yield userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
+      } yield {
+        userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
+      }
     }
   }
 }

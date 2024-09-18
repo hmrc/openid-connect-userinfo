@@ -25,10 +25,11 @@ import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import config.AppContext
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import testSupport.UnitSpec
+import uk.gov.hmrc.http.client.HttpClientV2
 
 class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
@@ -46,7 +47,7 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
 
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
 
-    val httpClient: HttpClient = app.injector.instanceOf[HttpClient]
+    val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
     val connector:  ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
