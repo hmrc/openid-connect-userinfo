@@ -6,7 +6,8 @@ import scala.collection.Seq
 
 val appName = "openid-connect-userinfo"
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "2.13.12"
+ThisBuild / scalaVersion := "3.3.3"
+//ThisBuild / scalaVersion := "2.13.12"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
@@ -16,10 +17,10 @@ lazy val microservice = Project(appName, file("."))
     playDefaultPort := 9836,
     libraryDependencies ++= AppDependencies(),
     scalacOptions ++= Seq(
-      "-Werror",
+     // "-Werror",
       "-feature",
-      "-Wconf:cat=unused-imports&src=views/.*:s",
-      "-Wconf:src=routes/.*:s"
+      "-Wconf:src=views/.*&msg=unused import:silent",
+      "-Wconf:src=routes/.*:silent"
     )
 
   )

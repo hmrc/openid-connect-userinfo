@@ -32,7 +32,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach {
 
   val ukCountryCode = 10
-  val nino = Nino("AB123456A")
+  val nino: Nino = Nino("AB123456A")
   val desAddress: ItmpAddress = ItmpAddress(Some("1 Station Road"),
                                             Some("Town Centre"),
                                             Some("London"),
@@ -42,12 +42,13 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
                                             Some("United Kingdom"),
                                             Some("GB")
                                            )
-  val desUserInfo = DesUserInfo(Some(ItmpName(Some("John"), Some("A"), Some("Smith"))), Some(LocalDate.parse("1980-01-01")), Some(desAddress))
-  val enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
+  val desUserInfo: DesUserInfo =
+    DesUserInfo(Some(ItmpName(Some("John"), Some("A"), Some("Smith"))), Some(LocalDate.parse("1980-01-01")), Some(desAddress))
+  val enrolments: Enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
 
-  val gatewayInformation = GatewayInformation(Some("gateway-token-abc"))
-  val mdtp = Mdtp("device-id1234", "session-id-123")
-  val authMdtp = MdtpInformation("device-id1234", "session-id-123")
+  val gatewayInformation: GatewayInformation = GatewayInformation(Some("gateway-token-abc"))
+  val mdtp:               Mdtp = Mdtp("device-id1234", "session-id-123")
+  val authMdtp:           MdtpInformation = MdtpInformation("device-id1234", "session-id-123")
   val userAddress: Address =
     Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
 
@@ -81,7 +82,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
     group_profile_uri    = None
   )
 
-  val userInfo = UserInfo(
+  val userInfo: UserInfo = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("A"),
@@ -97,7 +98,7 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
 
-    val transformer = new UserInfoTransformer {}
+    val transformer: UserInfoTransformer = new UserInfoTransformer {}
   }
 
   "transform" should {

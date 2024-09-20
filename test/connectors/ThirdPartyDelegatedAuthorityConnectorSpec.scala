@@ -35,7 +35,7 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
 
   val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
+  val wireMockUrl: String = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   trait Setup {

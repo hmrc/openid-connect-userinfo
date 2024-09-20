@@ -23,7 +23,7 @@ import scala.jdk.CollectionConverters._
 case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
 
 case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
-  def findAPIs(versions: List[String], config: Config) = {
+  def findAPIs(versions: List[String], config: Config): List[APIAccessConfig] = {
     versions.map { version =>
       val value = config.getConfig(version)
 
@@ -38,7 +38,7 @@ case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
     }
   }
 
-  def versions = {
+  def versions: Option[List[APIAccessConfig]] = {
     for {
       config <- versionConfigs
       keys = config.unwrapped().keySet().asScala.toList
