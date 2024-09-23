@@ -18,7 +18,7 @@ package config
 
 import com.typesafe.config.{Config, ConfigObject}
 
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 
 case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
 
@@ -34,7 +34,7 @@ case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
       val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
       val versionNumber = version.replace('_', '.')
 
-      new APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, allowListedApplicationIds.getOrElse(List()))
+      APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, allowListedApplicationIds.getOrElse(List()))
     }
   }
 

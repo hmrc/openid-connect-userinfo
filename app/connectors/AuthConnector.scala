@@ -60,10 +60,8 @@ abstract class AuthConnector extends PlayAuthConnector with AuthorisedFunctions 
   def fetchDesUserInfo()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[DesUserInfo]] = {
     val nothing = Future.successful(None)
     authorised()
-      .retrieve(Retrievals.allItmpUserDetails) {
-        case name ~ dateOfBirth ~ address =>
-          Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
-        case _ => nothing
+      .retrieve(Retrievals.allItmpUserDetails) { case name ~ dateOfBirth ~ address =>
+        Future.successful(Some(DesUserInfo(name, dateOfBirth, address)))
       }
       .recoverWith { case UpstreamErrorResponse(_, 404, _, _) =>
         nothing

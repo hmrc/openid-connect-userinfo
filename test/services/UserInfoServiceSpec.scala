@@ -19,8 +19,8 @@ package services
 import connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityConnector}
 import controllers.Version_1_0
 import data.UserInfoGenerator
-import domain._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import domain.*
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
@@ -44,7 +44,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
                                              Some(ItmpAddress(Some("1 Station Road"), Some("Town Centre"), None, None, None, None, None, None))
                                             )
   val enrolments: Enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
-  val authority:  Authority = Authority("32131", Some("AB123456A"))
+  val authority: Authority = Authority("32131", Some("AB123456A"))
 
   val userDetails: UserDetails =
     UserDetails(None, None, None, None, None, None, None, None, Some("affinityGroup"), None, None, Some("User"), None, None, None, None, None, None)
@@ -80,9 +80,9 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   trait Setup {
     implicit val headers: HeaderCarrier = HeaderCarrier().copy(authorization = Some(Authorization(authorizationTokens)), otherHeaders = otherHeaders)
 
-    val mockAuthConnector:                         AuthConnector = mock[AuthConnectorV1]
-    val mockUserInfoGenerator:                     UserInfoGenerator = mock[UserInfoGenerator]
-    val mockUserInfoTransformer:                   UserInfoTransformer = mock[UserInfoTransformer]
+    val mockAuthConnector: AuthConnector = mock[AuthConnectorV1]
+    val mockUserInfoGenerator: UserInfoGenerator = mock[UserInfoGenerator]
+    val mockUserInfoTransformer: UserInfoTransformer = mock[UserInfoTransformer]
     val mockThirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
 
     val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)

@@ -17,7 +17,7 @@
 package controllers
 
 import play.api.libs.json.Json
-import play.api.mvc._
+import play.api.mvc.*
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.matching.Regex
@@ -26,7 +26,7 @@ import scala.util.matching.Regex.Match
 trait HeaderValidator extends Results {
   outer =>
 
-  val validateVersion:     String => Boolean = _ == "1.0"
+  val validateVersion: String => Boolean = _ == "1.0"
   val validateContentType: String => Boolean = _ == "json"
 
   val matchHeader: String => Option[Match] =
@@ -41,7 +41,7 @@ trait HeaderValidator extends Results {
 
     def invokeBlock[A](
       request: Request[A],
-      block:   (Request[A]) => Future[Result]
+      block: (Request[A]) => Future[Result]
     ): Future[Result] =
       if (rules(request.headers.get("Accept"))) block(request)
       else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid)))

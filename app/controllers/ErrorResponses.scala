@@ -16,8 +16,8 @@
 
 package controllers
 
-import play.mvc.Http.Status._
-import play.api.libs.json._
+import play.mvc.Http.Status.*
+import play.api.libs.json.*
 
 sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String)
 

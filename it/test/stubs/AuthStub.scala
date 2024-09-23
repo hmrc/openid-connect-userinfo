@@ -16,15 +16,15 @@
 
 package stubs
 
-import com.github.tomakehurst.wiremock.client.WireMock._
-import play.api.libs.json._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import play.api.libs.json.*
 import play.api.libs.json.Writes.DefaultLocalDateWrites
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
 import controllers.{Version, Version_1_0}
-import domain.{DesUserInfo, _}
+import domain.{DesUserInfo, *}
 
 trait AuthStub {
 
@@ -53,7 +53,7 @@ trait AuthStub {
 
   def willReturnAuthorityWith(nino: Nino): Unit = {
     val response = Json.obj(
-      "nino"        -> nino,
+      "nino"                -> nino,
       "optionalCredentials" -> Json.obj("providerId" -> "1304372065861347", "providerType" -> "GG")
     )
     stubFor(
@@ -63,7 +63,7 @@ trait AuthStub {
             Json
               .obj(
                 "authorise" -> JsArray(),
-                "retrieve"  -> JsArray((Retrievals.credentials and Retrievals.nino).propertyNames.map(JsString))
+                "retrieve"  -> JsArray((Retrievals.credentials and Retrievals.nino).propertyNames.map(JsString(_)))
               )
               .toString()
           )
@@ -84,7 +84,7 @@ trait AuthStub {
             Json
               .obj(
                 "authorise" -> JsArray(),
-                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString(_)))
               )
               .toString()
           )
@@ -97,30 +97,30 @@ trait AuthStub {
     )
   }
 
-  def willFindUser(desUserInfo:        Option[DesUserInfo] = None,
-                   agentInformation:   Option[AgentInformation] = None,
-                   credentials:        Option[Credentials] = None,
-                   name:               Option[Name] = None,
-                   email:              Option[Email] = None,
-                   affinityGroup:      Option[AffinityGroup] = None,
-                   role:               Option[CredentialRole] = None,
-                   mdtp:               Option[MdtpInformation] = None,
+  def willFindUser(desUserInfo: Option[DesUserInfo] = None,
+                   agentInformation: Option[AgentInformation] = None,
+                   credentials: Option[Credentials] = None,
+                   name: Option[Name] = None,
+                   email: Option[Email] = None,
+                   affinityGroup: Option[AffinityGroup] = None,
+                   role: Option[CredentialRole] = None,
+                   mdtp: Option[MdtpInformation] = None,
                    gatewayInformation: Option[GatewayInformation] = None,
                    unreadMessageCount: Option[Int] = None,
-                   profileUrl:         Option[String] = None,
-                   groupProfileUrl:    Option[String] = None,
-                   version:            Version = Version_1_0
+                   profileUrl: Option[String] = None,
+                   groupProfileUrl: Option[String] = None,
+                   version: Version = Version_1_0
                   ): Unit = {
     implicit val agentWrites: OWrites[AgentInformation] = Json.writes[AgentInformation]
     implicit val credentialWrites: OWrites[Credentials] = Json.writes[Credentials]
     implicit val nameWrites: OWrites[Name] = Json.writes[Name]
-    val jsonAddress:     Option[JsValue] = desUserInfo.flatMap(_.address).map(a => Json.toJson(a))
-    val jsonItmpName:    Option[JsValue] = desUserInfo.flatMap(_.name).map(n => Json.toJson(n))
-    val jsonAgent:       Option[JsValue] = agentInformation.map(Json.toJson(_))
+    val jsonAddress: Option[JsValue] = desUserInfo.flatMap(_.address).map(a => Json.toJson(a))
+    val jsonItmpName: Option[JsValue] = desUserInfo.flatMap(_.name).map(n => Json.toJson(n))
+    val jsonAgent: Option[JsValue] = agentInformation.map(Json.toJson(_))
     val jsonCredentials: Option[JsValue] = credentials.map(Json.toJson(_))
-    val jsonName:        Option[JsValue] = name.map(Json.toJson(_))
+    val jsonName: Option[JsValue] = name.map(Json.toJson(_))
     val jsonDob = desUserInfo.flatMap(_.dateOfBirth)
-    val jsonMdtp:               Option[JsValue] = mdtp.map(Json.toJson(_))
+    val jsonMdtp: Option[JsValue] = mdtp.map(Json.toJson(_))
     val jsonGatewayInformation: Option[JsValue] = gatewayInformation.map(Json.toJson(_))
 
     val response = Json
@@ -132,7 +132,7 @@ trait AuthStub {
       .appendOptional("email", email.map(e => JsString(e.value)))
       .appendOptional("affinityGroup", affinityGroup.map(ag => AffinityGroup.jsonFormat.writes(ag)))
       .appendOptional("credentialRole", role.map(r => CredentialRole.reads.writes(r)))
-      .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString)))
+      .appendOptional("agentCode", agentInformation.flatMap(a => a.agentCode.map(JsString(_))))
       .appendOptional("mdtpInformation", jsonMdtp)
       .appendOptional("gatewayInformation", jsonGatewayInformation)
       .appendOptional("unreadMessageCount", unreadMessageCount.map(Json.toJson(_)))
@@ -151,7 +151,7 @@ trait AuthStub {
                   .obj(
                     "authorise" -> JsArray(),
                     "retrieve" -> JsArray(
-                      (Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString)
+                      (Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString(_))
                     )
                   )
                   .toString()
@@ -172,7 +172,7 @@ trait AuthStub {
             Json
               .obj(
                 "authorise" -> JsArray(),
-                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString(_)))
               )
               .toString()
           )
@@ -193,7 +193,7 @@ trait AuthStub {
             Json
               .obj(
                 "authorise" -> JsArray(),
-                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString))
+                "retrieve"  -> JsArray(Retrievals.allItmpUserDetails.propertyNames.map(JsString(_)))
               )
               .toString()
           )
@@ -213,7 +213,7 @@ trait AuthStub {
               .obj(
                 "authorise" -> JsArray(),
                 "retrieve" -> JsArray(
-                  (Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString)
+                  (Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation).propertyNames.map(JsString(_))
                 )
               )
               .toString()
@@ -254,7 +254,7 @@ trait AuthStub {
             Json
               .obj(
                 "authorise" -> JsArray(),
-                "retrieve"  -> JsArray(Retrievals.allEnrolments.propertyNames.map(JsString))
+                "retrieve"  -> JsArray(Retrievals.allEnrolments.propertyNames.map(JsString(_)))
               )
               .toString()
           )

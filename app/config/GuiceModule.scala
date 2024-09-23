@@ -20,7 +20,7 @@ import com.google.inject.AbstractModule
 import com.google.inject.name.Names
 import com.typesafe.config.Config
 import play.api.{Configuration, Environment}
-import connectors._
+import connectors.*
 import services.{LiveUserInfoService, SandboxUserInfoService, UserInfoService}
 import uk.gov.hmrc.play.bootstrap.config.ControllerConfig
 

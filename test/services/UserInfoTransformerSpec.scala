@@ -16,7 +16,7 @@
 
 package services
 
-import domain._
+import domain.*
 
 import java.time.LocalDate
 import org.scalatest.BeforeAndAfterEach
@@ -47,8 +47,8 @@ class UserInfoTransformerSpec extends UnitSpec with MockitoSugar with BeforeAndA
   val enrolments: Enrolments = Enrolments(Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated")))
 
   val gatewayInformation: GatewayInformation = GatewayInformation(Some("gateway-token-abc"))
-  val mdtp:               Mdtp = Mdtp("device-id1234", "session-id-123")
-  val authMdtp:           MdtpInformation = MdtpInformation("device-id1234", "session-id-123")
+  val mdtp: Mdtp = Mdtp("device-id1234", "session-id-123")
+  val authMdtp: MdtpInformation = MdtpInformation("device-id1234", "session-id-123")
   val userAddress: Address =
     Address("1 Station Road\nTown Centre\nLondon\nEngland\nUK\nNW1 6XE\nUnited Kingdom", Some("NW1 6XE"), Some("United Kingdom"), Some("GB"))
 

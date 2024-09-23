@@ -57,7 +57,6 @@ trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
             )
           )
         }
-        case _ => Future.successful(None)
       }
       .recover { case _: NotFoundException =>
         None

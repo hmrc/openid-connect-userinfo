@@ -24,7 +24,7 @@ import play.api.Logger
 import play.api.libs.json.Json
 import play.api.mvc.{Action, AnyContent, BodyParser, ControllerComponents}
 import services.UserInfoService
-import uk.gov.hmrc.http.{BadRequestException, UnauthorizedException, UpstreamErrorResponse => UER}
+import uk.gov.hmrc.http.{BadRequestException, UnauthorizedException, UpstreamErrorResponse as UER}
 import uk.gov.hmrc.http.UpstreamErrorResponse.{Upstream4xxResponse, Upstream5xxResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendBaseController
 
@@ -45,8 +45,8 @@ object Version {
 }
 
 trait UserInfoController extends BackendBaseController with HeaderValidator {
-  val service:                   UserInfoService
-  val appContext:                AppContext
+  val service: UserInfoService
+  val appContext: AppContext
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => version == "1.0"
 
@@ -69,8 +69,8 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
       case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
       case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
       case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException   => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
-      case uex: UnauthorizedException => Unauthorized(Json.toJson(ErrorUnauthorized(uex.getMessage)))
+      case bex: BadRequestException                  => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
+      case uex: UnauthorizedException                => Unauthorized(Json.toJson(ErrorUnauthorized(uex.getMessage)))
     }
   }
 }

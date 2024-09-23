@@ -21,7 +21,7 @@ import java.time.LocalDate
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import domain.{Address, GovernmentGatewayDetails, Mdtp, UserInfo}
 
-import scala.util.Random.{nextInt => randomNextInt}
+import scala.util.Random.nextInt as randomNextInt
 
 @Singleton
 class UserInfoGenerator {
@@ -111,15 +111,15 @@ class UserInfoGenerator {
 
   private lazy val ninoSuffixes = "ABCD"
 
-  private def firstNameGenerator:  Option[String] = firstNames(randomNextInt(firstNames.size))
-  private def lastNameGenerator:   Option[String] = lastNames(randomNextInt(lastNames.size))
+  private def firstNameGenerator: Option[String] = firstNames(randomNextInt(firstNames.size))
+  private def lastNameGenerator: Option[String] = lastNames(randomNextInt(lastNames.size))
   private def middleNameGenerator: Option[String] = middleNames(randomNextInt(middleNames.size))
-  private def dayGenerator:        Int = 1 + randomNextInt(28)
-  private def monthGenerator:      Int = 1 + randomNextInt(12)
-  private def yearGenerator:       Int = 1940 + randomNextInt(50)
+  private def dayGenerator: Int = 1 + randomNextInt(28)
+  private def monthGenerator: Int = 1 + randomNextInt(12)
+  private def yearGenerator: Int = 1940 + randomNextInt(50)
   private def ninoPrefixGenerator: Option[String] = Some(ninoPrefixes.charAt(randomNextInt(ninoPrefixes.length)).toString)
   private def ninoSuffixGenerator: Option[String] = Some(ninoSuffixes.charAt(randomNextInt(ninoSuffixes.length)).toString)
-  private def numbersGenerator:    Option[Int] = Some(100000 + randomNextInt(99999))
+  private def numbersGenerator: Option[Int] = Some(100000 + randomNextInt(99999))
 
   private def email(name: Option[String], lastName: Option[String]): Option[String] = (name, lastName) match {
     case (Some(n), None)    => Some(s"$n@abc.com")

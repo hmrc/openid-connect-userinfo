@@ -25,6 +25,7 @@ import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
 import connectors.AuthConnector
 import controllers.ErrorUnauthorized
 import org.apache.pekko.stream.Materializer
+import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -32,13 +33,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authConnector: AuthConnector)(implicit
   val mat: Materializer,
-  ec:      ExecutionContext
+  ec: ExecutionContext
 ) extends Filter
     with AuthorisedFunctions
     with Results {
 
   def apply(next: (RequestHeader) => Future[Result])(rh: RequestHeader): Future[Result] = {
-    implicit val hc = HeaderCarrierConverter.fromRequest(rh)
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequest(rh)
 
     rh.attrs.get(Router.Attrs.HandlerDef) match {
       case Some(name) if controllerNeedsAuth(name.controller).getOrElse(false) =>

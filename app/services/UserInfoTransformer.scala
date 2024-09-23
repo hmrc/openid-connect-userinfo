@@ -20,15 +20,15 @@ import javax.inject.Singleton
 import java.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
-import domain._
+import domain.*
 
 @Singleton
 class UserInfoTransformer {
 
-  def transform(scopes:      Set[String],
-                authority:   Option[Authority],
+  def transform(scopes: Set[String],
+                authority: Option[Authority],
                 desUserInfo: Option[DesUserInfo],
-                enrolments:  Option[Enrolments],
+                enrolments: Option[Enrolments],
                 userDetails: Option[UserDetails]
                ): UserInfo = {
 

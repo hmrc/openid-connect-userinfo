@@ -18,8 +18,8 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import config.AppContext
@@ -48,7 +48,7 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
 
     val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
-    val connector:  ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
+    val connector: ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
   override def beforeEach(): Unit = {

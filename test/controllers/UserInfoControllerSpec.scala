@@ -19,7 +19,7 @@ package controllers
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.apache.pekko.actor.ActorSystem
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 
 import java.time.LocalDate
 import org.mockito.Mockito.when
@@ -69,8 +69,8 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
   val userInfoV11: UserInfo = userInfoV1.copy(government_gateway = Some(ggDetailsV11))
 
   trait Setup {
-    val mockAppContext:             AppContext = mock[AppContext]
-    val mockLiveUserInfoService:    LiveUserInfoService = mock[LiveUserInfoService]
+    val mockAppContext: AppContext = mock[AppContext]
+    val mockLiveUserInfoService: LiveUserInfoService = mock[LiveUserInfoService]
     val mockSandboxUserInfoService: SandboxUserInfoService = mock[SandboxUserInfoService]
 
     val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext, cc)
