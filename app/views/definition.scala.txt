@@ -3,56 +3,6 @@
 
 @(versions: List[APIAccessConfig])
 {
-  "scopes":[
-    {
-      "key":"openid",
-      "name":"Confirm HMRC has a record of you",
-      "description":"Confirm HMRC has a record of you",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"profile",
-      "name":"Access your name, gender and date of birth",
-      "description":"Access your name, gender and date of birth",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"address",
-      "name":"Access your address details",
-      "description":"Access your address details",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"openid:gov-uk-identifiers",
-      "name":"Access your tax identifiers",
-      "description":"Access your tax identifiers",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"openid:hmrc-enrolments",
-      "name":"Access your enrolments",
-      "description":"Access your enrolments",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"openid:government-gateway",
-      "name":"Shows subset of your government gateway details",
-      "description":"Shows subset of yours government gateway details",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"email",
-      "name":"Shows your email address",
-      "description":"Shows your email address",
-      "confidenceLevel": 200
-    },
-    {
-      "key":"openid:mdtp",
-      "name":"Shows your sessionId and deviceId",
-      "description":"Shows your sessionId and deviceId",
-      "confidenceLevel": 200
-    }
-  ],
   "api":{
     "name":"User Information",
     "description":"The User Information API allows you to retrieve information about the signed-in user, in an OpenID Connect compliant format",
