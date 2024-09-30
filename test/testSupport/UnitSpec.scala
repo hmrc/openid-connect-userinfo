@@ -25,7 +25,7 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Result
 
 import scala.language.postfixOps
-import scala.concurrent.duration.{Duration, _}
+import scala.concurrent.duration.{Duration, *}
 import scala.concurrent.{Await, Future}
 import scala.language.implicitConversions
 

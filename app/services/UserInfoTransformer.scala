@@ -20,26 +20,26 @@ import javax.inject.Singleton
 import java.time.LocalDate
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.auth.core.retrieve.ItmpAddress
-import domain._
+import domain.*
 
 @Singleton
 class UserInfoTransformer {
 
-  def transform(scopes:      Set[String],
-                authority:   Option[Authority],
+  def transform(scopes: Set[String],
+                authority: Option[Authority],
                 desUserInfo: Option[DesUserInfo],
-                enrolments:  Option[Enrolments],
+                enrolments: Option[Enrolments],
                 userDetails: Option[UserDetails]
                ): UserInfo = {
 
     def profile = if (scopes.contains("profile"))
-      desUserInfo map (u => UserProfile(u.name.givenName, u.name.familyName, u.name.middleName, u.dateOfBirth))
+      desUserInfo map (u => UserProfile(u.name.flatMap(_.givenName), u.name.flatMap(_.familyName), u.name.flatMap(_.middleName), u.dateOfBirth))
     else None
 
     def address = if (scopes.contains("address")) {
-      val countryName = desUserInfo flatMap { c => c.address.countryName }
-      val countryCode = desUserInfo flatMap { u => u.address.countryCode }
-      desUserInfo map (u => Address(formattedAddress(u.address), u.address.postCode, countryName, countryCode))
+      val countryName = desUserInfo flatMap { c => c.address.flatMap(_.countryName) }
+      val countryCode = desUserInfo flatMap { u => u.address.flatMap(_.countryCode) }
+      desUserInfo.flatMap(_.address) map (address => Address(formattedAddress(address), address.postCode, countryName, countryCode))
     } else None
 
     val identifier = if (scopes.contains("openid:gov-uk-identifiers")) authority flatMap (_.nino) else None

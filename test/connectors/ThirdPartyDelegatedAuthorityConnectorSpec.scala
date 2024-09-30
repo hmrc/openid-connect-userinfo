@@ -18,23 +18,24 @@ package connectors
 
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
-import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.core.WireMockConfiguration._
+import com.github.tomakehurst.wiremock.client.WireMock.*
+import com.github.tomakehurst.wiremock.core.WireMockConfiguration.*
 import org.scalatest.BeforeAndAfterEach
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import config.AppContext
 import org.mockito.Mockito.when
 import org.scalatestplus.mockito.MockitoSugar
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient}
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import testSupport.UnitSpec
+import uk.gov.hmrc.http.client.HttpClientV2
 
 class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSugar with BeforeAndAfterEach with GuiceOneAppPerSuite {
 
   val stubPort: Int = sys.env.getOrElse("WIREMOCK", "11111").toInt
   val stubHost = "localhost"
-  val wireMockUrl = s"http://$stubHost:$stubPort"
+  val wireMockUrl: String = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
 
   trait Setup {
@@ -46,8 +47,8 @@ class ThirdPartyDelegatedAuthorityConnectorSpec extends UnitSpec with MockitoSug
 
     when(mockAppContext.thirdPartyDelegatedAuthorityUrl).thenReturn(wireMockUrl)
 
-    val httpClient: HttpClient = app.injector.instanceOf[HttpClient]
-    val connector:  ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
+    val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
+    val connector: ThirdPartyDelegatedAuthorityConnector = new ThirdPartyDelegatedAuthorityConnector(mockAppContext, httpClient)
   }
 
   override def beforeEach(): Unit = {

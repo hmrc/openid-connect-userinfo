@@ -1,2 +1,2 @@
-GET /             @controllers.SandboxUserInfoController.userInfo
-POST /            @controllers.SandboxUserInfoController.userInfo
+GET /             @controllers.SandboxUserInfoController.userInfo()
+POST /            @controllers.SandboxUserInfoController.userInfo()

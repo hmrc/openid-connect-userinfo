@@ -17,15 +17,15 @@
 package domain
 
 case class GovernmentGatewayDetails(
-  user_id:              Option[String],
-  roles:                Option[Seq[String]],
-  user_name:            Option[String],
-  affinity_group:       Option[String],
-  agent_code:           Option[String],
-  agent_id:             Option[String],
-  agent_friendly_name:  Option[String],
-  gateway_token:        Option[String],
+  user_id: Option[String],
+  roles: Option[Seq[String]],
+  user_name: Option[String],
+  affinity_group: Option[String],
+  agent_code: Option[String],
+  agent_id: Option[String],
+  agent_friendly_name: Option[String],
+  gateway_token: Option[String],
   unread_message_count: Option[Int] = None,
-  profile_uri:          Option[String],
-  group_profile_uri:    Option[String]
+  profile_uri: Option[String],
+  group_profile_uri: Option[String]
 )

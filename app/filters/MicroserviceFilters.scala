@@ -24,9 +24,9 @@ import uk.gov.hmrc.play.bootstrap.metrics.MetricsFilterImpl
 @Singleton
 class MicroserviceFilters @Inject() (
   metricsFilter: MetricsFilterImpl,
-  auditFilter:   AuditFilter,
+  auditFilter: AuditFilter,
   loggingFilter: LoggingFilter,
-  cacheFilter:   CacheControlFilter,
-  mdcFilter:     MDCFilter,
-  authFilter:    MicroserviceAuthFilter
+  cacheFilter: CacheControlFilter,
+  mdcFilter: MDCFilter,
+  authFilter: MicroserviceAuthFilter
 ) extends DefaultHttpFilters(metricsFilter, auditFilter, loggingFilter, cacheFilter, mdcFilter, authFilter)

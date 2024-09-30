@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, ItmpAddress, ItmpName, MdtpInformation}
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
@@ -25,16 +25,16 @@ package object domain {
   implicit val desAddress: OFormat[ItmpAddress] = Json.format
 
   implicit val enrolmentIdentifier: OFormat[EnrolmentIdentifier] = Json.format
-  implicit val enrloment:           OFormat[Enrolment] = Json.format
+  implicit val enrloment: OFormat[Enrolment] = Json.format
 
-  implicit val gatewayInformationFmt:    Format[GatewayInformation] = Json.format
-  implicit val mdtpInformationFmt:       Format[MdtpInformation] = Json.format
-  implicit val userDetails:              OFormat[UserDetails] = Json.format
-  implicit val mdtp:                     OFormat[Mdtp] = Json.format
+  implicit val gatewayInformationFmt: Format[GatewayInformation] = Json.format
+  implicit val mdtpInformationFmt: Format[MdtpInformation] = Json.format
+  implicit val userDetails: OFormat[UserDetails] = Json.format
+  implicit val mdtp: OFormat[Mdtp] = Json.format
   implicit val governmentGatewayDetails: OFormat[GovernmentGatewayDetails] = Json.format
 
-  implicit val addressFmt:   OFormat[Address] = Json.format
-  implicit val userInfoFmt:  OFormat[UserInfo] = Json.format
+  implicit val addressFmt: OFormat[Address] = Json.format
+  implicit val userInfoFmt: OFormat[UserInfo] = Json.format
   implicit val apiAccessFmt: OFormat[APIAccess] = Json.format
 
 }

@@ -18,35 +18,41 @@ import java.nio.file.Paths
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
-import domain._
+import domain.*
 
 import java.time.LocalDate
 import play.api.libs.json.Json
-import scalaj.http.{Http, HttpOptions}
+import play.api.libs.ws.WSClient
 import stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
-import uk.gov.hmrc.auth.core._
-import uk.gov.hmrc.auth.core.retrieve._
+import uk.gov.hmrc.auth.core.*
+import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.domain.Nino
+
+import scala.concurrent.duration.{Duration, SECONDS}
 
 class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
   val serviceUrl: String = resource("")
+
+  protected def wsClient: WSClient = app.injector.instanceOf[WSClient]
 
   val authorizationTokens = "AUTHORIZATION_TOKENS"
   val accessToken = "ACCESS_TOKEN"
   val nino = "AB123456A"
   val ukCountryCode = 1
   val desUserInfo = DesUserInfo(
-    ItmpName(Some("John"), Some("A"), Some("Smith")),
+    Some(ItmpName(Some("John"), Some("A"), Some("Smith"))),
     Some(LocalDate.parse("1980-01-01")),
-    ItmpAddress(Some("1 Station Road"),
-                Some("Town Centre"),
-                Some("London"),
-                Some("England"),
-                Some("UK"),
-                Some("NW1 6XE"),
-                Some("GREAT BRITAIN"),
-                Some("GB")
-               )
+    Some(
+      ItmpAddress(Some("1 Station Road"),
+                  Some("Town Centre"),
+                  Some("London"),
+                  Some("England"),
+                  Some("UK"),
+                  Some("NW1 6XE"),
+                  Some("GREAT BRITAIN"),
+                  Some("GB")
+                 )
+    )
   )
   val enrolments: Set[Enrolment] = Set(Enrolment("IR-SA", List(EnrolmentIdentifier("UTR", "174371121")), "Activated"))
   val deviceId = "device-id-12345"
@@ -109,17 +115,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
   )
 
   val desUserInfoWithoutFirstName = DesUserInfo(
-    ItmpName(None, Some("A"), Some("Smith")),
+    Some(ItmpName(None, Some("A"), Some("Smith"))),
     Some(LocalDate.parse("1980-01-01")),
-    ItmpAddress(Some("1 Station Road"),
-                Some("Town Centre"),
-                Some("London"),
-                Some("England"),
-                Some("UK"),
-                Some("NW1 6XE"),
-                Some("GREAT BRITAIN"),
-                Some("GB")
-               )
+    Some(
+      ItmpAddress(Some("1 Station Road"),
+                  Some("Town Centre"),
+                  Some("London"),
+                  Some("England"),
+                  Some("UK"),
+                  Some("NW1 6XE"),
+                  Some("GREAT BRITAIN"),
+                  Some("GB")
+                 )
+    )
   )
   val userInfoWithoutFirstName = UserInfo(
     None,
@@ -134,17 +142,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Some(mdtp)
   )
   val desUserInfoWithoutFamilyName = DesUserInfo(
-    ItmpName(Some("John"), Some("A"), None),
+    Some(ItmpName(Some("John"), Some("A"), None)),
     Some(LocalDate.parse("1980-01-01")),
-    ItmpAddress(Some("1 Station Road"),
-                Some("Town Centre"),
-                Some("London"),
-                Some("England"),
-                Some("UK"),
-                Some("NW1 6XE"),
-                Some("GREAT BRITAIN"),
-                Some("GB")
-               )
+    Some(
+      ItmpAddress(Some("1 Station Road"),
+                  Some("Town Centre"),
+                  Some("London"),
+                  Some("England"),
+                  Some("UK"),
+                  Some("NW1 6XE"),
+                  Some("GREAT BRITAIN"),
+                  Some("GB")
+                 )
+    )
   )
   val userInfoWithoutFamilyName = UserInfo(
     Some("John"),
@@ -159,9 +169,11 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Some(mdtp)
   )
   val desUserInfoWithPartialAddress = DesUserInfo(
-    ItmpName(Some("John"), Some("A"), Some("Smith")),
+    Some(ItmpName(Some("John"), Some("A"), Some("Smith"))),
     Some(LocalDate.parse("1980-01-01")),
-    ItmpAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))
+    Some(
+      ItmpAddress(Some("1 Station Road"), None, Some("Lancaster"), Some("England"), Some("UK"), Some("NW1 6XE"), Some("GREAT BRITAIN"), Some("GB"))
+    )
   )
   val userInfoWithPartialAddress = UserInfo(
     Some("John"),
@@ -221,16 +233,18 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       )
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq(
+
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .get()
+      )
 
       val validator = JsonSchemaFactory.byDefault().getValidator
       val mapper = new ObjectMapper
@@ -241,9 +255,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
       Then("The user information is returned")
-      result.code shouldBe 200
+      result.status shouldBe 200
 
-      import scala.jdk.CollectionConverters._
+      import scala.jdk.CollectionConverters.*
       assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
       json shouldBe Json.toJson(userInfo_v1)
@@ -292,19 +306,20 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       )
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.2.0+json",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .get()
+      )
 
       Then("return Not Acceptable http response")
-      result.code shouldBe 406
+      result.status shouldBe 406
     }
 
     Scenario("fetch user profile v1 when Accept Header is missing") {
@@ -350,16 +365,17 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       )
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN",
             "Accept" -> "" // "" is needed to pretend it is missing as test http libraries (such as scalaj.http and play.api.http) inject default Accept header if this is absent
           )
-        )
-        .asString
+          .get()
+      )
 
       val validator = JsonSchemaFactory.byDefault().getValidator
       val mapper = new ObjectMapper
@@ -370,9 +386,9 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       val report = validator.validate(schema, mapper.readTree(json.toString()))
 
       Then("The user information is returned")
-      result.code shouldBe 200
+      result.status shouldBe 200
 
-      import scala.jdk.CollectionConverters._
+      import scala.jdk.CollectionConverters.*
       assert(report.isSuccess, report.asScala.filter(_.getLogLevel == LogLevel.ERROR).map(m => m))
 
       json shouldBe Json.toJson(userInfo_v1)
@@ -394,17 +410,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willFindUser(Some(desUserInfoWithoutFamilyName))
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code             shouldBe 200
+      result.status           shouldBe 200
       Json.parse(result.body) shouldBe Json.toJson(userInfoWithoutFamilyName.copy(government_gateway = None, email = None, mdtp = None))
     }
 
@@ -445,19 +463,20 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       )
 
       When("We request the user information with x-client-authorization-token header name in lowercase")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
             "x-client-authorization-token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code             shouldBe 200
+      result.status           shouldBe 200
       Json.parse(result.body) shouldBe Json.toJson(userInfo_v1.copy(hmrc_enrolments = None))
     }
 
@@ -477,17 +496,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willNotFindUser()
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code shouldBe 200
+      result.status shouldBe 200
       val userWithNinoAndEnrolmentsOnly = userInfo_v1.copy(given_name         = None,
                                                            family_name        = None,
                                                            middle_name        = None,
@@ -513,17 +534,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willReturnEnrolmentsWith()
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code shouldBe 200
+      result.status shouldBe 200
       val userWithEnrolmentsOnly = userInfo_v1.copy(given_name         = None,
                                                     family_name        = None,
                                                     middle_name        = None,
@@ -564,19 +587,20 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       )
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code shouldBe 200
+      result.status shouldBe 200
       val userWithGovernmentDetailsOnly = userInfo_v1.copy(given_name      = None,
                                                            family_name     = None,
                                                            middle_name     = None,
@@ -601,17 +625,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willAuthoriseWith(401)
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("Unauthorized status is returned")
-      result.code shouldBe 401
+      result.status shouldBe 401
     }
   }
 
@@ -628,24 +654,26 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willAuthoriseWith(503, errorMsg)
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("Bad gateway status is returned")
-      result.code             shouldBe 502
+      result.status           shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
     Scenario("return 502 when Auth returns not found") {
       val errorMsg = "auth error msg"
       val expectedErrorMessage =
-        s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 404 (Not Found). Response body: '$errorMsg'"}"""
+        s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 404. Response body: '$errorMsg'"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
@@ -653,17 +681,19 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willAuthoriseWith(404, errorMsg)
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .headers(
-          Seq("Authorization"                -> s"Bearer $authorizationTokens",
-              "Accept"                       -> "application/vnd.hmrc.1.0+json",
-              "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
-             )
-        )
-        .asString
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
 
       Then("Bad gateway status is returned")
-      result.code             shouldBe 502
+      result.status           shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
     }
 
@@ -699,20 +729,21 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willFindUserFailed(500)
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .withRequestTimeout(Duration(1000, SECONDS))
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code shouldBe 502
+      result.status shouldBe 502
 
     }
 
@@ -748,20 +779,21 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willFindUserFailed(409)
 
       When("We request the user information")
-      val result = Http(s"$serviceUrl")
-        .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization"                -> s"Bearer $authorizationTokens",
             "Accept"                       -> "application/vnd.hmrc.1.0+json",
             "token"                        -> "ggToken",
             "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
           )
-        )
-        .asString
+          .withRequestTimeout(Duration(1000, SECONDS))
+          .get()
+      )
 
       Then("The user information is returned")
-      result.code shouldBe 502
+      result.status shouldBe 502
 
     }
 
@@ -797,19 +829,20 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       willFindUserFailed(409)
 
       When("We request the user information without the X-Client-Authorization-Token header")
-      val result = Http(s"$serviceUrl")
-        .options(HttpOptions.readTimeout(1000000), HttpOptions.connTimeout(1000000))
-        .headers(
-          Seq(
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
             "Authorization" -> s"Bearer $authorizationTokens",
             "Accept"        -> "application/vnd.hmrc.1.0+json",
             "token"         -> "ggToken"
           )
-        )
-        .asString
+          .withRequestTimeout(Duration(1000, SECONDS))
+          .get()
+      )
 
       Then("The user information is not returned")
-      result.code shouldBe 401
+      result.status shouldBe 401
 
     }
 

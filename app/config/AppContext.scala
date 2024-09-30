@@ -23,9 +23,9 @@ import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 @Singleton
 class AppContext @Inject() (val runModeConfiguration: Configuration) extends ServicesConfig(runModeConfiguration) {
-  lazy val appName:                         String = runModeConfiguration.get[String]("appName")
-  lazy val authUrl:                         String = baseUrl("auth")
+  lazy val appName: String = runModeConfiguration.get[String]("appName")
+  lazy val authUrl: String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
-  lazy val access:                          Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
-  lazy val logUserInfoResponsePayload:      Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
+  lazy val access: Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
+  lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
 }

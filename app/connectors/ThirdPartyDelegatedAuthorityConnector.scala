@@ -19,22 +19,27 @@ package connectors
 import config.AppContext
 import play.api.http.Status
 import uk.gov.hmrc.http.HttpReads.Implicits.readRaw
-import uk.gov.hmrc.http.{HeaderCarrier, HttpGet}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, StringContextOps}
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, http: HttpGet) {
+class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, httpClient: HttpClientV2) {
   val serviceUrl: String = appContext.thirdPartyDelegatedAuthorityUrl
 
   def fetchScopes(accessToken: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Set[String]] = {
-    http.GET(s"$serviceUrl/delegated-authority", Nil, Seq("access-token" -> accessToken))(readRaw, hc, ec) map { response =>
-      if (response.status == Status.NOT_FOUND) {
-        Set[String]()
-      } else {
-        (response.json \ "token" \ "scopes").as[Set[String]]
+    httpClient
+      .get(url"$serviceUrl/delegated-authority")
+      .setHeader("access-token" -> accessToken)
+      .execute(readRaw, ec)
+      .map { response =>
+        if (response.status == Status.NOT_FOUND) {
+          Set[String]()
+        } else {
+          (response.json \ "token" \ "scopes").as[Set[String]]
+        }
       }
-    }
   }
 }

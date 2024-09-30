@@ -17,30 +17,28 @@
 package connectors
 
 import uk.gov.hmrc.auth.core.AuthorisedFunctions
-import uk.gov.hmrc.auth.core.retrieve.Retrievals
+import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.retrieve.~
 import uk.gov.hmrc.http.{HeaderCarrier, NotFoundException}
 import domain.UserDetails
 
-import scala.annotation.nowarn
 import scala.concurrent.{ExecutionContext, Future}
 
-@nowarn("cat=deprecation")
 trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
   self: AuthorisedFunctions =>
 
-  def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
+  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]] = {
     authorised()
       .retrieve(Retrievals.allUserDetails and Retrievals.mdtpInformation and Retrievals.gatewayInformation) {
         case credentials ~ name ~ birthDate ~ postCode ~ email ~ affinityGroup ~ agentCode ~ agentInformation ~
-            credentialRole ~ description ~ groupId ~ mdtp ~ gatewayInformation =>
+            credentialRole ~ description ~ groupId ~ mdtp ~ gatewayInformation => {
           Future.successful(
             Some(
               UserDetails(
-                authProviderId     = Some(credentials.providerId),
-                authProviderType   = Some(credentials.providerType),
-                name               = name.name,
-                lastName           = name.lastName,
+                authProviderId     = credentials.map(_.providerId),
+                authProviderType   = credentials.map(_.providerType),
+                name               = name.flatMap(_.name),
+                lastName           = name.flatMap(_.lastName),
                 dateOfBirth        = birthDate,
                 postCode           = postCode,
                 email              = email,
@@ -58,7 +56,7 @@ trait AuthV1UserDetailsFetcher extends UserDetailsFetcher {
               )
             )
           )
-        case _ => Future.successful(None)
+        }
       }
       .recover { case _: NotFoundException =>
         None

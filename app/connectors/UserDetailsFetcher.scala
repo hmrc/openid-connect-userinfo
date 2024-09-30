@@ -22,5 +22,5 @@ import domain.UserDetails
 import scala.concurrent.{ExecutionContext, Future}
 
 trait UserDetailsFetcher {
-  def fetchDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]]
+  def fetchUserDetails()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[UserDetails]]
 }

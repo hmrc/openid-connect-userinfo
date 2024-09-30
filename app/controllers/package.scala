@@ -20,10 +20,10 @@ package object controllers {
 
   private def errorWrites[T <: ErrorResponse]: Writes[T] = (o: T) => Json.obj("code" -> o.errorCode, "message" -> o.message)
 
-  implicit val errorResponseWrites:            Writes[ErrorResponse] = errorWrites[ErrorResponse]
-  implicit val errorUnauthorizedWrites:        Writes[ErrorUnauthorized] = errorWrites[ErrorUnauthorized]
-  implicit val errorNotFoundWrites:            Writes[ErrorNotFound] = errorWrites[ErrorNotFound]
+  implicit val errorResponseWrites: Writes[ErrorResponse] = errorWrites[ErrorResponse]
+  implicit val errorUnauthorizedWrites: Writes[ErrorUnauthorized] = errorWrites[ErrorUnauthorized]
+  implicit val errorNotFoundWrites: Writes[ErrorNotFound] = errorWrites[ErrorNotFound]
   implicit val errorAcceptHeaderInvalidWrites: Writes[ErrorAcceptHeaderInvalid] = errorWrites[ErrorAcceptHeaderInvalid]
-  implicit val errorBadGatewayWrites:          Writes[ErrorBadGateway] = errorWrites[ErrorBadGateway]
-  implicit val errorBadRequestWrites:          Writes[ErrorBadRequest] = errorWrites[ErrorBadRequest]
+  implicit val errorBadGatewayWrites: Writes[ErrorBadGateway] = errorWrites[ErrorBadGateway]
+  implicit val errorBadRequestWrites: Writes[ErrorBadRequest] = errorWrites[ErrorBadRequest]
 }

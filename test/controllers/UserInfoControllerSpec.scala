@@ -19,10 +19,10 @@ package controllers
 import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.apache.pekko.actor.ActorSystem
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 
 import java.time.LocalDate
-import org.mockito.BDDMockito.given
+import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.libs.json.Json
@@ -39,7 +39,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
   implicit val actorSystem: ActorSystem = ActorSystem("test")
 
-  val ggDetailsV1 = GovernmentGatewayDetails(
+  val ggDetailsV1: GovernmentGatewayDetails = GovernmentGatewayDetails(
     Some("32131"),
     Some(Seq("User")),
     Some("John"),
@@ -52,9 +52,9 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
     None,
     None
   )
-  val ggDetailsV11 = ggDetailsV1.copy(profile_uri = Some("some_url"), group_profile_uri = Some("some_other_url"))
+  val ggDetailsV11: GovernmentGatewayDetails = ggDetailsV1.copy(profile_uri = Some("some_url"), group_profile_uri = Some("some_other_url"))
 
-  val userInfoV1 = UserInfo(
+  val userInfoV1: UserInfo = UserInfo(
     Some("John"),
     Some("Smith"),
     Some("Hannibal"),
@@ -66,12 +66,12 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
     Some(ggDetailsV1),
     None
   )
-  val userInfoV11 = userInfoV1.copy(government_gateway = Some(ggDetailsV11))
+  val userInfoV11: UserInfo = userInfoV1.copy(government_gateway = Some(ggDetailsV11))
 
   trait Setup {
-    val mockAppContext = mock[AppContext]
-    val mockLiveUserInfoService = mock[LiveUserInfoService]
-    val mockSandboxUserInfoService = mock[SandboxUserInfoService]
+    val mockAppContext: AppContext = mock[AppContext]
+    val mockLiveUserInfoService: LiveUserInfoService = mock[LiveUserInfoService]
+    val mockSandboxUserInfoService: SandboxUserInfoService = mock[SandboxUserInfoService]
 
     val sandboxController = new SandboxUserInfoController(mockSandboxUserInfoService, mockAppContext, cc)
     val liveController = new LiveUserInfoController(mockLiveUserInfoService, mockAppContext, cc)
@@ -80,7 +80,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
   "sandbox userInfo" should {
     "retrieve user information v1.0" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
+      when(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).thenReturn(userInfoV1)
 
       val result = await(sandboxController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
@@ -90,7 +90,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "fail with 406 (Not Acceptable) if version headers not present" in new Setup {
 
-      given(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
+      when(mockSandboxUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).thenReturn(userInfoV1)
 
       val result = await(sandboxController.userInfo()(FakeRequest()))
 
@@ -102,7 +102,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "retrieve user information v1.0" in new Setup {
 
-      given(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).willReturn(userInfoV1)
+      when(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier])).thenReturn(userInfoV1)
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
@@ -119,8 +119,8 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
 
     "fail with Bad Request if service throws BadRequestException" in new Setup {
 
-      given(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier]))
-        .willReturn(Future.failed(new BadRequestException("NINO is required")))
+      when(mockLiveUserInfoService.fetchUserInfo(eqTo(Version_1_0))(any[HeaderCarrier]))
+        .thenReturn(Future.failed(new BadRequestException("NINO is required")))
 
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 

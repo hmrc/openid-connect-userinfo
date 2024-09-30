@@ -24,22 +24,22 @@ case class Address(formatted: String, postal_code: Option[String], country: Opti
 
 case class Mdtp(device_id: String, session_id: String)
 
-case class UserInfo(given_name:         Option[String] = None,
-                    family_name:        Option[String] = None,
-                    middle_name:        Option[String] = None,
-                    address:            Option[Address] = None,
-                    email:              Option[String] = None,
-                    birthdate:          Option[LocalDate] = None,
-                    uk_gov_nino:        Option[String] = None,
-                    hmrc_enrolments:    Option[Set[Enrolment]] = None,
+case class UserInfo(given_name: Option[String] = None,
+                    family_name: Option[String] = None,
+                    middle_name: Option[String] = None,
+                    address: Option[Address] = None,
+                    email: Option[String] = None,
+                    birthdate: Option[LocalDate] = None,
+                    uk_gov_nino: Option[String] = None,
+                    hmrc_enrolments: Option[Set[Enrolment]] = None,
                     government_gateway: Option[GovernmentGatewayDetails] = None,
-                    mdtp:               Option[Mdtp] = None,
-                    profile_url:        Option[String] = None,
-                    group_profile_url:  Option[String] = None
+                    mdtp: Option[Mdtp] = None,
+                    profile_url: Option[String] = None,
+                    group_profile_url: Option[String] = None
                    )
 
 case class UserInformation(profile: Option[UserProfile], address: Option[Address], uk_gov_nino: Option[String])
 
 case class UserProfile(given_name: Option[String], family_name: Option[String], middle_name: Option[String], birthdate: Option[LocalDate])
 
-case class DesUserInfo(name: ItmpName, dateOfBirth: Option[LocalDate], address: ItmpAddress)
+case class DesUserInfo(name: Option[ItmpName], dateOfBirth: Option[LocalDate], address: Option[ItmpAddress])

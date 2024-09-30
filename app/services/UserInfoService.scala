@@ -16,10 +16,10 @@
 
 package services
 
-import connectors._
+import connectors.*
 import controllers.{Version, Version_1_0}
 import data.UserInfoGenerator
-import domain._
+import domain.*
 import uk.gov.hmrc.auth.core.Enrolments
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, UnauthorizedException}
 
@@ -31,8 +31,8 @@ trait UserInfoService {
 }
 
 class LiveUserInfoService @Inject() (
-  v1AuthConnector:                       AuthConnector,
-  userInfoTransformer:                   UserInfoTransformer,
+  v1AuthConnector: AuthConnector,
+  userInfoTransformer: UserInfoTransformer,
   thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
 )(implicit ec: ExecutionContext)
     extends UserInfoService {
@@ -58,7 +58,7 @@ class LiveUserInfoService @Inject() (
       val maybeAuthority = getMaybeForScopes(scopesForAuthority, scopes, v1AuthConnector.fetchAuthority())
 
       val scopesForUserDetails = Set("openid:government-gateway", "email", "openid:mdtp")
-      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, v1AuthConnector.fetchUserDetails())
+      def maybeUserDetails = getMaybeForScopes[UserDetails](scopesForUserDetails, scopes, v1AuthConnector.fetchDetails())
 
       val scopesForDes = Set("profile", "address")
       def maybeDesUserInfo = {
@@ -79,7 +79,9 @@ class LiveUserInfoService @Inject() (
         enrolments  <- maybeEnrolments
         desUserInfo <- maybeDesUserInfo
         userDetails <- maybeUserDetails
-      } yield userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
+      } yield {
+        userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
+      }
     }
   }
 }
@@ -89,7 +91,6 @@ class SandboxUserInfoService @Inject() (userInfoGenerator: UserInfoGenerator) ex
   override def fetchUserInfo(version: Version)(implicit hc: HeaderCarrier): Future[UserInfo] = {
     val generator: UserInfo = version match {
       case Version_1_0 => userInfoGenerator.userInfoV1_0()
-      case _           => UserInfo()
     }
     Future.successful(generator)
   }
