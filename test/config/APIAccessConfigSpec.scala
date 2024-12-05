@@ -44,11 +44,11 @@ class APIAccessConfigSpec extends UnitSpec {
             version.accessType                     shouldBe "PRIVATE"
             version.status                         shouldBe "STABLE"
             version.endpointsEnabled               shouldBe true
-            version.whiteListedApplicationIds      shouldBe a[List[_]]
-            version.whiteListedApplicationIds.size shouldBe 3
-            version.whiteListedApplicationIds        should contain("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
-            version.whiteListedApplicationIds        should contain("df8c10db-01fb-4543-b77e-859267462231")
-            version.whiteListedApplicationIds        should contain("9a32c713-7741-4aae-b39d-957021fb97a9")
+            version.allowListedApplicationIds      shouldBe a[List[_]]
+            version.allowListedApplicationIds.size shouldBe 3
+            version.allowListedApplicationIds        should contain("649def0f-3ed3-4df5-8ae1-3e687a9143ea")
+            version.allowListedApplicationIds        should contain("df8c10db-01fb-4543-b77e-859267462231")
+            version.allowListedApplicationIds        should contain("9a32c713-7741-4aae-b39d-957021fb97a9")
           case unknown => fail(s"Unknown version found : $unknown")
         }
       }

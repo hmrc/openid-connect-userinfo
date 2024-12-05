@@ -20,7 +20,7 @@ import com.typesafe.config.{Config, ConfigObject}
 
 import scala.jdk.CollectionConverters.*
 
-case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
+case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, allowListedApplicationIds: List[String])
 
 case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
   def findAPIs(versions: List[String], config: Config): List[APIAccessConfig] = {

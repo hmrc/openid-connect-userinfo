@@ -18,8 +18,7 @@
         "status":"@version.status",
         "endpointsEnabled": @version.endpointsEnabled,
         "access" : {
-            "type" : "@version.accessType",
-            "whitelistedApplicationIds" : @Json.toJson(version.whiteListedApplicationIds)
+            "type" : "@version.accessType"
         }
     }
 }
