@@ -18,10 +18,8 @@ package filters
 
 import connectors.AuthConnector
 import controllers.ErrorResponse
-import controllers.ErrorResponse.writes
 import org.apache.pekko.stream.Materializer
 import play.api.Configuration
-import play.api.libs.json.Json
 import play.api.mvc.{Filter, RequestHeader, Result, Results}
 import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
@@ -47,7 +45,7 @@ class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authCo
         authorised() {
           next(rh)
         } recoverWith { case e: AuthorisationException =>
-          Future.successful(Unauthorized(Json.toJson(ErrorResponse.unauthorized())))
+          Future.successful(ErrorResponse.unauthorized().toResult)
         }
       case _ => next(rh)
     }

@@ -18,8 +18,15 @@ package controllers
 
 import play.mvc.Http.Status.*
 import play.api.libs.json.*
+import play.api.mvc.Result
+import play.api.mvc.Results.Status
 
-case class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String)
+/** Please use the constructors provided in the companion object and not the main constructor as these responses are expected to contain specific
+  * wording.
+  */
+case class ErrorResponse private (httpStatusCode: Int, errorCode: String, message: String) {
+  def toResult: Result = Status(httpStatusCode)(Json.toJson(this))
+}
 
 object ErrorResponse {
   implicit val writes: Writes[ErrorResponse] = (e: ErrorResponse) => Json.obj("code" -> e.errorCode, "message" -> e.message)
@@ -27,5 +34,10 @@ object ErrorResponse {
   def badGateway(msg: String = "Bad gateway"): ErrorResponse = ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
   def unauthorized(msg: String = "Bearer token is missing or not authorized"): ErrorResponse = ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
   def badRequest(msg: String = "Bad request"): ErrorResponse = ErrorResponse(BAD_REQUEST, "BAD_REQUEST", msg)
-  def notAcceptable(msg: String = "The accept header is invalid"): ErrorResponse = ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
+  def badRequest(errors: Seq[(JsPath, Seq[JsonValidationError])]): ErrorResponse = badRequest(JsError.toJson(errors).as[String])
+  val acceptHeaderInvalid: ErrorResponse = ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", "The accept header is missing or invalid")
+  val notFound: ErrorResponse = ErrorResponse(NOT_FOUND, "NOT_FOUND", "Resource was not found")
+  val unauthorizedLowCL: ErrorResponse = ErrorResponse(UNAUTHORIZED, "LOW_CONFIDENCE_LEVEL", "Confidence Level on account does not allow access")
+  val internalServerError: ErrorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal server error")
+  val preferencesSettingsError: ErrorResponse = ErrorResponse(INTERNAL_SERVER_ERROR, "PREFERENCE_SETTINGS_ERROR", "Failed to set preferences")
 }
