@@ -16,15 +16,16 @@
 
 package handlers
 
-import javax.inject.{Inject, Singleton}
 import com.google.inject.Provider
+import controllers.ErrorResponse
 import play.api.http.DefaultHttpErrorHandler
 import play.api.libs.json.Json
-import play.api.mvc.Results.Status
+import play.api.mvc.Results.{BadGateway, Unauthorized}
 import play.api.mvc.{RequestHeader, Result}
 import play.api.routing.Router
 import play.api.{Configuration, Environment, OptionalSourceMapper}
-import controllers.{ErrorBadGateway, ErrorUnauthorized}
+
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -39,8 +40,8 @@ class ErrorHandler @Inject() (
   override def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = {
     super.onServerError(request, exception) map (res => {
       res.header.status match {
-        case 401 => Status(ErrorUnauthorized().httpStatusCode)(Json.toJson(ErrorUnauthorized()))
-        case _   => Status(ErrorBadGateway().httpStatusCode)(Json.toJson(ErrorBadGateway(exception.getMessage)))
+        case 401 => Unauthorized(Json.toJson(ErrorResponse.unauthorized()))
+        case _   => BadGateway(Json.toJson(ErrorResponse.badGateway(exception.getMessage)))
       }
     })
   }

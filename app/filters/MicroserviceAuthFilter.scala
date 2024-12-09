@@ -16,18 +16,19 @@
 
 package filters
 
-import javax.inject.{Inject, Singleton}
+import connectors.AuthConnector
+import controllers.ErrorResponse
+import controllers.ErrorResponse.writes
+import org.apache.pekko.stream.Materializer
 import play.api.Configuration
 import play.api.libs.json.Json
 import play.api.mvc.{Filter, RequestHeader, Result, Results}
 import play.api.routing.Router
 import uk.gov.hmrc.auth.core.{AuthorisationException, AuthorisedFunctions}
-import connectors.AuthConnector
-import controllers.ErrorUnauthorized
-import org.apache.pekko.stream.Materializer
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
@@ -46,7 +47,7 @@ class MicroserviceAuthFilter @Inject() (configuration: Configuration, val authCo
         authorised() {
           next(rh)
         } recoverWith { case e: AuthorisationException =>
-          Future.successful(Unauthorized(Json.toJson(ErrorUnauthorized())))
+          Future.successful(Unauthorized(Json.toJson(ErrorResponse.unauthorized())))
         }
       case _ => next(rh)
     }

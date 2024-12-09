@@ -17,16 +17,22 @@
 package stubs
 
 import com.github.tomakehurst.wiremock.client.WireMock.*
+import controllers.{Version, Version_1_0}
+import domain.*
 import play.api.libs.json.*
 import play.api.libs.json.Writes.DefaultLocalDateWrites
 import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.auth.core.{AffinityGroup, CredentialRole}
 import uk.gov.hmrc.domain.Nino
-import controllers.{Version, Version_1_0}
-import domain.{DesUserInfo, *}
 
 trait AuthStub {
+
+  private implicit val itmpNameFormat: OFormat[ItmpName] = Json.format
+  private implicit val itmpAddressFormat: OFormat[ItmpAddress] = Json.format
+
+  private implicit val gatewayInformationFormat: Format[GatewayInformation] = Json.format
+  private implicit val mdtpInformationFormat: Format[MdtpInformation] = Json.format
 
   implicit class JsOptAppendable(jsObject: JsObject) {
     def appendOptional(key: String, value: Option[JsValue]): JsObject = value

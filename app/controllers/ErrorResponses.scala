@@ -19,31 +19,13 @@ package controllers
 import play.mvc.Http.Status.*
 import play.api.libs.json.*
 
-sealed abstract class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String)
-
-case class ErrorUnauthorized(msg: String = "Bearer token is missing or not authorized") extends ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
-
-case class ErrorNotFound(msg: String = "Resource was not found") extends ErrorResponse(NOT_FOUND, "NOT_FOUND", msg)
-
-case class ErrorAcceptHeaderInvalid(msg: String = "The accept header is invalid") extends ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
-
-case class ErrorBadGateway(msg: String = "Bad gateway") extends ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
-
-case class ErrorBadRequest(msg: String = "Bad request") extends ErrorResponse(BAD_REQUEST, "BAD_REQUEST", msg)
-
-case object ErrorUnauthorizedLowCL extends ErrorResponse(401, "LOW_CONFIDENCE_LEVEL", "Confidence Level on account does not allow access")
-
-object ErrorBadRequest {
-  def apply(errors: Seq[(JsPath, Seq[JsonValidationError])]): ErrorBadRequest =
-    ErrorBadRequest(JsError.toJson(errors).as[String])
-}
-
-case object ErrorAcceptHeaderInvalid extends ErrorResponse(406, "ACCEPT_HEADER_INVALID", "The accept header is missing or invalid")
-
-case object ErrorInternalServerError extends ErrorResponse(500, "INTERNAL_SERVER_ERROR", "Internal server error")
-
-case object PreferencesSettingsError extends ErrorResponse(500, "PREFERENCE_SETTINGS_ERROR", "Failed to set preferences")
+case class ErrorResponse(val httpStatusCode: Int, val errorCode: String, val message: String)
 
 object ErrorResponse {
   implicit val writes: Writes[ErrorResponse] = (e: ErrorResponse) => Json.obj("code" -> e.errorCode, "message" -> e.message)
+
+  def badGateway(msg: String = "Bad gateway"): ErrorResponse = ErrorResponse(BAD_GATEWAY, "BAD_GATEWAY", msg)
+  def unauthorized(msg: String = "Bearer token is missing or not authorized"): ErrorResponse = ErrorResponse(UNAUTHORIZED, "UNAUTHORIZED", msg)
+  def badRequest(msg: String = "Bad request"): ErrorResponse = ErrorResponse(BAD_REQUEST, "BAD_REQUEST", msg)
+  def notAcceptable(msg: String = "The accept header is invalid"): ErrorResponse = ErrorResponse(NOT_ACCEPTABLE, "ACCEPT_HEADER_INVALID", msg)
 }

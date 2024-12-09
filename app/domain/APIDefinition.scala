@@ -16,4 +16,10 @@
 
 package domain
 
-case class APIAccess(`type`: String, allowlistedApplicationIds: Option[Seq[String]])
+import play.api.libs.json.{Json, OFormat}
+
+case class APIAccess(`type`: String)
+
+object APIAccess {
+  implicit val format: OFormat[APIAccess] = Json.format[APIAccess]
+}

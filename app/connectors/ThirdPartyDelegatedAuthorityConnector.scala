@@ -33,7 +33,7 @@ class ThirdPartyDelegatedAuthorityConnector @Inject() (appContext: AppContext, h
     httpClient
       .get(url"$serviceUrl/delegated-authority")
       .setHeader("access-token" -> accessToken)
-      .execute(readRaw, ec)
+      .execute(using readRaw, ec)
       .map { response =>
         if (response.status == Status.NOT_FOUND) {
           Set[String]()
