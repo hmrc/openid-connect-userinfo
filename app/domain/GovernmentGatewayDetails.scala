@@ -16,6 +16,8 @@
 
 package domain
 
+import play.api.libs.json.{Json, OFormat}
+
 case class GovernmentGatewayDetails(
   user_id: Option[String],
   roles: Option[Seq[String]],
@@ -29,3 +31,7 @@ case class GovernmentGatewayDetails(
   profile_uri: Option[String],
   group_profile_uri: Option[String]
 )
+
+object GovernmentGatewayDetails {
+  implicit val format: OFormat[GovernmentGatewayDetails] = Json.format[GovernmentGatewayDetails]
+}

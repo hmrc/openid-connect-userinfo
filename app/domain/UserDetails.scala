@@ -16,8 +16,10 @@
 
 package domain
 
-import java.time.LocalDate
+import play.api.libs.json.{Json, OFormat}
 import uk.gov.hmrc.auth.core.retrieve.{GatewayInformation, MdtpInformation}
+
+import java.time.LocalDate
 
 case class UserDetails(
   authProviderId: Option[String] = None,
@@ -39,3 +41,9 @@ case class UserDetails(
   profile: Option[String],
   groupProfile: Option[String]
 )
+
+object UserDetails {
+  private implicit val giFormat: OFormat[GatewayInformation] = Json.format[GatewayInformation]
+  private implicit val miFormat: OFormat[MdtpInformation] = Json.format[MdtpInformation]
+  implicit val format: OFormat[UserDetails] = Json.format[UserDetails]
+}

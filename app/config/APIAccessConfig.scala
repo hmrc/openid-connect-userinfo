@@ -20,7 +20,7 @@ import com.typesafe.config.{Config, ConfigObject}
 
 import scala.jdk.CollectionConverters.*
 
-case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean, whiteListedApplicationIds: List[String])
+case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean)
 
 case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
   def findAPIs(versions: List[String], config: Config): List[APIAccessConfig] = {
@@ -29,12 +29,10 @@ case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
 
       val accessType = if (value.hasPath("type")) value.getString("type") else "PRIVATE"
       val status = if (value.hasPath("status")) value.getString("status") else throw new IllegalArgumentException("Status missing")
-      val allowListedApplicationIds =
-        if (value.hasPath("allow-list.applicationIds")) Some(value.getStringList("allow-list.applicationIds").asScala.toList) else None
       val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
       val versionNumber = version.replace('_', '.')
 
-      APIAccessConfig(versionNumber, status, accessType, endpointsEnabled, allowListedApplicationIds.getOrElse(List()))
+      APIAccessConfig(versionNumber, status, accessType, endpointsEnabled)
     }
   }
 

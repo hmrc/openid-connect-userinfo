@@ -66,11 +66,11 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 
       Ok(json)
     } recover {
-      case Upstream4xxResponse(UER(_, 401, _, _))    => Unauthorized(Json.toJson(ErrorUnauthorized()))
-      case Upstream4xxResponse(UER(msg4xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg4xx)))
-      case Upstream5xxResponse(UER(msg5xx, _, _, _)) => BadGateway(Json.toJson(ErrorBadGateway(msg5xx)))
-      case bex: BadRequestException                  => BadRequest(Json.toJson(ErrorBadRequest(bex.getMessage)))
-      case uex: UnauthorizedException                => Unauthorized(Json.toJson(ErrorUnauthorized(uex.getMessage)))
+      case Upstream4xxResponse(UER(_, 401, _, _))    => ErrorResponse.unauthorized().toResult
+      case Upstream4xxResponse(UER(msg4xx, _, _, _)) => ErrorResponse.badGateway(msg4xx).toResult
+      case Upstream5xxResponse(UER(msg5xx, _, _, _)) => ErrorResponse.badGateway(msg5xx).toResult
+      case bex: BadRequestException                  => ErrorResponse.badRequest(bex.getMessage).toResult
+      case uex: UnauthorizedException                => ErrorResponse.unauthorized(uex.getMessage).toResult
     }
   }
 }

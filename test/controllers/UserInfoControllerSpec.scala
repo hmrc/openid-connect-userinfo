@@ -20,8 +20,6 @@ import config.AppContext
 import domain.{Address, GovernmentGatewayDetails, UserInfo}
 import org.apache.pekko.actor.ActorSystem
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
-
-import java.time.LocalDate
 import org.mockito.Mockito.when
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.mockito.MockitoSugar
@@ -33,6 +31,7 @@ import testSupport.UnitSpec
 import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier}
 
+import java.time.LocalDate
 import scala.concurrent.{ExecutionContext, Future}
 
 class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: ExecutionContext) extends UnitSpec with MockitoSugar with ScalaFutures {
@@ -125,7 +124,7 @@ class UserInfoControllerSpec(implicit val cc: ControllerComponents, ex: Executio
       val result = await(liveController.userInfo()(FakeRequest().withHeaders("Accept" -> "application/vnd.hmrc.1.0+json")))
 
       status(result)     shouldBe 400
-      jsonBodyOf(result) shouldBe Json.toJson(ErrorBadRequest("NINO is required"))
+      jsonBodyOf(result) shouldBe Json.toJson(ErrorResponse.badRequest("NINO is required"))
     }
   }
 }

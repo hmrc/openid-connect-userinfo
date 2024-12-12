@@ -16,7 +16,6 @@
 
 package controllers
 
-import play.api.libs.json.Json
 import play.api.mvc.*
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -44,7 +43,7 @@ trait HeaderValidator extends Results {
       block: (Request[A]) => Future[Result]
     ): Future[Result] =
       if (rules(request.headers.get("Accept"))) block(request)
-      else Future.successful(Status(ErrorAcceptHeaderInvalid.httpStatusCode)(Json.toJson[ErrorResponse](ErrorAcceptHeaderInvalid)))
+      else Future.successful(ErrorResponse.acceptHeaderInvalid.toResult)
 
     override def parser: BodyParser[AnyContent] = outer.parser
 
