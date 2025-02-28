@@ -6,7 +6,7 @@ import scala.collection.Seq
 
 val appName = "openid-connect-userinfo"
 ThisBuild / majorVersion := 1
-ThisBuild / scalaVersion := "3.5.1"
+ThisBuild / scalaVersion := "3.3.4"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
