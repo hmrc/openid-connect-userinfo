@@ -45,6 +45,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
     val mockAppContext: AppContext = mock[AppContext]
     when(mockAppContext.fandfUrl).thenReturn(wireMockUrl)
+    when(mockAppContext.platformHost).thenReturn("http://www.tax.service.gov.uk")
 
     val httpClient: HttpClientV2 = app.injector.instanceOf[HttpClientV2]
     val connector: TrustedHelperConnector = new TrustedHelperConnector(mockAppContext, httpClient)
@@ -55,6 +56,8 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
       returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
       principalNino = "AA000001A"
     )
+    val expectedTrustedHelper = testTrustedHelper.copy(returnLinkUrl = "http://www.tax.service.gov.uk/trusted-helpers/redirect-to-trusted-helpers")
+    val absoluteTrustedHelper = testTrustedHelper.copy(returnLinkUrl = "https://www.tax.service.gov.uk/redirect")
   }
 
   override def beforeEach(): Unit = {
@@ -69,7 +72,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
   "getDelegation" should {
 
-    "return Some(TrustedHelper) when delegation exists" in new Setup {
+    "return Some(TrustedHelper) when delegation exists and returnLinkUrl is relative" in new Setup {
       stubFor(
         get(urlPathMatching("/fandf/delegation/get"))
           .willReturn(
@@ -81,7 +84,22 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
       val result = await(connector.getDelegation())
 
-      result shouldBe Some(testTrustedHelper)
+      result shouldBe Some(expectedTrustedHelper)
+    }
+
+    "return Some(TrustedHelper) when delegation exists and returnLinkUrl is already absolute" in new Setup {
+      stubFor(
+        get(urlPathMatching("/fandf/delegation/get"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(absoluteTrustedHelper).toString())
+          )
+      )
+
+      val result = await(connector.getDelegation())
+
+      result shouldBe Some(absoluteTrustedHelper)
     }
 
     "return None when delegation is not found" in new Setup {

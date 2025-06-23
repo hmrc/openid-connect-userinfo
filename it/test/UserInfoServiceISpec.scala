@@ -194,6 +194,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
     principalNino = "AA000001A"
   )
+  val expectedTrustedHelper = trustedHelper.copy(returnLinkUrl = "http://localhost:9836/trusted-helpers/redirect-to-trusted-helpers")
 
   Feature("fetch user information") {
 
@@ -680,7 +681,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
       result.status shouldBe 200
       val json = Json.parse(result.body)
       (json \ "trusted_helper").toOption shouldBe defined
-      json.as[UserInfo].trusted_helper   shouldBe Some(trustedHelper)
+      json.as[UserInfo].trusted_helper   shouldBe Some(expectedTrustedHelper)
     }
 
     Scenario("trusted helper data is not present when openid:trusted-helper scope is not included") {

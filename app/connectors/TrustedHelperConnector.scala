@@ -36,7 +36,12 @@ class TrustedHelperConnector @Inject() (appContext: AppContext, httpClient: Http
       .execute(using readRaw, ec)
       .map { response =>
         response.status match {
-          case Status.OK        => Some(response.json.as[TrustedHelper])
+          case Status.OK =>
+            val helper = response.json.as[TrustedHelper]
+            val updatedHelper =
+              if (helper.returnLinkUrl.startsWith("http://") || helper.returnLinkUrl.startsWith("https://")) helper
+              else helper.copy(returnLinkUrl = appContext.platformHost.stripSuffix("/") + helper.returnLinkUrl)
+            Some(updatedHelper)
           case Status.NOT_FOUND => None
           case _                => throw new Exception(s"Unexpected response from trusted helper service: ${response.status}")
         }

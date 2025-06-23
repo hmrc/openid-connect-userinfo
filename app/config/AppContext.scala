@@ -29,4 +29,5 @@ class AppContext @Inject() (val runModeConfiguration: Configuration) extends Ser
   lazy val fandfUrl: String = baseUrl("fandf")
   lazy val access: Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
   lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
+  lazy val platformHost: String = runModeConfiguration.getOptional[String]("platform.host").getOrElse("http://localhost:9836")
 }
