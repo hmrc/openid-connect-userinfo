@@ -29,7 +29,8 @@ class UserInfoTransformer {
                 authority: Option[Authority],
                 desUserInfo: Option[DesUserInfo],
                 enrolments: Option[Enrolments],
-                userDetails: Option[UserDetails]
+                userDetails: Option[UserDetails],
+                trustedHelper: Option[TrustedHelper]
                ): UserInfo = {
 
     def profile = if (scopes.contains("profile"))
@@ -55,6 +56,8 @@ class UserInfoTransformer {
 
     val mdtp = if (scopes.contains("openid:mdtp")) userDetails.flatMap(_.mdtpInformation.map(m => Mdtp(m.deviceId, m.sessionId))) else None
 
+    val trustedHelperInfo = if (scopes.contains("openid:trusted-helper")) trustedHelper else None
+
     UserInfo(
       profile.flatMap(_.firstName),
       profile.flatMap(_.familyName),
@@ -65,7 +68,8 @@ class UserInfoTransformer {
       identifier,
       userEnrolments.map(_.enrolments),
       ggInfo,
-      mdtp
+      mdtp,
+      trustedHelperInfo
     )
   }
 

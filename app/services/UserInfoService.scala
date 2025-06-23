@@ -33,7 +33,8 @@ trait UserInfoService {
 class LiveUserInfoService @Inject() (
   v1AuthConnector: AuthConnector,
   userInfoTransformer: UserInfoTransformer,
-  thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector
+  thirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector,
+  trustedHelperConnector: TrustedHelperConnector
 )(implicit ec: ExecutionContext)
     extends UserInfoService {
 
@@ -74,13 +75,16 @@ class LiveUserInfoService @Inject() (
 
       def maybeEnrolments = getMaybeForScopes[Enrolments](Set("openid:hmrc-enrolments"), scopes, v1AuthConnector.fetchEnrolments())
 
+      def maybeTrustedHelper = getMaybeForScopes[TrustedHelper](Set("openid:trusted-helper"), scopes, trustedHelperConnector.getDelegation())
+
       for {
-        authority   <- maybeAuthority
-        enrolments  <- maybeEnrolments
-        desUserInfo <- maybeDesUserInfo
-        userDetails <- maybeUserDetails
+        authority     <- maybeAuthority
+        enrolments    <- maybeEnrolments
+        desUserInfo   <- maybeDesUserInfo
+        userDetails   <- maybeUserDetails
+        trustedHelper <- maybeTrustedHelper
       } yield {
-        userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails)
+        userInfoTransformer.transform(scopes, authority, desUserInfo, enrolments, userDetails, trustedHelper)
       }
     }
   }
