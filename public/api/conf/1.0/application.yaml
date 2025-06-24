@@ -16,7 +16,7 @@ info:
     * 'openid:government-gateway': government_gateway<br>
     * 'openid:mdtp': mdtp<br>
     * 'openid:gov-uk-identifiers': uk_gov_nino<br>
-    * 'openid:trusted-helper': trustedHelper<br>
+    * 'openid:trusted-helper': trusted_helper<br>
   contact: {}
   version: '1.0'
 servers:
