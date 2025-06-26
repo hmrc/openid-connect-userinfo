@@ -17,10 +17,10 @@
 package domain
 
 import play.api.libs.json.{Format, Json, OFormat, Reads}
+import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
+import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
 
 import java.time.LocalDate
-import uk.gov.hmrc.auth.core.{Enrolment, EnrolmentIdentifier}
-import uk.gov.hmrc.auth.core.retrieve.{ItmpAddress, ItmpName}
 
 case class Address(formatted: String, postal_code: Option[String], country: Option[String], country_code: Option[String])
 
@@ -44,8 +44,9 @@ case class UserInfo(given_name: Option[String] = None,
                     hmrc_enrolments: Option[Set[Enrolment]] = None,
                     government_gateway: Option[GovernmentGatewayDetails] = None,
                     mdtp: Option[Mdtp] = None,
-                    profile_url: Option[String] = None,
-                    group_profile_url: Option[String] = None
+                    trusted_helper: Option[TrustedHelper] = None,
+                    group_profile_url: Option[String] = None,
+                    profile_url: Option[String] = None
                    )
 
 object UserInfo {

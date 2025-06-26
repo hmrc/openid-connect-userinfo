@@ -16,7 +16,7 @@
 
 package services
 
-import connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityConnector}
+import connectors.{AuthConnector, AuthConnectorV1, ThirdPartyDelegatedAuthorityConnector, TrustedHelperConnector}
 import controllers.Version_1_0
 import data.UserInfoGenerator
 import domain.*
@@ -64,6 +64,13 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   )
   val mdtp: Mdtp = Mdtp("device-id-12", "session-id-133")
 
+  val testTrustedHelper = TrustedHelper(
+    principalName = "John Smith",
+    attorneyName  = "Jane Doe",
+    returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
+    principalNino = "AA000001A"
+  )
+
   val userInfo: UserInfo = UserInfo(
     Some("John"),
     Some("Smith"),
@@ -74,7 +81,10 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     Some(nino).map(_.nino),
     Some(enrolments.enrolments),
     Some(governmentGateway),
-    Some(mdtp)
+    Some(mdtp),
+    Some(testTrustedHelper),
+    None,
+    None
   )
 
   trait Setup {
@@ -84,29 +94,40 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
     val mockUserInfoGenerator: UserInfoGenerator = mock[UserInfoGenerator]
     val mockUserInfoTransformer: UserInfoTransformer = mock[UserInfoTransformer]
     val mockThirdPartyDelegatedAuthorityConnector: ThirdPartyDelegatedAuthorityConnector = mock[ThirdPartyDelegatedAuthorityConnector]
+    val mockTrustedHelperConnector: TrustedHelperConnector = mock[TrustedHelperConnector]
 
     val sandboxInfoService = new SandboxUserInfoService(mockUserInfoGenerator)
     val liveInfoService =
-      new LiveUserInfoService(mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector)
+      new LiveUserInfoService(mockAuthConnector, mockUserInfoTransformer, mockThirdPartyDelegatedAuthorityConnector, mockTrustedHelperConnector)
   }
 
   "LiveUserInfoService" should {
 
-    "requests all available data when access token in otherHeaders" in new Setup {
+    "requests all available data including trusted helper when access token in otherHeaders" in new Setup {
 
-      val scopes = Set("openid", "address", "profile", "openid:gov-uk-identifiers", "openid:hmrc-enrolments", "email", "openid:government-gateway")
+      val scopes = Set("openid",
+                       "address",
+                       "profile",
+                       "openid:gov-uk-identifiers",
+                       "openid:hmrc-enrolments",
+                       "email",
+                       "openid:government-gateway",
+                       "openid:trusted-helper"
+                      )
       when(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext]))
         .thenReturn(Future.successful(scopes))
       when(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(authority)))
       when(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(enrolments)))
       when(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(desUserInfo)))
       when(mockAuthConnector.fetchDetails()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(userDetails)))
+      when(mockTrustedHelperConnector.getDelegation()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(testTrustedHelper)))
       when(
         mockUserInfoTransformer.transform(eqTo(scopes),
                                           eqTo(Some(authority)),
                                           eqTo(Some(desUserInfo)),
                                           eqTo(Some(enrolments)),
-                                          eqTo(Some(userDetails))
+                                          eqTo(Some(userDetails)),
+                                          eqTo(Some(testTrustedHelper))
                                          )
       )
         .thenReturn(UserInfo())
@@ -117,6 +138,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(mockAuthConnector).fetchEnrolments()
       verify(mockAuthConnector).fetchAuthority()
       verify(mockAuthConnector).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
+      verify(mockTrustedHelperConnector).getDelegation()(any[HeaderCarrier], any[ExecutionContext])
     }
 
     "should fail with UnauthorizedException when access token is not in the headers" in new Setup {
@@ -141,7 +163,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
         .thenReturn(Future.successful(scopes))
       when(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(authority)))
       when(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(enrolments)))
-      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None)))
+      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None), eqTo(None)))
         .thenReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
@@ -159,7 +181,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       when(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(authority)))
       when(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(Some(enrolments)))
-      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None)))
+      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None), eqTo(None)))
         .thenReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
@@ -177,7 +199,7 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
 
       when(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(authority)))
       when(mockAuthConnector.fetchDesUserInfo()(eqTo(headers), any[ExecutionContext])).thenReturn(Future.successful(None))
-      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(None), eqTo(None)))
+      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(None), eqTo(None), eqTo(None)))
         .thenReturn(UserInfo())
 
       await(liveInfoService.fetchUserInfo(Version_1_0))
@@ -185,6 +207,21 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
       verify(mockAuthConnector, never).fetchEnrolments()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector).fetchDesUserInfo()(any[HeaderCarrier], any[ExecutionContext])
       verify(mockAuthConnector, never).fetchDetails()(any[HeaderCarrier], any[ExecutionContext])
+    }
+
+    "does not request TrustedHelperConnector::getDelegation when the scopes does not contain 'openid:trusted-helper'" in new Setup {
+
+      val scopes = Set("openid:gov-uk-identifiers", "openid:hmrc-enrolments")
+      when(mockThirdPartyDelegatedAuthorityConnector.fetchScopes(eqTo(accessToken))(eqTo(headers), any[ExecutionContext]))
+        .thenReturn(Future.successful(scopes))
+      when(mockAuthConnector.fetchAuthority()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(authority)))
+      when(mockAuthConnector.fetchEnrolments()(eqTo(headers), any[ExecutionContext])).thenReturn(Future(Some(enrolments)))
+      when(mockUserInfoTransformer.transform(eqTo(scopes), eqTo(Some(authority)), eqTo(None), eqTo(Some(enrolments)), eqTo(None), eqTo(None)))
+        .thenReturn(UserInfo())
+
+      await(liveInfoService.fetchUserInfo(Version_1_0))
+
+      verify(mockTrustedHelperConnector, never).getDelegation()(any[HeaderCarrier], any[ExecutionContext])
     }
   }
 

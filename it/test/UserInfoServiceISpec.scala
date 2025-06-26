@@ -14,13 +14,11 @@
  * limitations under the License.
  */
 
-import java.nio.file.Paths
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.github.fge.jsonschema.core.report.LogLevel
 import com.github.fge.jsonschema.main.JsonSchemaFactory
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import domain.*
-
-import java.time.LocalDate
 import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import stubs.{AuthStub, ThirdPartyDelegatedAuthorityStub}
@@ -28,6 +26,8 @@ import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.*
 import uk.gov.hmrc.domain.Nino
 
+import java.nio.file.Paths
+import java.time.LocalDate
 import scala.concurrent.duration.{Duration, SECONDS}
 
 class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPartyDelegatedAuthorityStub {
@@ -187,6 +187,14 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
     Some(government_gateway_v1),
     Some(mdtp)
   )
+
+  val trustedHelper = TrustedHelper(
+    principalName = "Principal Firstname Surname",
+    attorneyName  = "Firstname Surname",
+    returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
+    principalNino = "AA000001A"
+  )
+  val expectedTrustedHelper = trustedHelper.copy(returnLinkUrl = "http://localhost:9836/trusted-helpers/redirect-to-trusted-helpers")
 
   Feature("fetch user information") {
 
@@ -612,6 +620,129 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
                                                            mdtp            = None
                                                           )
       Json.parse(result.body) shouldBe Json.toJson(userWithGovernmentDetailsOnly)
+    }
+
+    Scenario("trusted helper data is present when openid:trusted-helper scope is included") {
+      Given("A Auth token with 'openid:trusted-helper' and other scopes")
+      willReturnScopesForAuthTokens(
+        accessToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "openid:mdtp",
+          "openid:trusted-helper"
+        )
+      )
+      willAuthoriseWith(200)
+      willReturnAuthorityWith(Nino(nino))
+      willReturnEnrolmentsWith()
+      willFindUser(
+        Some(desUserInfo),
+        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
+        Some(Email(email)),
+        Some(AffinityGroup.Individual),
+        Some(User),
+        Some(authMdtp),
+        Some(gatewayInformation),
+        Some(10)
+      )
+
+      // Stub the trusted helper endpoint
+      stubFor(
+        get(urlEqualTo("/fandf/delegation/get"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(trustedHelper).toString())
+          )
+      )
+
+      When("We request the user information")
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
+
+      Then("The user information is returned and includes trusted_helper")
+      result.status shouldBe 200
+      val json = Json.parse(result.body)
+      (json \ "trusted_helper").toOption shouldBe defined
+      json.as[UserInfo].trusted_helper   shouldBe Some(expectedTrustedHelper)
+    }
+
+    Scenario("trusted helper data is not present when openid:trusted-helper scope is not included") {
+      Given("A Auth token without 'openid:trusted-helper' scope")
+      willReturnScopesForAuthTokens(
+        accessToken,
+        Set(
+          "openid",
+          "profile",
+          "address",
+          "openid:gov-uk-identifiers",
+          "openid:hmrc-enrolments",
+          "openid:government-gateway",
+          "email",
+          "openid:mdtp"
+        )
+      )
+      willAuthoriseWith(200)
+      willReturnAuthorityWith(Nino(nino))
+      willReturnEnrolmentsWith()
+      willFindUser(
+        Some(desUserInfo),
+        Some(AgentInformation(government_gateway_v1.agent_id, government_gateway_v1.agent_code, government_gateway_v1.agent_friendly_name)),
+        Some(Credentials("1304372065861347", "")),
+        Some(uk.gov.hmrc.auth.core.retrieve.Name(Some("Bob"), None)),
+        Some(Email(email)),
+        Some(AffinityGroup.Individual),
+        Some(User),
+        Some(authMdtp),
+        Some(gatewayInformation),
+        Some(10)
+      )
+
+      // Stub the trusted helper endpoint (should not be called, but stub anyway)
+      stubFor(
+        get(urlEqualTo("/fandf/delegation/get"))
+          .willReturn(
+            aResponse()
+              .withStatus(200)
+              .withBody(Json.toJson(trustedHelper).toString())
+          )
+      )
+
+      When("We request the user information")
+      val result = await(
+        wsClient
+          .url(s"$serviceUrl")
+          .withHttpHeaders(
+            "Authorization"                -> s"Bearer $authorizationTokens",
+            "Accept"                       -> "application/vnd.hmrc.1.0+json",
+            "token"                        -> "ggToken",
+            "X-Client-Authorization-Token" -> "ACCESS_TOKEN"
+          )
+          .get()
+      )
+
+      Then("The user information is returned and does not include trusted_helper")
+      result.status shouldBe 200
+      val json = Json.parse(result.body)
+      (json \ "trusted_helper").toOption shouldBe empty
+      json.as[UserInfo].trusted_helper   shouldBe None
     }
   }
 
