@@ -189,7 +189,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
   )
 
   val trustedHelper = TrustedHelper(
-    principalName = "Firstname Surname",
+    principalName = "Principal Firstname Surname",
     attorneyName  = "Firstname Surname",
     returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
     principalNino = "AA000001A"
