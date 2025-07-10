@@ -26,6 +26,8 @@ class AppContext @Inject() (val runModeConfiguration: Configuration) extends Ser
   lazy val appName: String = runModeConfiguration.get[String]("appName")
   lazy val authUrl: String = baseUrl("auth")
   lazy val thirdPartyDelegatedAuthorityUrl: String = baseUrl("third-party-delegated-authority")
+  lazy val fandfUrl: String = baseUrl("fandf")
   lazy val access: Option[ConfigObject] = runModeConfiguration.getOptional[ConfigObject]("api.access.version")
   lazy val logUserInfoResponsePayload: Boolean = runModeConfiguration.underlying.getBoolean("log-user-info-response-payload")
+  lazy val platformHost: String = runModeConfiguration.getOptional[String]("platform.host").getOrElse("http://localhost:9836")
 }
