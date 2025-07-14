@@ -29,11 +29,12 @@ see [the reference guide](https://developer.service.hmrc.gov.uk/api-documentatio
 User details data structures follow the OpenId Connect UserInfo specification (
 see [the specification](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo))
 
-You can dive deeper into the documentation in
-the [API Developer Hub](https://developer.service.hmrc.gov.uk/api-documentation/docs/api#openid-connect-userinfo).
+https://developer.service.hmrc.gov.uk/api-documentation/docs/using-the-hub which explains how to authenticate with OpenID Connect (OIDC) oauth2, create your App in the Developer Hub and subscribe to the /userinfo API.
+
+For testing in our Sandbox Test environment, his child page is a UI tool called "Create a Test User" that is useful:
+https://developer.service.hmrc.gov.uk/api-test-user
 
 <a name="how-to-build-and-test"></a>
-
 ## How to build and test
 
 Run the service `sbt run -Drun.mode=Dev`
@@ -47,11 +48,15 @@ Run the service in service manager; if you want live endpoints, then start depen
 
 Now you can test the sandbox `curl -v http://localhost:9836/sandbox/ -H 'Accept: application/vnd.hmrc.1.0+json'`
 
-Link to API
-documentation https://admin.qa.tax.service.gov.uk/api-catalogue/integrations/61b66a2b-a892-4197-bb40-eac67e2ce3c6/user-information  
-You need a devhub account from https://developer.qa.tax.service.gov.uk/developer/login and follow the instructions for
-making an app to subscribe to the test api
-on https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+on+Development+and+QA
+Internal users may reference this API documentation: https://admin.qa.tax.service.gov.uk/api-catalogue/integrations/61b66a2b-a892-4197-bb40-eac67e2ce3c6/user-information  
+You need a devhub account from https://developer.qa.tax.service.gov.uk/developer/login and follow the instructions for making an app to subscribe to the test api on https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+on+Development+and+QA
+
+Internal users may also reference this link on how to setup and test:
+https://confluence.tools.tax.service.gov.uk/display/ApiPlatform/Testing+an+API+microservice+on+Development+and+QA
+
+Internal reference documentation is also at:
+https://confluence.tools.tax.service.gov.uk/display/GG/Scopes+and+Claims
+https://confluence.tools.tax.service.gov.uk/display/GG/Userinfo+Endpoint
 
 <a name="authentication-tokens"></a>
 

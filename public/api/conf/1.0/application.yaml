@@ -79,6 +79,11 @@ paths:
                     mdtp:
                       device_id: device_id-12345
                       session_id: session_id_123455
+                    trusted_helper:
+                      "principalName": "James Jones",
+                      "attorneyName": "Terry Tibbs",
+                      "returnLinkUrl": "https://tax-service.gov.uk/trusted-helpers/redirect-to-trusted-helpers",
+                      "principalNino": "AA000001A"
               examples:
                 example-1:
                   value:
@@ -117,6 +122,11 @@ paths:
                     mdtp:
                       device_id: device_id-12345
                       session_id: session_id_123455
+                    trusted_helper:
+                      "principalName": "James Jones",
+                      "attorneyName": "Terry Tibbs",
+                      "returnLinkUrl": "https://tax-service.gov.uk/trusted-helpers/redirect-to-trusted-helpers",
+                      "principalNino": "AA000001A"
         '403':
           description: ''
           headers: {}
