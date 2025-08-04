@@ -302,6 +302,22 @@ components:
       - givenToAgent
       type: string
       description: End-User's HMRC enrolment status.
+    TrustedHelper:
+      title: TrustedHelper
+      type: object
+      properties:
+        principalName:
+          type: string
+          description: Name of the principal using a trusted helper
+        attorneyName:
+          type: string
+          description: Name of the trusted helper
+        returnLinkUrl:
+          type: string
+          description:  Return link
+        principalNino:
+          type: string
+          description: NINO of the principal using a trusted helper
     Userinforesponse:
       title: Userinforesponse
       type: object
@@ -345,6 +361,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/GovernmentGateway'
           - description: Legacy properties based on government gateway input.
+        trusted_helper:
+          allOf:
+            - $ref: '#/components/schemas/TrustedHelper'
+            - description: Trusted helper info
       description: User Info
   securitySchemes:
     userRestricted:
