@@ -656,7 +656,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
       // Stub the trusted helper endpoint
       stubFor(
-        get(urlEqualTo("/fandf/delegation/get"))
+        get(urlEqualTo("/delegation/get"))
           .willReturn(
             aResponse()
               .withStatus(200)
