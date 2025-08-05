@@ -10,7 +10,6 @@ ThisBuild / scalaVersion := "3.3.4"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(PlayScala, SbtDistributablesPlugin)
-  .settings(DefaultBuildSettings.defaultSettings() *)
   .disablePlugins(JUnitXmlReportPlugin) // Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     playDefaultPort := 9836,

@@ -32,7 +32,7 @@ class TrustedHelperConnector @Inject() (appContext: AppContext, httpClient: Http
 
   def getDelegation()(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Option[TrustedHelper]] = {
     httpClient
-      .get(url"$serviceUrl/fandf/delegation/get")
+      .get(url"$serviceUrl/delegation/get")
       .execute(using readRaw, ec)
       .map { response =>
         response.status match {

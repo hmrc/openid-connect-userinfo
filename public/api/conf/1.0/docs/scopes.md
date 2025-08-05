@@ -9,3 +9,4 @@ Here is a list of supported scopes and the claims they contain. The details of e
 * 'openid:government-gateway': government_gateway
 * 'openid:mdtp': mdtp
 * 'openid:gov-uk-identifiers': uk_gov_nino
+* 'openid:trusted-helper': trusted_helper

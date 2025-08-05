@@ -39,6 +39,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
   val stubHost = "localhost"
   val wireMockUrl: String = s"http://$stubHost:$stubPort"
   val wireMockServer = new WireMockServer(wireMockConfig().port(stubPort))
+  val trustedHelperPath = "/delegation/get"
 
   trait Setup {
     implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -74,7 +75,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
     "return Some(TrustedHelper) when delegation exists and returnLinkUrl is relative" in new Setup {
       stubFor(
-        get(urlPathMatching("/fandf/delegation/get"))
+        get(urlPathMatching(trustedHelperPath))
           .willReturn(
             aResponse()
               .withStatus(200)
@@ -89,7 +90,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
     "return Some(TrustedHelper) when delegation exists and returnLinkUrl is already absolute" in new Setup {
       stubFor(
-        get(urlPathMatching("/fandf/delegation/get"))
+        get(urlPathMatching(trustedHelperPath))
           .willReturn(
             aResponse()
               .withStatus(200)
@@ -104,7 +105,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
     "return None when delegation is not found" in new Setup {
       stubFor(
-        get(urlPathMatching("/fandf/delegation/get"))
+        get(urlPathMatching(trustedHelperPath))
           .willReturn(aResponse().withStatus(404))
       )
 
@@ -115,7 +116,7 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
 
     "throw an exception for unexpected response" in new Setup {
       stubFor(
-        get(urlPathMatching("/fandf/delegation/get"))
+        get(urlPathMatching(trustedHelperPath))
           .willReturn(aResponse().withStatus(500))
       )
 

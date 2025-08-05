@@ -79,6 +79,11 @@ paths:
                     mdtp:
                       device_id: device_id-12345
                       session_id: session_id_123455
+                    trusted_helper:
+                      "principalName": "James Jones",
+                      "attorneyName": "Terry Tibbs",
+                      "returnLinkUrl": "https://tax-service.gov.uk/trusted-helpers/redirect-to-trusted-helpers",
+                      "principalNino": "AA000001A"
               examples:
                 example-1:
                   value:
@@ -117,6 +122,11 @@ paths:
                     mdtp:
                       device_id: device_id-12345
                       session_id: session_id_123455
+                    trusted_helper:
+                      "principalName": "James Jones",
+                      "attorneyName": "Terry Tibbs",
+                      "returnLinkUrl": "https://tax-service.gov.uk/trusted-helpers/redirect-to-trusted-helpers",
+                      "principalNino": "AA000001A"
         '403':
           description: ''
           headers: {}
@@ -292,6 +302,22 @@ components:
       - givenToAgent
       type: string
       description: End-User's HMRC enrolment status.
+    TrustedHelper:
+      title: TrustedHelper
+      type: object
+      properties:
+        principalName:
+          type: string
+          description: Name of the principal using a trusted helper
+        attorneyName:
+          type: string
+          description: Name of the trusted helper
+        returnLinkUrl:
+          type: string
+          description:  Return link
+        principalNino:
+          type: string
+          description: NINO of the principal using a trusted helper
     Userinforesponse:
       title: Userinforesponse
       type: object
@@ -335,6 +361,10 @@ components:
           allOf:
           - $ref: '#/components/schemas/GovernmentGateway'
           - description: Legacy properties based on government gateway input.
+        trusted_helper:
+          allOf:
+            - $ref: '#/components/schemas/TrustedHelper'
+            - description: Trusted helper info
       description: User Info
   securitySchemes:
     userRestricted:
