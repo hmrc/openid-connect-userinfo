@@ -80,7 +80,7 @@ paths:
                       device_id: device_id-12345
                       session_id: session_id_123455
                     trusted_helper:
-                      principalName: James Jones
+                      principal_name: James Jones
                       attorney_name: Terry Tibbs
                       return_link_url: https://tax-service.gov.uk/trusted-helpers/redirect-to-trusted-helpers
                       principal_nino: AA000001A
