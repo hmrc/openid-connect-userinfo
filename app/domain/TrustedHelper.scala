@@ -19,10 +19,10 @@ package domain
 import play.api.libs.json.{Format, Json}
 
 case class TrustedHelper(
-  principalName: String,
-  attorneyName: String,
-  returnLinkUrl: String,
-  principalNino: String
+  principal_name: String,
+  attorney_name: String,
+  return_link_url: String,
+  principal_nino: String
 )
 
 object TrustedHelper {

@@ -189,12 +189,12 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
   )
 
   val trustedHelper = TrustedHelper(
-    principalName = "Principal Firstname Surname",
-    attorneyName  = "Firstname Surname",
-    returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
-    principalNino = "AA000001A"
+    principal_name  = "Principal Firstname Surname",
+    attorney_name   = "Firstname Surname",
+    return_link_url = "/trusted-helpers/redirect-to-trusted-helpers",
+    principal_nino  = "AA000001A"
   )
-  val expectedTrustedHelper = trustedHelper.copy(returnLinkUrl = "http://localhost:9836/trusted-helpers/redirect-to-trusted-helpers")
+  val expectedTrustedHelper = trustedHelper.copy(return_link_url = "http://localhost:9836/trusted-helpers/redirect-to-trusted-helpers")
 
   Feature("fetch user information") {
 
