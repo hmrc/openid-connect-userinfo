@@ -65,10 +65,10 @@ class UserInfoServiceSpec extends UnitSpec with MockitoSugar with ScalaFutures {
   val mdtp: Mdtp = Mdtp("device-id-12", "session-id-133")
 
   val testTrustedHelper = TrustedHelper(
-    principalName = "John Smith",
-    attorneyName  = "Jane Doe",
-    returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
-    principalNino = "AA000001A"
+    principal_name  = "John Smith",
+    attorney_name   = "Jane Doe",
+    return_link_url = "/trusted-helpers/redirect-to-trusted-helpers",
+    principal_nino  = "AA000001A"
   )
 
   val userInfo: UserInfo = UserInfo(

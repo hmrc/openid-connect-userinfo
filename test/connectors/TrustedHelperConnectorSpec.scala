@@ -52,13 +52,13 @@ class TrustedHelperConnectorSpec extends UnitSpec with MockitoSugar with BeforeA
     val connector: TrustedHelperConnector = new TrustedHelperConnector(mockAppContext, httpClient)
 
     val testTrustedHelper = TrustedHelper(
-      principalName = "John Smith",
-      attorneyName  = "Jane Doe",
-      returnLinkUrl = "/trusted-helpers/redirect-to-trusted-helpers",
-      principalNino = "AA000001A"
+      principal_name  = "John Smith",
+      attorney_name   = "Jane Doe",
+      return_link_url = "/trusted-helpers/redirect-to-trusted-helpers",
+      principal_nino  = "AA000001A"
     )
-    val expectedTrustedHelper = testTrustedHelper.copy(returnLinkUrl = "http://www.tax.service.gov.uk/trusted-helpers/redirect-to-trusted-helpers")
-    val absoluteTrustedHelper = testTrustedHelper.copy(returnLinkUrl = "https://www.tax.service.gov.uk/redirect")
+    val expectedTrustedHelper = testTrustedHelper.copy(return_link_url = "http://www.tax.service.gov.uk/trusted-helpers/redirect-to-trusted-helpers")
+    val absoluteTrustedHelper = testTrustedHelper.copy(return_link_url = "https://www.tax.service.gov.uk/redirect")
   }
 
   override def beforeEach(): Unit = {
