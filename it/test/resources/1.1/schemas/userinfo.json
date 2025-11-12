@@ -98,12 +98,8 @@
             "type": "string",
             "description": "End-user's HMRC enrolment status.",
             "enum": [
-              "awaitingActivation",
-              "activated",
-              "Active",
               "Activated",
-              "pending",
-              "givenToAgent"
+              "NotYetActivated"
             ]
           }
         },

@@ -294,12 +294,8 @@ components:
     State:
       title: State
       enum:
-      - awaitingActivation
-      - activated
-      - Active
       - Activated
-      - pending
-      - givenToAgent
+      - NotYetActivated
       type: string
       description: End-User's HMRC enrolment status.
     TrustedHelper:
