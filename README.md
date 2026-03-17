@@ -37,14 +37,22 @@ https://developer.service.hmrc.gov.uk/api-test-user
 <a name="how-to-build-and-test"></a>
 ## How to build and test
 
-Run the service `sbt run -Drun.mode=Dev`
+Run the service 
+```shell
+sbt run -Drun.mode=Dev
+```
 
-Run the tests & test coverage report `sbt clean coverage test it/test coverageReport`
+Run the tests & test coverage report 
+```shell
+sbt clean coverage test it/test coverageReport
+```
 
 The test coverage report will be available in `target/scala-2.12/scoverage-report/index.html`
 
 Run the service in service manager; if you want live endpoints, then start dependencies thus:
-`sm2 --start AUTH DATASTREAM -r`
+```shell
+sm2 --start AUTH DATASTREAM -r
+```
 
 Now you can test the sandbox `curl -v http://localhost:9836/sandbox/ -H 'Accept: application/vnd.hmrc.1.0+json'`
 
