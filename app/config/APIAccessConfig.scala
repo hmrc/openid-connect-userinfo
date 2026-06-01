@@ -17,22 +17,23 @@
 package config
 
 import com.typesafe.config.{Config, ConfigObject}
+import domain.APIAccess
 
 import scala.jdk.CollectionConverters.*
 
-case class APIAccessConfig(version: String, status: String, accessType: String, endpointsEnabled: Boolean)
+case class APIAccessConfig(version: String, status: String, accessType: APIAccess, endpointsEnabled: Boolean)
 
 case class APIAccessVersions(versionConfigs: Option[ConfigObject]) {
   def findAPIs(versions: List[String], config: Config): List[APIAccessConfig] = {
     versions.map { version =>
       val value = config.getConfig(version)
 
-      val accessType = if (value.hasPath("type")) value.getString("type") else "PRIVATE"
+      val accessType = if (value.hasPath("type")) value.getString("type") else "INTERNAL"
       val status = if (value.hasPath("status")) value.getString("status") else throw new IllegalArgumentException("Status missing")
       val endpointsEnabled = if (value.hasPath("endpointsEnabled")) value.getBoolean("endpointsEnabled") else false
       val versionNumber = version.replace('_', '.')
 
-      APIAccessConfig(versionNumber, status, accessType, endpointsEnabled)
+      APIAccessConfig(versionNumber, status, APIAccess(accessType), endpointsEnabled)
     }
   }
 

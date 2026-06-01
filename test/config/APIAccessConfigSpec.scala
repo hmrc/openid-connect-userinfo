@@ -17,13 +17,14 @@
 package config
 
 import com.typesafe.config.ConfigObject
+import domain.APIAccess
 import play.api.Configuration
 import testSupport.UnitSpec
 
 class APIAccessConfigSpec extends UnitSpec {
   val configuration: Configuration = Configuration.from(
     Map(
-      "api.access.version.1_0.type"             -> "PRIVATE",
+      "api.access.version.1_0.type"             -> "INTERNAL",
       "api.access.version.1_0.status"           -> "STABLE",
       "api.access.version.1_0.endpointsEnabled" -> true
     )
@@ -38,7 +39,7 @@ class APIAccessConfigSpec extends UnitSpec {
         version shouldBe a[APIAccessConfig]
         version.version match {
           case "1.0" =>
-            version.accessType       shouldBe "PRIVATE"
+            version.accessType       shouldBe APIAccess("INTERNAL")
             version.status           shouldBe "STABLE"
             version.endpointsEnabled shouldBe true
           case unknown => fail(s"Unknown version found : $unknown")

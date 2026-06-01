@@ -16,10 +16,17 @@
 
 package domain
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json.*
 
 case class APIAccess(`type`: String)
 
 object APIAccess {
-  implicit val format: OFormat[APIAccess] = Json.format[APIAccess]
+  implicit val writes: Writes[APIAccess] = new Writes[APIAccess] {
+    // [GG-9032], see also Tech Blog dated 18 May 2026
+    def writes(o: APIAccess): JsValue = o.`type`.toUpperCase match {
+      case "PUBLIC"               => JsString("PUBLIC")
+      case "INTERNAL" | "PRIVATE" => JsString("INTERNAL")
+      case x                      => throw new IllegalArgumentException(s"Illegal API access type: $x")
+    }
+  }
 }

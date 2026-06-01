@@ -17,8 +17,6 @@
         "version":"@version.version",
         "status":"@version.status",
         "endpointsEnabled": @version.endpointsEnabled,
-        "access" : {
-            "type" : "@version.accessType"
-        }
+        "access" : @Json.toJson(version.accessType)
     }
 }
