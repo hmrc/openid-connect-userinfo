@@ -22,12 +22,9 @@ A typical workflow would be:
 1. Authenticate.
 2. Access a user-info resource via GET or POST request. GET is recommended.
 
-All end points are User Restricted (
-see [authorisation](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation)). Versioning follows the
-API Platform standards (
-see [the reference guide](https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide)).
-User details data structures follow the OpenId Connect UserInfo specification (
-see [the specification](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo))
+All end points are User Restricted (see [authorisation](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation)). Versioning follows the
+API Platform standards (see [the reference guide](https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide)).
+User details data structures follow the OpenId Connect UserInfo specification (see [the specification](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo))
 
 https://developer.service.hmrc.gov.uk/api-documentation/docs/using-the-hub which explains how to authenticate with OpenID Connect (OIDC) oauth2, create your App in the Developer Hub and subscribe to the /userinfo API.
 
@@ -56,8 +53,8 @@ sm2 --start AUTH DATASTREAM -r
 
 Now you can test the sandbox `curl -v http://localhost:9836/sandbox/ -H 'Accept: application/vnd.hmrc.1.0+json'`
 
-Internal users may reference this API documentation: https://admin.qa.tax.service.gov.uk/api-catalogue/integrations/61b66a2b-a892-4197-bb40-eac67e2ce3c6/user-information  
-You need a devhub account from https://developer.qa.tax.service.gov.uk/developer/login and follow the instructions for making an app to subscribe to the test api on https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+on+Development+and+QA
+Internal users may reference this API documentation: https://admin.qa.tax.service.gov.uk/integration-hub/apis/details/d4bd6213-1097-48ca-8041-2db5c6d89c39  
+You need a devhub account from https://developer.qa.tax.service.gov.uk/developer/login and follow the instructions for making an app to subscribe to the test api on https://confluence.tools.tax.service.gov.uk/spaces/ApiPlatform/pages/77858387/Testing+an+API+microservice+on+Development+and+QA
 
 Internal users may also reference this link on how to setup and test:
 https://confluence.tools.tax.service.gov.uk/display/ApiPlatform/Testing+an+API+microservice+on+Development+and+QA
@@ -111,4 +108,4 @@ is documented further down.
 ### License
 
 This code is open source software licensed under
-the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html") 
+the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0.html) 
