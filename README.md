@@ -36,14 +36,6 @@ the `/userinfo` API.
 For testing in the Sandbox test environment, the ["Create a Test User"](https://developer.service.hmrc.gov.uk/api-test-user)
 UI tool is useful.
 
-<a name="technology-stack"></a>
-
-## Technology Stack
-
-- Scala 3.3.6
-- Play Framework 3.0 (via `bootstrap-backend-play-30` 10.7.0)
-- sbt 1.10.10
-
 <a name="how-to-build-and-test"></a>
 
 ## How to build and test
