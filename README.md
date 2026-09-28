@@ -13,68 +13,80 @@
 
 ## Overview
 
-The REST API, exposed by the HMRC API Platform as /userinfo to external clients, aims to provide a specification
+The REST API, exposed by the HMRC API Platform as `/userinfo` to external clients, aims to provide a specification
 compliant OpenID Connect implementation. It allows consumers to access user details with consent and in the OpenID
 Connect UserInfo format.
 
 A typical workflow would be:
 
 1. Authenticate.
-2. Access a user-info resource via GET or POST request. GET is recommended.
+2. Access a user-info resource via a GET or POST request. GET is recommended.
 
-All end points are User Restricted (see [authorisation](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation)). Versioning follows the
-API Platform standards (see [the reference guide](https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide)).
-User details data structures follow the OpenId Connect UserInfo specification (see [the specification](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo))
+All end points are User Restricted (
+see [authorisation](https://developer.service.hmrc.gov.uk/api-documentation/docs/authorisation)). Versioning follows the
+API Platform standards (
+see [the reference guide](https://developer.service.hmrc.gov.uk/api-documentation/docs/reference-guide)).
+User details data structures follow the OpenID Connect UserInfo specification (
+see [the specification](http://openid.net/specs/openid-connect-core-1_0.html#UserInfo)).
 
-https://developer.service.hmrc.gov.uk/api-documentation/docs/using-the-hub which explains how to authenticate with OpenID Connect (OIDC) oauth2, create your App in the Developer Hub and subscribe to the /userinfo API.
+See [Using the Developer Hub](https://developer.service.hmrc.gov.uk/api-documentation/docs/using-the-hub), which
+explains how to authenticate with OpenID Connect (OIDC) OAuth2, create your app in the Developer Hub and subscribe to
+the `/userinfo` API.
 
-For testing in our Sandbox Test environment, his child page is a UI tool called "Create a Test User" that is useful:
-https://developer.service.hmrc.gov.uk/api-test-user
+For testing in the Sandbox test environment, the ["Create a Test User"](https://developer.service.hmrc.gov.uk/api-test-user)
+UI tool is useful.
 
 <a name="how-to-build-and-test"></a>
+
 ## How to build and test
 
-Run the service 
+Run the service:
 ```shell
 sbt run -Drun.mode=Dev
 ```
 
-Run the tests & test coverage report 
+Run the tests and test coverage report:
 ```shell
 sbt clean coverage test it/test coverageReport
 ```
 
-The test coverage report will be available in `target/scala-2.12/scoverage-report/index.html`
+The test coverage report will be available in `target/scala-3.3.6/scoverage-report/index.html`.
 
-Run the service in service manager; if you want live endpoints, then start dependencies thus:
+Run the service in Service Manager; if you want live endpoints, then start the dependencies with:
 ```shell
 sm2 --start AUTH DATASTREAM -r
 ```
 
-Now you can test the sandbox `curl -v http://localhost:9836/sandbox/ -H 'Accept: application/vnd.hmrc.1.0+json'`
+Now you can test the sandbox:
+```shell
+curl -v http://localhost:9836/sandbox/ -H 'Accept: application/vnd.hmrc.1.0+json'
+```
 
-Internal users may reference this API documentation: https://admin.qa.tax.service.gov.uk/integration-hub/apis/details/d4bd6213-1097-48ca-8041-2db5c6d89c39  
-You need a devhub account from https://developer.qa.tax.service.gov.uk/developer/login and follow the instructions for making an app to subscribe to the test api on https://confluence.tools.tax.service.gov.uk/spaces/ApiPlatform/pages/77858387/Testing+an+API+microservice+on+Development+and+QA
+Internal users may reference this API documentation: https://admin.qa.tax.service.gov.uk/api-catalogue/integrations/61b66a2b-a892-4197-bb40-eac67e2ce3c6/user-information
 
-Internal users may also reference this link on how to setup and test:
+You need a Developer Hub account from https://developer.qa.tax.service.gov.uk/developer/login and should follow the
+instructions for creating an app to subscribe to the test API on
+https://confluence.tools.tax.service.gov.uk/display/DTRG/Testing+an+API+microservice+on+Development+and+QA
+
+Internal users may also reference this link on how to set up and test:
 https://confluence.tools.tax.service.gov.uk/display/ApiPlatform/Testing+an+API+microservice+on+Development+and+QA
 
-Internal reference documentation is also at:
-https://confluence.tools.tax.service.gov.uk/display/GG/Scopes+and+Claims
-https://confluence.tools.tax.service.gov.uk/display/GG/Userinfo+Endpoint
+Internal reference documentation is also available at:
+- https://confluence.tools.tax.service.gov.uk/display/GG/Scopes+and+Claims
+- https://confluence.tools.tax.service.gov.uk/display/GG/Userinfo+Endpoint
 
 <a name="authentication-tokens"></a>
 
 ## Authentication tokens
 
-Note, the /userinfo endpoint is an external API endpoint. This endpoint requires an API token for authentication.
+Note, the `/userinfo` endpoint is an external API endpoint. This endpoint requires an API token for authentication.
 
 <a name="api"></a>
 
 ## API
 
 | Method | HMRC API Platform Path | Internal Path | Description                                                                                                          |
-|--------|------------------------|---------------|----------------------------------------------------------------------------------------------------------------------|
+|--------|------------------------|---------------|---------------------------------------------------------------------------------------------------------------------|
 | GET    | /userinfo              | /             | Returns information about an End-User as requested in the openid scopes as documented in the published API document. |
 | POST   | /userinfo              | /             | Returns information about an End-User as requested in the openid scopes as documented in the published API document. |
 
@@ -88,24 +100,23 @@ Access to user information is controlled through scopes. Each access token (OAut
 set of scopes at login.
 
 When a request is made for user information, only information belonging to the provided scopes is returned. The
-information is returned in the form of claims, which sometimes are simple fields and sometimes objects that contain
+information is returned in the form of claims, which are sometimes simple fields and sometimes objects that contain
 further fields.
 
-Here is the supported scope list and the claims they contain. The details of each claim, including any contained fields,
-is documented further down.
+Here is the supported scope list and the claims they contain:
 
-* 'profile': given_name, middle_name, family_name, birthdate
-* 'address': address (sourced from ITMP)
-* 'email': email
-* 'openid:hmrc-enrolments': hmrc_enrolments
-* 'openid:government-gateway': government_gateway
-* 'openid:mdtp': mdtp
-* 'openid:gov-uk-identifiers': uk_gov_nino
-* 'openid:trusted-helper': trusted_helper
+* `profile`: given_name, middle_name, family_name, birthdate
+* `address`: address (sourced from ITMP)
+* `email`: email
+* `openid:hmrc-enrolments`: hmrc_enrolments
+* `openid:government-gateway`: government_gateway
+* `openid:mdtp`: mdtp
+* `openid:gov-uk-identifiers`: uk_gov_nino
+* `openid:trusted-helper`: trusted_helper
 
 <a name="license"></a>
 
-### License
+## License
 
 This code is open source software licensed under
-the [Apache 2.0 License](https://www.apache.org/licenses/LICENSE-2.0.html) 
+the [Apache 2.0 License](http://www.apache.org/licenses/LICENSE-2.0.html).
