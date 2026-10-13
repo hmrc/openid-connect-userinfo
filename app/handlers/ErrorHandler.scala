@@ -39,7 +39,7 @@ class ErrorHandler @Inject() (
     super.onServerError(request, exception) map (res => {
       res.header.status match {
         case 401 => ErrorResponse.unauthorized().toResult
-        case _   => ErrorResponse.badGateway(exception.getMessage).toResult
+        case _   => ErrorResponse.badGateway().toResult
       }
     })
   }
