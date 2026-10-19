@@ -50,7 +50,8 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => version == "1.0"
 
-  val responseLogger: Logger = Logger("userInfoResponsePayloadLogger")
+  private val responseLogger: Logger = Logger("userInfoResponsePayloadLogger")
+  private val logger: Logger = Logger(getClass)
 
   // use custom rule as Accept header is optional therefore it has to return true (see more in play.api.mvc.ActionBuilder) if absent in order to let the controller handle it
   private val acceptHeaderValidationRulesCustom: Option[String] => Boolean =
@@ -66,11 +67,15 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
 
       Ok(json)
     } recover {
-      case Upstream4xxResponse(UER(_, 401, _, _))    => ErrorResponse.unauthorized().toResult
-      case Upstream4xxResponse(UER(msg4xx, _, _, _)) => ErrorResponse.badGateway(msg4xx).toResult
-      case Upstream5xxResponse(UER(msg5xx, _, _, _)) => ErrorResponse.badGateway(msg5xx).toResult
-      case bex: BadRequestException                  => ErrorResponse.badRequest(bex.getMessage).toResult
-      case uex: UnauthorizedException                => ErrorResponse.unauthorized(uex.getMessage).toResult
+      case Upstream4xxResponse(UER(_, 401, _, _)) => ErrorResponse.unauthorized().toResult
+      case Upstream4xxResponse(e) =>
+        logger.warn(s"Upstream 4xx response while fetching user info: ${e.getMessage}", e)
+        ErrorResponse.badGateway().toResult
+      case Upstream5xxResponse(e) =>
+        logger.error(s"Upstream 5xx response while fetching user info: ${e.getMessage}", e)
+        ErrorResponse.badGateway().toResult
+      case bex: BadRequestException   => ErrorResponse.badRequest(bex.getMessage).toResult
+      case uex: UnauthorizedException => ErrorResponse.unauthorized(uex.getMessage).toResult
     }
   }
 }
