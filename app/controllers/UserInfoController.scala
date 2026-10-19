@@ -50,7 +50,7 @@ trait UserInfoController extends BackendBaseController with HeaderValidator {
   implicit val executionContext: ExecutionContext
   override val validateVersion: String => Boolean = version => version == "1.0"
 
-  val responseLogger: Logger = Logger("userInfoResponsePayloadLogger")
+  private val responseLogger: Logger = Logger("userInfoResponsePayloadLogger")
   private val logger: Logger = Logger(getClass)
 
   // use custom rule as Accept header is optional therefore it has to return true (see more in play.api.mvc.ActionBuilder) if absent in order to let the controller handle it
