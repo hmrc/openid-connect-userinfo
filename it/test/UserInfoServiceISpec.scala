@@ -776,8 +776,7 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
 
     Scenario("return 502 when Auth returns error") {
       val errorMsg = "auth error msg"
-      val expectedErrorMessage =
-        s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 503. Response body: '$errorMsg'"}"""
+      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"Bad gateway"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
@@ -796,15 +795,15 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
           .get()
       )
 
-      Then("Bad gateway status is returned")
+      Then("Bad gateway status is returned without exposing the upstream error detail")
       result.status           shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
+      (result.body: String)     should not include errorMsg
     }
 
     Scenario("return 502 when Auth returns not found") {
       val errorMsg = "auth error msg"
-      val expectedErrorMessage =
-        s"""{"code":"BAD_GATEWAY","message":"POST of 'http://localhost:$stubPort/auth/authorise' returned 404. Response body: '$errorMsg'"}"""
+      val expectedErrorMessage = """{"code":"BAD_GATEWAY","message":"Bad gateway"}"""
       Given("A Auth token with openid:government-gateway, openid:hmrc-enrolments, address scopes")
       willReturnScopesForAuthTokens(accessToken, Set("openid:government-gateway", "openid:hmrc-enrolments", "address"))
 
@@ -823,9 +822,10 @@ class UserInfoServiceISpec extends BaseFeatureISpec with AuthStub with ThirdPart
           .get()
       )
 
-      Then("Bad gateway status is returned")
+      Then("Bad gateway status is returned without exposing the upstream error detail")
       result.status           shouldBe 502
       Json.parse(result.body) shouldBe Json.parse(expectedErrorMessage)
+      (result.body: String)     should not include errorMsg
     }
 
     Scenario("fetching user info returns 5xx then we return 502") {
